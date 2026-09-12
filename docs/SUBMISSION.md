@@ -87,7 +87,7 @@ The README must be present at the repo root, with the one-liner, a GIF, architec
 ### Project Deck or Whitepaper (PDF URL)
 
 ```
-{{DECK_URL}}
+docs/deck.pdf
 ```
 
 Source: `docs/DECK.md`. Built PDF: `docs/deck.pdf`. Host the PDF at a stable public URL, or link the raw file in the repo, before pasting.
@@ -118,12 +118,12 @@ Paste into the form's description if space allows, and into the README regardles
 
 | Contract | Address (CC3 testnet, chainId 102031) |
 |---|---|
-| `AttestedWorldID` (Ethereum mainnet, chainKey 3) | `{{ADDRESS_ATTESTED_WORLDID_MAINNET}}` |
-| `AttestedWorldID` (Ethereum Sepolia, chainKey 1) | `{{ADDRESS_ATTESTED_WORLDID_SEPOLIA}}` |
-| `HumanRegistry` | `{{ADDRESS_HUMAN_REGISTRY}}` |
-| `CreditLine` | `{{ADDRESS_CREDIT_LINE}}` |
-| `hUSD` | `{{ADDRESS_HUSD}}` |
-| `HumanGate` (example integration) | `{{ADDRESS_HUMAN_GATE}}` |
+| `AttestedWorldID` (Ethereum mainnet, chainKey 3) | `0x1122ef3fa4ab0693809e42a00b2476efcf4468ad` |
+| `AttestedWorldID` (Ethereum Sepolia, chainKey 1) | `0x3a7c3cc67034197208923587b8dc5c4674cbcef7` |
+| `HumanRegistry` | `0x62c2fd99ea587e4b466175ad248468782bd5298d` |
+| `CreditLine` | `0x1bd40163e41e44d2f139d95de88b640f6ea461f7` |
+| `hUSD` | `0x4bd7f4c6648deb8f107932572ce7e85aca259640` |
+| `HumanGate` (example integration) | `0xa3e021de49cec8819ea1bd37a8b5a9df005b776c` |
 
 Explorer: `https://creditcoin-testnet.blockscout.com`. All six verified on Blockscout.
 
@@ -198,7 +198,7 @@ Confirm each before submitting. These are the organizers' stated conditions, and
 - [ ] Web app live at `{{LIVE_URL}}` with no build errors and no "not deployed yet" banner.
 - [ ] README present at repo root with the one-liner, addresses and known limitations.
 - [ ] `docs/ATTESTCOIN_INTEGRATION.md` present and linked from the README (this satisfies the technical documentation requirement).
-- [ ] `docs/deck.pdf` built and hosted; `{{DECK_URL}}` replaced.
+- [ ] `docs/deck.pdf` built and hosted; `docs/deck.pdf` replaced.
 - [ ] Video recorded, uploaded, ungated; `{{VIDEO_URL}}` replaced.
 - [ ] Description block under 300 words and integration summary under 400 words, both checked with `wc -w`.
 - [ ] Foundry suite green, worker tests green, negative-path suite runnable without a wallet.

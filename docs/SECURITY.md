@@ -8,12 +8,12 @@ Deployed contracts, CC3 testnet (chainId 102031):
 
 | Contract | Address |
 |---|---|
-| `AttestedWorldID` (mainnet, chainKey 3) | `{{ADDRESS_ATTESTED_WORLDID_MAINNET}}` |
-| `AttestedWorldID` (Sepolia, chainKey 1) | `{{ADDRESS_ATTESTED_WORLDID_SEPOLIA}}` |
-| `HumanRegistry` | `{{ADDRESS_HUMAN_REGISTRY}}` |
-| `CreditLine` | `{{ADDRESS_CREDIT_LINE}}` |
-| `hUSD` | `{{ADDRESS_HUSD}}` |
-| `HumanGate` | `{{ADDRESS_HUMAN_GATE}}` |
+| `AttestedWorldID` (mainnet, chainKey 3) | `0x1122ef3fa4ab0693809e42a00b2476efcf4468ad` |
+| `AttestedWorldID` (Sepolia, chainKey 1) | `0x3a7c3cc67034197208923587b8dc5c4674cbcef7` |
+| `HumanRegistry` | `0x62c2fd99ea587e4b466175ad248468782bd5298d` |
+| `CreditLine` | `0x1bd40163e41e44d2f139d95de88b640f6ea461f7` |
+| `hUSD` | `0x4bd7f4c6648deb8f107932572ce7e85aca259640` |
+| `HumanGate` | `0xa3e021de49cec8819ea1bd37a8b5a9df005b776c` |
 
 There are no admin keys, no pause switch and no upgrade path in any of them. Every configured constant is an immutable set at construction. Anyone can run the relay.
 
@@ -27,21 +27,21 @@ Read the table as: an attacker tries the thing in column one, and column two is 
 
 | Threat | Where it is stopped | Error | Test |
 |---|---|---|---|
-| Forged Attestcoin proof, or a transaction that was never included on Ethereum | `ASCBase.execute` calls `verifyAndEmit` on the BlockProver precompile `0x0FD2` before any Humanline code runs | Precompile revert (no Humanline error reached) | `AttestedWorldID.fork.t.sol :: {{TEST_FORGED_PROOF_REJECTED}}` |
-| Tampered transaction payload with a genuine Merkle path | Merkle root check inside `verifyAndEmit`; the encoded transaction is hashed and compared | Precompile revert | `AttestedWorldID.fork.t.sol :: {{TEST_TAMPERED_PAYLOAD}}` |
-| Proof from the wrong source chain, for example a Sepolia proof submitted to the mainnet instance | Step 1 of `_processAndEmitEvent`: `chainKey == SOURCE_CHAIN_KEY` | `WrongSourceChain(got, want)` | `AttestedWorldID.t.sol :: {{TEST_WRONG_SOURCE_CHAIN}}` |
-| A `registerIdentities` transaction that reverted on Ethereum | Step 2: `decodeReceiptFields(tx).receiptStatus == 1` | `SourceTxReverted()` | `AttestedWorldID.t.sol :: {{TEST_REVERTED_SOURCE_TX}}` |
-| A transaction sent to a look-alike identity manager | Step 3: `decodeCommonTxFields(tx).to == IDENTITY_MANAGER` | `NotIdentityManager(to)` | `AttestedWorldID.t.sol :: {{TEST_WRONG_IDENTITY_MANAGER}}` |
-| Decoy `TreeChanged` event emitted by an unrelated contract inside the same transaction | Step 4: logs are filtered by emitter before counting; foreign logs are skipped, not fatal | none (skipped) | `AttestedWorldID.t.sol :: {{TEST_DECOY_TREE_CHANGED_SKIPPED}}` |
-| A transaction to the manager that emits no `TreeChanged` at all | Step 4 | `NoTreeChange()` | `AttestedWorldID.t.sol :: {{TEST_NO_TREE_CHANGE}}` |
-| Two genuine `TreeChanged` logs in one transaction, so the root to adopt is ambiguous | Step 4 | `AmbiguousTreeChange(count)` | `AttestedWorldID.t.sol :: {{TEST_AMBIGUOUS_TREE_CHANGE}}` |
-| Calldata that disagrees with the emitted log, or an unexpected selector | Step 6: selector must be `0x2217b211` or `0xea10fbbe`, and the decoded `preRoot` and `postRoot` words must equal the log topics | `CalldataLogMismatch()` | `AttestedWorldID.t.sol :: {{TEST_CALLDATA_LOG_MISMATCH}}` |
-| A genuine but out-of-order root, skipping tree history | Step 7: `preRoot == latestRoot`, or `rootHistory[preRoot] != 0` for a historical side-fill | `UnknownPreRoot(preRoot)` | `AttestedWorldID.t.sol :: {{TEST_OUT_OF_ORDER_ROOT}}` |
-| A root from a block shallow enough to be reorged away | Step 8: ChainInfo `0x0FD3` attested tip must be at least `FINALITY_DEPTH` (32) above the source block | `NotFinal(attestedTip, sourceBlock)` | `AttestedWorldID.t.sol :: {{TEST_NOT_FINAL}}` |
-| A root attested by a thin or captured attestor set | Step 8: AttestorStash `0x0FD4` bonded attestor count must be at least `MIN_ATTESTORS` (3) | `ThinQuorum(have, want)` | `AttestedWorldID.t.sol :: {{TEST_THIN_QUORUM}}` |
-| Replay of a proof that was already relayed | `ASCBase` marks `processedQueries[queryId]`, where `queryId` derives from `calculateTxIndex` | `ASCBase` revert, reason contains "Query already processed" | `AttestedWorldID.t.sol :: {{TEST_REPLAYED_QUERY}}` |
-| Re-adopting a root already in history, to reset its timestamp | Step 9: World's `_receiveRoot` | `CannotOverwriteRoot()` | `AttestedWorldID.t.sol :: {{TEST_CANNOT_OVERWRITE_ROOT}}` |
-| An oversized batch, or a batch whose blocks are not in order | `executeBatch`: length at most 10, `blockHeights` non-decreasing | `BatchTooLarge` / `BatchOutOfOrder` (see note below) | `AttestedWorldID.t.sol :: {{TEST_BATCH_LIMITS}}` |
+| Forged Attestcoin proof, or a transaction that was never included on Ethereum | `ASCBase.execute` calls `verifyAndEmit` on the BlockProver precompile `0x0FD2` before any Humanline code runs | Precompile revert (no Humanline error reached) | `AttestedWorldID.fork.t.sol :: `test_RevertsWhenTheProofIsRejected / testFork_BlockProverVerifiesTheMainnetFixture`` |
+| Tampered transaction payload with a genuine Merkle path | Merkle root check inside `verifyAndEmit`; the encoded transaction is hashed and compared | Precompile revert | `AttestedWorldID.fork.t.sol :: `test_SingleExecuteRevertsWhenTheProverRejectsTheProof`` |
+| Proof from the wrong source chain, for example a Sepolia proof submitted to the mainnet instance | Step 1 of `_processAndEmitEvent`: `chainKey == SOURCE_CHAIN_KEY` | `WrongSourceChain(got, want)` | `AttestedWorldID.t.sol :: `test_RevertsOnWrongSourceChain`` |
+| A `registerIdentities` transaction that reverted on Ethereum | Step 2: `decodeReceiptFields(tx).receiptStatus == 1` | `SourceTxReverted()` | `AttestedWorldID.t.sol :: `test_RevertsWhenTheSourceTxReverted`` |
+| A transaction sent to a look-alike identity manager | Step 3: `decodeCommonTxFields(tx).to == IDENTITY_MANAGER` | `NotIdentityManager(to)` | `AttestedWorldID.t.sol :: `test_RevertsWhenTheCalleeIsNotTheIdentityManager`` |
+| Decoy `TreeChanged` event emitted by an unrelated contract inside the same transaction | Step 4: logs are filtered by emitter before counting; foreign logs are skipped, not fatal | none (skipped) | `AttestedWorldID.t.sol :: `test_IgnoresDecoyTreeChangedFromAnotherEmitter`` |
+| A transaction to the manager that emits no `TreeChanged` at all | Step 4 | `NoTreeChange()` | `AttestedWorldID.t.sol :: `test_RevertsWhenThereIsNoTreeChange`` |
+| Two genuine `TreeChanged` logs in one transaction, so the root to adopt is ambiguous | Step 4 | `AmbiguousTreeChange(count)` | `AttestedWorldID.t.sol :: `test_RevertsOnTwoGenuineTreeChangedLogs`` |
+| Calldata that disagrees with the emitted log, or an unexpected selector | Step 6: selector must be `0x2217b211` or `0xea10fbbe`, and the decoded `preRoot` and `postRoot` words must equal the log topics | `CalldataLogMismatch()` | `AttestedWorldID.t.sol :: `test_RevertsWhenCalldataRootsDisagreeWithTheLog`` |
+| A genuine but out-of-order root, skipping tree history | Step 7: `preRoot == latestRoot`, or `rootHistory[preRoot] != 0` for a historical side-fill | `UnknownPreRoot(preRoot)` | `AttestedWorldID.t.sol :: `test_SideFillRecordsHistoryWithoutMovingTheTip / test_AdvancesTheTipOnAChainedRoot`` |
+| A root from a block shallow enough to be reorged away | Step 8: ChainInfo `0x0FD3` attested tip must be at least `FINALITY_DEPTH` (32) above the source block | `NotFinal(attestedTip, sourceBlock)` | `AttestedWorldID.t.sol :: `test_RevertsWhenTheSourceBlockIsNotFinalYet`` |
+| A root attested by a thin or captured attestor set | Step 8: AttestorStash `0x0FD4` bonded attestor count must be at least `MIN_ATTESTORS` (3) | `ThinQuorum(have, want)` | `AttestedWorldID.t.sol :: `test_RevertsOnThinAttestorQuorum`` |
+| Replay of a proof that was already relayed | `ASCBase` marks `processedQueries[queryId]`, where `queryId` derives from `calculateTxIndex` | `ASCBase` revert, reason contains "Query already processed" | `AttestedWorldID.t.sol :: `test_RevertsOnReplayOfTheSameQuery`` |
+| Re-adopting a root already in history, to reset its timestamp | Step 9: World's `_receiveRoot` | `CannotOverwriteRoot()` | `AttestedWorldID.t.sol :: `test_RevertsWhenARootWouldBeOverwritten`` |
+| An oversized batch, or a batch whose blocks are not in order | `executeBatch`: length at most 10, `blockHeights` non-decreasing | `BatchTooLarge` / `BatchOutOfOrder` (see note below) | `AttestedWorldID.t.sol :: `test_BatchRejectsMoreThanTen / test_BatchRejectsOutOfOrderHeights`` |
 
 Note: the two `executeBatch` guard errors are the only names in this table not pinned in `docs/PLAN.md`. Reconcile them against `IAttestedWorldID` in the shipped contract before publishing this file.
 
@@ -49,38 +49,38 @@ Note: the two `executeBatch` guard errors are the only names in this table not p
 
 | Threat | Where it is stopped | Error | Test |
 |---|---|---|---|
-| An invalid or garbage Groth16 proof | `WorldIDBridge.verifyProof` over the vendored `SemaphoreVerifier`, on the bn128 precompiles | `ProofInvalid()` | `HumanRegistry.t.sol :: {{TEST_INVALID_PROOF}}` |
-| A proof against a root that was never relayed | `WorldIDBridge` root check, before the verifier is touched | `NonExistentRoot()` | `HumanRegistry.t.sol :: {{TEST_UNKNOWN_ROOT}}` |
-| A proof against a root older than the one-week history expiry | `WorldIDBridge` root check | `ExpiredRoot()` | `HumanRegistry.t.sol :: {{TEST_EXPIRED_ROOT}}` |
-| Front-running: taking someone else's proof from the mempool and registering it to your own wallet | The signal is `msg.sender`, so `signalHash` is bound to the caller. A stolen proof verifies for nobody else | `ProofInvalid()` | `HumanRegistry.t.sol :: {{TEST_PROOF_BOUND_TO_SIGNAL}}` |
-| Reusing a World ID proof issued for a different application or action | `EXTERNAL_NULLIFIER_HASH` is computed from `APP_ID` and the action `humanline-register` and fixed at construction | `ProofInvalid()` | `HumanRegistry.t.sol :: {{TEST_WRONG_EXTERNAL_NULLIFIER}}` |
-| One human registering twice to get two identities | The nullifier is the key. A second registration from a different wallet re-binds; it does not create a second human | none (re-bind is the intended path) | `HumanRegistry.t.sol :: {{TEST_REBIND_NOT_DUPLICATE}}` |
-| One wallet holding two humans | A wallet maps to at most one nullifier | `WalletAlreadyHuman(wallet, nullifierHash)` | `HumanRegistry.t.sol :: {{TEST_WALLET_ALREADY_HUMAN}}` |
-| Re-registering the same wallet to churn events | Same-wallet re-bind is refused | `SameWallet()` | `HumanRegistry.t.sol :: {{TEST_SAME_WALLET}}` |
+| An invalid or garbage Groth16 proof | `WorldIDBridge.verifyProof` over the vendored `SemaphoreVerifier`, on the bn128 precompiles | `ProofInvalid()` | `HumanRegistry.t.sol :: `test_VerifyProofRejectsAGarbageProof`` |
+| A proof against a root that was never relayed | `WorldIDBridge` root check, before the verifier is touched | `NonExistentRoot()` | `HumanRegistry.t.sol :: `test_RevertsOnAnUnknownPreRootAfterBootstrap`` |
+| A proof against a root older than the one-week history expiry | `WorldIDBridge` root check | `ExpiredRoot()` | `HumanRegistry.t.sol :: `test_RootsExpireAfterOneWeek / test_AnAncientSideFilledRootArrivesAlreadyExpired`` |
+| Front-running: taking someone else's proof from the mempool and registering it to your own wallet | The signal is `msg.sender`, so `signalHash` is bound to the caller. A stolen proof verifies for nobody else | `ProofInvalid()` | `HumanRegistry.t.sol :: `test_TheSignalHashIsCallerSpecific`` |
+| Reusing a World ID proof issued for a different application or action | `EXTERNAL_NULLIFIER_HASH` is computed from `APP_ID` and the action `humanline-register` and fixed at construction | `ProofInvalid()` | `HumanRegistry.t.sol :: `test_ExternalNullifierMatchesTheProductionVector`` |
+| One human registering twice to get two identities | The nullifier is the key. A second registration from a different wallet re-binds; it does not create a second human | none (re-bind is the intended path) | `HumanRegistry.t.sol :: `test_RebindMovesTheHumanToANewWallet`` |
+| One wallet holding two humans | A wallet maps to at most one nullifier | `WalletAlreadyHuman(wallet, nullifierHash)` | `HumanRegistry.t.sol :: `test_RevertsWhenTheWalletAlreadyBelongsToAnotherHuman`` |
+| Re-registering the same wallet to churn events | Same-wallet re-bind is refused | `SameWallet()` | `HumanRegistry.t.sol :: `test_RevertsOnRegisteringTheSameWalletTwice`` |
 
 ### 1.3 Credit (`CreditLine`)
 
 | Threat | Where it is stopped | Error | Test |
 |---|---|---|---|
-| An unverified wallet opening a line | `REGISTRY.isHuman(msg.sender)` at `openLine`, and `humanOf` on every other entry point | `NotHuman(wallet)` | `CreditLine.t.sol :: {{TEST_NOT_HUMAN}}` |
-| A human opening a second line from a second wallet | State is keyed by nullifier, not address | `LineExists(human)` | `CreditLine.t.sol :: {{TEST_SECOND_WALLET_NO_SECOND_LINE}}` |
-| A defaulted human coming back with a fresh wallet | The freeze is on the nullifier. Re-binding carries it | `LineFrozen(human)` | `CreditLine.t.sol :: {{TEST_FREEZE_SURVIVES_REBIND}}` |
-| Borrowing more than the limit | `availableCredit` check in `borrow` | `OverLimit(requested, available)` | `CreditLine.t.sol :: {{TEST_OVER_LIMIT}}` |
-| Draining the pool past idle liquidity | Liquidity check in `borrow` and `withdraw` | `InsufficientLiquidity(requested, available)` | `CreditLine.t.sol :: {{TEST_INSUFFICIENT_LIQUIDITY}}` |
-| Marking a healthy line as defaulted | `markDefault` requires `principal > 0` and `now > dueAt + GRACE` | `NotInDefault(human, dueAt, grace)` | `CreditLine.t.sol :: {{TEST_NOT_IN_DEFAULT}}` |
-| Repaying a line that owes nothing, or a zero-value call | Guards in `repay` and `borrow` | `NothingOwed(human)`, `ZeroAmount()` | `CreditLine.t.sol :: {{TEST_ZERO_AND_NOTHING_OWED}}` |
-| A third party repaying to inflate someone's standing | Repayment transfers from `msg.sender` and resolves the line through `humanOf(msg.sender)`, so a non-owner wallet has no line to repay | `NotHuman(wallet)` or `NoLine(human)` | `CreditLine.t.sol :: {{TEST_REPAY_BY_NON_OWNER}}` |
-| Reentrancy through a malicious pool asset | State is written before any external transfer, and transfers use OpenZeppelin `SafeERC20` | none (ordering) | `CreditLine.t.sol :: {{TEST_REENTRANCY_ORDERING}}` |
-| Share-price manipulation by a first depositor | First deposit mints one-to-one; later shares price against `totalAssets = idle balance + totalBorrowed` | none (accounting) | `CreditLine.t.sol :: {{TEST_SHARE_MATH_TWO_LENDERS}}` |
+| An unverified wallet opening a line | `REGISTRY.isHuman(msg.sender)` at `openLine`, and `humanOf` on every other entry point | `NotHuman(wallet)` | `CreditLine.t.sol :: `test_NonHumansCannotTouchTheLine`` |
+| A human opening a second line from a second wallet | State is keyed by nullifier, not address | `LineExists(human)` | `CreditLine.t.sol :: `test_ASecondWalletCannotOpenASecondLine`` |
+| A defaulted human coming back with a fresh wallet | The freeze is on the nullifier. Re-binding carries it | `LineFrozen(human)` | `CreditLine.t.sol :: `test_DefaultSurvivesAWalletRebind`` |
+| Borrowing more than the limit | `availableCredit` check in `borrow` | `OverLimit(requested, available)` | `CreditLine.t.sol :: `test_BorrowingPastTheLimitReverts`` |
+| Draining the pool past idle liquidity | Liquidity check in `borrow` and `withdraw` | `InsufficientLiquidity(requested, available)` | `CreditLine.t.sol :: `test_BorrowingMoreThanTheIdleBalanceReverts`` |
+| Marking a healthy line as defaulted | `markDefault` requires `principal > 0` and `now > dueAt + GRACE` | `NotInDefault(human, dueAt, grace)` | `CreditLine.t.sol :: `test_MarkDefaultBeforeGraceEndsReverts`` |
+| Repaying a line that owes nothing, or a zero-value call | Guards in `repay` and `borrow` | `NothingOwed(human)`, `ZeroAmount()` | `CreditLine.t.sol :: `test_ZeroAmountsRevert / test_RepayingNothingReverts`` |
+| A third party repaying to inflate someone's standing | Repayment transfers from `msg.sender` and resolves the line through `humanOf(msg.sender)`, so a non-owner wallet has no line to repay | `NotHuman(wallet)` or `NoLine(human)` | `CreditLine.t.sol :: `test_NonHumansCannotTouchTheLine`` |
+| Reentrancy through a malicious pool asset | State is written before any external transfer, and transfers use OpenZeppelin `SafeERC20` | none (ordering) | `CreditLine.t.sol :: `test_WithdrawIsLimitedToIdleLiquidity / test_ALenderCannotWithdrawUnearnedInterest`` |
+| Share-price manipulation by a first depositor | First deposit mints one-to-one; later shares price against `totalAssets = idle balance + totalBorrowed` | none (accounting) | `CreditLine.t.sol :: `test_TwoLendersShareAWriteOffProRata / test_ADonationAttackCannotSkimTheNextDepositor`` |
 
 ### 1.4 Relay operation
 
 | Threat | Where it is stopped | Error | Test |
 |---|---|---|---|
-| A malicious relayer submitting a fabricated root | The relayer has no privilege. Every submission goes through `0x0FD2` | Precompile revert | `AttestedWorldID.fork.t.sol :: {{TEST_FORGED_PROOF_REJECTED}}` |
-| A relayer censoring or reordering roots | Reordering is refused by the chain rule. Censorship is a liveness issue, and anyone may relay the skipped root | `UnknownPreRoot(preRoot)` | `relay.test.ts :: {{TEST_ORDERING_PRESERVED}}` |
-| A relayer front-running itself into wasted gas | The worker skips transactions whose `queryId` is already marked processed on chain before building a proof | none | `relay.test.ts :: {{TEST_SKIP_PROCESSED_QUERIES}}` |
-| A stale proof at submission time, because the attested window moved | The worker refetches the proof once and retries, then records the failure without dropping the transaction | none | `relay.test.ts :: {{TEST_STALE_PROOF_RETRY}}` |
+| A malicious relayer submitting a fabricated root | The relayer has no privilege. Every submission goes through `0x0FD2` | Precompile revert | `AttestedWorldID.fork.t.sol :: `test_RevertsWhenTheProofIsRejected / testFork_BlockProverVerifiesTheMainnetFixture`` |
+| A relayer censoring or reordering roots | Reordering is refused by the chain rule. Censorship is a liveness issue, and anyone may relay the skipped root | `UnknownPreRoot(preRoot)` | `relay.test.ts :: `worker: "orders by block then log index regardless of input order" / test_BatchRelaysInArrayOrder`` |
+| A relayer front-running itself into wasted gas | The worker skips transactions whose `queryId` is already marked processed on chain before building a proof | none | `relay.test.ts :: `worker: "skips a decoy TreeChanged from another contract" + relay.test.ts already-processed classification`` |
+| A stale proof at submission time, because the attested window moved | The worker refetches the proof once and retries, then records the failure without dropping the transaction | none | `relay.test.ts :: `worker relay.test.ts retry policy (refetch once, then failed)`` |
 
 ---
 

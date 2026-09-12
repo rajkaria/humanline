@@ -8,12 +8,12 @@ Deployed addresses, CC3 testnet (chainId 102031):
 
 | Contract | Address |
 |---|---|
-| `AttestedWorldID` (Ethereum mainnet, chainKey 3) | `{{ADDRESS_ATTESTED_WORLDID_MAINNET}}` |
-| `AttestedWorldID` (Ethereum Sepolia, chainKey 1) | `{{ADDRESS_ATTESTED_WORLDID_SEPOLIA}}` |
-| `HumanRegistry` | `{{ADDRESS_HUMAN_REGISTRY}}` |
-| `CreditLine` | `{{ADDRESS_CREDIT_LINE}}` |
-| `hUSD` | `{{ADDRESS_HUSD}}` |
-| `HumanGate` | `{{ADDRESS_HUMAN_GATE}}` |
+| `AttestedWorldID` (Ethereum mainnet, chainKey 3) | `0x1122ef3fa4ab0693809e42a00b2476efcf4468ad` |
+| `AttestedWorldID` (Ethereum Sepolia, chainKey 1) | `0x3a7c3cc67034197208923587b8dc5c4674cbcef7` |
+| `HumanRegistry` | `0x62c2fd99ea587e4b466175ad248468782bd5298d` |
+| `CreditLine` | `0x1bd40163e41e44d2f139d95de88b640f6ea461f7` |
+| `hUSD` | `0x4bd7f4c6648deb8f107932572ce7e85aca259640` |
+| `HumanGate` | `0xa3e021de49cec8819ea1bd37a8b5a9df005b776c` |
 
 ---
 
