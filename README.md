@@ -139,7 +139,23 @@ cannot, because the nullifier is the human.
    the write-off pro rata. Because the freeze is keyed by nullifier, a fresh wallet inherits it.
 
 No owner, no pause, no upgrade path, in any contract. Every parameter is an immutable set at
-construction. Anyone can run the relay.
+construction. Anyone can run the relay — and in the app, anyone does.
+
+**Self-relay: nobody waits for our relayer.** World mints a proof against its newest root, which may
+not have reached Creditcoin yet. When it has not, the verify card's Sync step offers *Relay it now
+from your wallet*. `/api/relay/plan` finds the `TreeChanged` transaction whose `postRoot` is the
+proof's root, walks the `preRoot → postRoot` chain back to the root Creditcoin already follows, and
+splits the missing updates into `executeBatch` calls (at most 10, within one continuity span).
+While the update is still shallower than the 32-block finality depth it shows how many attested
+blocks are left and an ETA. `/api/relay/proof` builds the Attestcoin proof, the browser dry-runs it
+with `eth_call`, tops the wallet up from `/api/gas` if it is empty, and the user's own wallet sends
+it. The contract re-checks everything, so the plan cannot talk anyone into relaying a false root.
+The same code path runs from the command line: `cd web && bun run scripts/self-relay.ts --send --fresh`
+relays from a brand-new wallet funded only by the faucet. It has, live: a wallet generated seconds
+earlier, holding 0.05 faucet tCTC, carried Sepolia root `0x041e604b…` to Creditcoin in
+[`0xd1df2b92…`](https://creditcoin-testnet.blockscout.com/tx/0xd1df2b9251ff67d1487580ffc21bd9e6f02296ebfb0d2339222b9ee816ba6e85)
+(278,292 gas), ahead of the scheduled relayer. The row is in
+[`evidence/self-relay.jsonl`](evidence/self-relay.jsonl).
 
 ## Built with
 
@@ -280,7 +296,8 @@ cd web
 cp .env.example .env.local                 # WORLD_RP_SIGNER_PRIVATE_KEY is server-side only
 bun run dev                                # http://localhost:3000
 bun run build
-bun test                                   # 215 tests
+bun test                                   # 267 tests
+bun run scripts/self-relay.ts              # plan + proof + eth_call for the newest World update
 ```
 
 `/app` picks the deployment at runtime — the staging-tree profile (World ID Simulator, no Orb
@@ -294,8 +311,9 @@ See [`web/README.md`](web/README.md).
 | Suite | Count | Command |
 |---|---|---|
 | Contracts (Foundry) | 101, including 7 that run against the live CC3 node | `cd contracts && CC3_FORK=1 forge test` |
-| Worker (Bun) | 195, no network | `cd worker && bun test` |
-| Web (Bun) | 215 | `cd web && bun test` |
+| Worker (Bun) | 202, no network | `cd worker && bun test` |
+| Web (Bun) | 267, including the self-relay planner and real-proof encoding | `cd web && bun test` |
+| Everything | contracts + worker + web, typecheck and lint | `bash scripts/verify.sh` |
 
 The 7 fork tests are the ones worth reading: they confirm that the real `0x0FD2` returns `true` for
 both proof fixtures and agrees the mainnet transaction index is 173, that the real `0x0FD3` tracks
@@ -352,8 +370,9 @@ Stated up front rather than discovered later. The full list, with reasoning, is 
 - **The attestor set is the deepest assumption.** A colluding quorum could attest to a block that
   does not exist. Humanline enforces a floor of 3 bonded attestors and a depth of 32 attested blocks,
   and cannot do better than the protocol it sits on.
-- **The relay is single-operator today.** That is a liveness dependency, not a trust one: the worker
-  is public, the contract does not care who calls it, and nothing is lost while nobody relays.
+- **The scheduled relay has one operator.** That is a liveness dependency, not a trust one, and it is
+  no longer a blocking one: any user whose root has not arrived can relay it from their own wallet
+  in the verify card, the worker is public, and nothing is lost while nobody relays.
 - **Testnet economics.** `hUSD` is a test stablecoin we mint, lender deposits are testnet funds, and
   no economic claim here has been tested with real money.
 - **A freeze is permanent and there is nobody to appeal to.** There is no owner, including us. That

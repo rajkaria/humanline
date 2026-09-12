@@ -5,6 +5,24 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Self-relay from the verify card.** When a proof's root has not reached Creditcoin, the Sync
+  step now offers *Relay it now from your wallet* instead of only a wait. `GET /api/relay/plan`
+  finds the World ID update carrying the proof's root by its indexed `postRoot`, links every
+  update back to the root Creditcoin already follows, and splits them into `executeBatch` calls
+  (≤ 10 members, ≤ 1000-block span). If the update is not yet 32 attested blocks deep it reports
+  the blocks left and an ETA, using the same ChainInfo reads as `AttestedWorldID._attestedTip`.
+  `POST /api/relay/proof` builds the Attestcoin proof (single or shared-continuity batch) and
+  rejects any proof with missing, extra or path-inconsistent members. The browser dry-runs with
+  `eth_call`, tops up an empty wallet from `/api/gas`, and sends from the user's own wallet.
+- **`web/scripts/self-relay.ts`**, the same path from the command line; `--send --fresh` relays
+  from a new wallet funded only by the gas faucet and appends `evidence/self-relay.jsonl`.
+- **`scripts/verify.sh`**, one command for contracts, worker and web (tests, typecheck, lint).
+- 38 tests for the planner and for encoding real proof fixtures as `executeBatch` calldata.
+
 ## [0.2.0] - 2026-09-12
 
 The submission becomes something a stranger can use, not only something a judge can inspect.

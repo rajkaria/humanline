@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { useAccount } from "wagmi";
 
 import { HashLink } from "@/components/hash-link";
+import { SelfRelayPanel } from "@/components/self-relay-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,6 +44,7 @@ import { formatDuration } from "@/lib/format";
 import { useNow } from "@/lib/hooks/use-now";
 import { useRootStatus } from "@/lib/hooks/use-root-status";
 import { useRpContext } from "@/lib/hooks/use-rp-context";
+import { useSelfRelay } from "@/lib/hooks/use-self-relay";
 import { useProfile } from "@/lib/profile-context";
 import { useTx } from "@/lib/hooks/use-tx";
 import { cn } from "@/lib/utils";
@@ -99,6 +101,15 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
   const rootStatus = useRootStatus(proof?.root);
   const rootNotRelayedYet = proof !== null && rootStatus.rootIsKnown === false;
   const rootConfirmed = proof !== null && rootStatus.rootIsKnown === true;
+
+  // Nobody has to wait for our relayer: the same proof can be carried from this wallet.
+  const sourceChainKey = profile.worldIdKey === "attestedWorldIDMainnet" ? 3 : 1;
+  const selfRelay = useSelfRelay({
+    chainKey: sourceChainKey,
+    root: proof?.root,
+    enabled: rootNotRelayedYet,
+    onRelayed: () => void rootStatus.refetch(),
+  });
 
   // Tell the user the moment the wait is over — they may have looked away.
   const wasWaiting = useRef(false);
@@ -289,7 +300,21 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
           </>
         ) : rootNotRelayedYet ? (
           <>
-            <RelayWaitPanel receivedAt={receivedAt} onCheck={rootStatus.refetch} />
+            <RelayWaitPanel receivedAt={receivedAt} onCheck={rootStatus.refetch}>
+              <SelfRelayPanel
+                plan={selfRelay.plan}
+                planLoading={selfRelay.planLoading}
+                planError={selfRelay.planError}
+                phase={selfRelay.phase}
+                progress={selfRelay.progress}
+                txUrls={selfRelay.txUrls}
+                error={selfRelay.error}
+                busy={selfRelay.busy}
+                canSend={isConnected && onRightChain}
+                sourceLabel={sourceChainKey === 3 ? "Ethereum mainnet" : "Ethereum Sepolia"}
+                onRelay={() => void selfRelay.run()}
+              />
+            </RelayWaitPanel>
             <Button size="lg" disabled>
               <LockIcon />
               Verify on Creditcoin
@@ -409,9 +434,12 @@ export function VerifySteps({ states }: { states: [StepState, StepState, StepSta
 export function RelayWaitPanel({
   receivedAt,
   onCheck,
+  children,
 }: {
   receivedAt: number;
   onCheck: () => Promise<void>;
+  /** The self-relay option, rendered under the wait status. */
+  children?: React.ReactNode;
 }) {
   const now = useNow();
   const [checking, setChecking] = useState(false);
@@ -431,8 +459,9 @@ export function RelayWaitPanel({
         <div className="flex min-w-0 flex-col gap-1">
           <p className="text-sm font-medium text-foreground">Proof received — syncing to Creditcoin</p>
           <p className="text-xs leading-relaxed text-muted-foreground">
-            World just added you to its latest update. A relayer copies each update to Creditcoin,
-            usually within a few minutes. Nothing to do — this step unlocks on its own.
+            World just added you to its latest update. Creditcoin accepts it once its attestors
+            have followed Ethereum about 32 blocks past it (roughly 15 minutes), and then any
+            relayer can carry it across. This step unlocks on its own — or relay it yourself below.
           </p>
         </div>
       </div>
@@ -469,6 +498,8 @@ export function RelayWaitPanel({
           </a>
         </div>
       </div>
+
+      {children}
 
       <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
         <InfoIcon className="size-3 shrink-0" aria-hidden />

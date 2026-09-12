@@ -165,6 +165,50 @@ The order of the checks is the security model. Inclusion is proven first, becaus
 
 Only after all of that does a root enter `rootHistory` and become something a human can prove against.
 
+### 2a. Self-relay from the verify card
+
+The worker is one relayer, not the relayer. When a user's proof root has not arrived, their own wallet carries it.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as User wallet
+    participant APP as Verify card
+    participant PLAN as /api/relay/plan
+    participant SRC as Ethereum (source chain)
+    participant PRF as /api/relay/proof
+    participant PRV as Attestcoin proof builder
+    participant AW as AttestedWorldID on CC3
+
+    APP->>AW: isValidRoot(proof root)
+    AW-->>APP: false
+    APP->>PLAN: chainKey, root
+    PLAN->>AW: latestRoot, FINALITY_DEPTH, SOURCE_BLOCK_TIME
+    PLAN->>AW: ChainInfo attested tip (attestation and checkpoint, as the contract reads it)
+    PLAN->>SRC: eth_getLogs TreeChanged with postRoot = proof root (indexed topic)
+    PLAN->>SRC: eth_getLogs TreeChanged with postRoot = latestRoot
+    PLAN->>SRC: every TreeChanged between the two
+    PLAN->>PLAN: walk preRoot to postRoot links, split into batches of 10 within 1000 blocks
+    PLAN-->>APP: ready, or waiting with blocks to go and ETA, or stale / not found / gap
+
+    U->>APP: Relay it now from your wallet
+    APP->>APP: balance under 0.005 tCTC, so POST /api/gas first
+    loop each batch, oldest first
+        APP->>PRF: tx hashes
+        PRF->>PRV: proof-by-tx, or proof-batch-by-tx for 2 or more
+        PRV-->>PRF: tx bytes, Merkle paths, shared continuity proof
+        PRF->>PRF: reject missing, extra, or path-inconsistent members
+        PRF-->>APP: executeBatch arguments
+        APP->>AW: eth_call executeBatch (free dry run, named revert)
+        U->>AW: executeBatch, signed by the user
+        AW-->>APP: RootRelayed, relayer = the user
+    end
+    APP->>AW: isValidRoot(proof root)
+    AW-->>APP: true, and step 3 unlocks
+```
+
+Nothing in the plan is trusted. It decides what the wallet is asked to send, and the contract then checks that exactly as it checks the worker. A wrong plan costs a failed dry run, and a malicious one cannot produce a proof the precompile accepts.
+
 ---
 
 ## 3. Sequence: register and borrow
@@ -264,7 +308,7 @@ Values 1 through 9 are the Attestcoin half of the system. Values 10 through 13 a
 
 **The worker** (`worker/`) is a Bun process with a SQLite cursor. It tails `TreeChanged` on both source chains, groups transactions into batches within the protocol's limits, waits for attestation, fetches proofs, and submits. It never skips and never reorders. Its cursor is derived from chain state, specifically `latestRoot` and past `RootRelayed` events, so a fresh worker or the GitHub Actions cron resumes correctly with no local state. It holds no privilege. The only thing it can do that a stranger cannot is pay for the gas.
 
-**The web app** (`web/`) is Next.js 15 on Vercel. It is entirely a read-and-submit client. It runs no indexer of its own and reads every number it shows directly from CC3, including the precompile values on `/relay`. If the app is down, every contract still works. Two server-side keys exist and neither can move a user's funds or sign on their behalf: the World ID relying-party key, which signs the `rp_context` nonce IDKit requires, and the gas faucet key, which sends native tCTC to a wallet that cannot yet pay for its own registration.
+**The web app** (`web/`) is Next.js 15 on Vercel. It is entirely a read-and-submit client. It runs no indexer of its own and reads every number it shows directly from CC3, including the precompile values on `/relay`. If the app is down, every contract still works. Two read-only routes serve self-relay: `/api/relay/plan` scans the source chain (the browser cannot call `eth_getLogs` against public Ethereum endpoints reliably) and `/api/relay/proof` proxies the proof builder (no CORS). Neither signs anything. Two server-side keys exist and neither can move a user's funds or sign on their behalf: the World ID relying-party key, which signs the `rp_context` nonce IDKit requires, and the gas faucet key, which sends native tCTC to a wallet that cannot yet pay for its own registration.
 
 **The evidence log** (`evidence/relay-log.jsonl`) is one JSON line per relayed transaction: source, Ethereum tx hash, source block and tx index, pre and post root, humans added, Creditcoin tx hash, gas used, attestation lag, timestamp. It is committed to the repository by the relay workflow. It proves nothing on its own, and no contract reads it. It exists so a judge can audit the relay's history without running the worker.
 

@@ -33,6 +33,21 @@ daemon and as the 15-minute GitHub Actions cron in
 [`.github/workflows/relay.yml`](../.github/workflows/relay.yml). The workflow commits new
 rows back to `main`, so the file's git history is the relayer's uptime record.
 
+## `self-relay.jsonl`
+
+One JSON object per self-relay transaction, written by
+[`web/scripts/self-relay.ts --send`](../web/scripts/self-relay.ts), which runs the same plan,
+proof and `executeBatch` code as the verify card's *Relay it now from your wallet* button.
+
+| Field | Meaning |
+|---|---|
+| `kind` | always `self-relay` |
+| `relayer`, `freshWallet` | the sending address, and whether it was generated for this run and funded only by the gas faucet |
+| `cc3TxHash`, `status`, `gasUsed` | the Creditcoin `executeBatch` transaction |
+| `sourceTxHashes`, `postRoots` | the World ID updates it carried, oldest first |
+| `roots` | `RootRelayed` events in the receipt |
+| `chainKey`, `contract`, `at` | source chain, receiving `AttestedWorldID`, and when |
+
 ## The rest
 
 | File | What it is |

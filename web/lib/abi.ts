@@ -633,6 +633,50 @@ export const chainInfoHeightAbi = [
   },
 ] as const;
 
+/**
+ * The two ChainInfo getters `AttestedWorldID._attestedTip()` reads, with the struct
+ * layout from `contracts/src/interfaces/IChainInfo.sol` (`HeightHashResult`). The
+ * self-relay planner uses them so its "is this final yet" answer is the contract's.
+ */
+export const chainInfoAttestationAbi = [
+  {
+    type: "function",
+    name: "get_latest_attestation_height_and_hash",
+    stateMutability: "view",
+    inputs: [{ name: "chainKey", type: "uint64" }],
+    outputs: [
+      {
+        name: "result",
+        type: "tuple",
+        components: [
+          { name: "height", type: "uint64" },
+          { name: "hash", type: "bytes32" },
+          { name: "isAttestation", type: "bool" },
+          { name: "exists", type: "bool" },
+        ],
+      },
+    ],
+  },
+  {
+    type: "function",
+    name: "get_latest_checkpoint_height_and_hash",
+    stateMutability: "view",
+    inputs: [{ name: "chainKey", type: "uint64" }],
+    outputs: [
+      {
+        name: "result",
+        type: "tuple",
+        components: [
+          { name: "height", type: "uint64" },
+          { name: "hash", type: "bytes32" },
+          { name: "isAttestation", type: "bool" },
+          { name: "exists", type: "bool" },
+        ],
+      },
+    ],
+  },
+] as const;
+
 /** `IAttestorStash` at 0x0FD4. */
 export const attestorStashAbi = [
   {

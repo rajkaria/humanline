@@ -44,6 +44,8 @@ bun test           # unit tests for lib/worldid.ts and lib/format.ts
 | `/api/world/rp-context` | Signs an IDKit 4.x proof request server-side. |
 | `/api/attestcoin/proof` | Proxies the CC3 proof builder (it sends no CORS headers). |
 | `/api/attestcoin/attested-height` | Proxies the proof builder's attested-height endpoint. |
+| `/api/relay/plan` | Self-relay plan for a proof root: which World ID updates are missing, how they batch, and whether they are final yet. CORS open. |
+| `/api/relay/proof` | `executeBatch` arguments for up to 10 updates, built from the Attestcoin proof builder and checked member by member. |
 
 ---
 
@@ -145,6 +147,7 @@ app/
   docs/                        integration guide + security model
   api/world/rp-context/        signs IDKit proof requests (server only)
   api/attestcoin/              proof builder proxies
+  api/relay/                   self-relay plan and proof (read-only, sign nothing)
   error.tsx global-error.tsx not-found.tsx loading.tsx
 components/
   ui/                          shadcn/ui primitives
