@@ -1,8 +1,12 @@
 name: relay
 
-# Serverless fallback for the long-lived worker. Every 15 minutes the runner derives its
-# cursor from chain state (RootRelayed events + processedQueries), relays whatever is
-# outstanding, and commits the evidence log back to the repo.
+# One of three independent relayers. The primary is Vercel Cron → /api/cron/relay every
+# 5 minutes (web/vercel.json); users can self-relay from the verify card at any time; this
+# workflow is the backup. GitHub queues `schedule` triggers on shared runners and in practice
+# fires far less often than asked, so each scheduled run relays continuously for 19 minutes.
+# The cron route can also dispatch it (workflow_dispatch) when GITHUB_DISPATCH_TOKEN is set.
+# Every run derives its cursor from chain state (RootRelayed events + processedQueries),
+# relays whatever is outstanding, and commits the evidence log back to the repo.
 on:
   schedule:
     - cron: "*/15 * * * *"
@@ -81,6 +85,13 @@ jobs:
           ETH_MAINNET_RPC: ${{ secrets.ETH_MAINNET_RPC }}
           ETH_SEPOLIA_RPC: ${{ secrets.ETH_SEPOLIA_RPC }}
         run: bun run worker/src/cli.ts status
+
+      # The watchdog's verdict after this run, for the job log. Informational: a late root
+      # is exactly what this job exists to fix, so it never fails the run.
+      - name: Watchdog
+        if: always()
+        run: |
+          curl -fsS --max-time 60 https://humanline.credit/api/relay/health || echo "watchdog: relay not healthy (see body above)"
 
       - name: Commit evidence
         if: always()

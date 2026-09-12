@@ -6,6 +6,7 @@ import { ArrowRightIcon, RadioIcon, ShieldIcon, TimerIcon } from "lucide-react";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { HashLink } from "@/components/hash-link";
 import { NotDeployedBanner } from "@/components/not-deployed-banner";
+import { RelayHealth } from "@/components/relay-health";
 import { SectionHeading } from "@/components/page-shell";
 import { Stat } from "@/components/stat";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,16 @@ export function RelayClient() {
   return (
     <div className="flex flex-col gap-10">
       <NotDeployedBanner need={["attestedWorldIDMainnet", "attestedWorldIDSepolia"]} />
+
+      <section className="flex flex-col gap-4">
+        <SectionHeading
+          title="Relay liveness"
+          description="Measured from chain, not reported: every number below is recomputed from RootRelayed events and block timestamps on both chains."
+        />
+        <ErrorBoundary title="Relay liveness">
+          <RelayHealth />
+        </ErrorBoundary>
+      </section>
 
       <ErrorBoundary title="Instance headers">
         <InstanceHeaders />

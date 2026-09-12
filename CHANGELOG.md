@@ -20,6 +20,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `eth_call`, tops up an empty wallet from `/api/gas`, and sends from the user's own wallet.
 - **`web/scripts/self-relay.ts`**, the same path from the command line; `--send --fresh` relays
   from a new wallet funded only by the gas faucet and appends `evidence/self-relay.jsonl`.
+- **An always-on relay.** Vercel Cron calls `/api/cron/relay` every 5 minutes (`web/vercel.json`,
+  `Authorization: Bearer $CRON_SECRET`, constant-time compared, refuses everyone when the secret
+  is unset). It runs one pass for both source chains with `RELAYER_PRIVATE_KEY` through the
+  self-relay planner and proof path, optionally dispatches `relay.yml` (`GITHUB_DISPATCH_TOKEN`),
+  and alerts `RELAY_ALERT_WEBHOOK` once when the watchdog crosses a threshold. The GitHub
+  `schedule` stays as a backup and now logs the watchdog verdict.
+- **Published relay statistics.** `/api/relay/stats` and a *Relay liveness* section on `/relay`:
+  end-to-end latency and relay delay (p50/p95/max), uptime against a 10-minute target over 24 h
+  and 7 d, pending relayable roots, and which relays came from non-operator wallets. All
+  recomputed from `RootRelayed`, CC3 and source block timestamps, and `TreeChanged`.
+- **`/api/relay/health`**, a watchdog for uptime monitors: `200` ok, `503` late or stalled.
 - **`scripts/verify.sh`**, one command for contracts, worker and web (tests, typecheck, lint).
 - 38 tests for the planner and for encoding real proof fixtures as `executeBatch` calldata.
 

@@ -46,6 +46,9 @@ bun test           # unit tests for lib/worldid.ts and lib/format.ts
 | `/api/attestcoin/attested-height` | Proxies the proof builder's attested-height endpoint. |
 | `/api/relay/plan` | Self-relay plan for a proof root: which World ID updates are missing, how they batch, and whether they are final yet. CORS open. |
 | `/api/relay/proof` | `executeBatch` arguments for up to 10 updates, built from the Attestcoin proof builder and checked member by member. |
+| `/api/relay/stats` | The relay's track record from chain: latency percentiles, uptime vs a 10-minute target, pending roots, relayers. CORS open. |
+| `/api/relay/health` | Watchdog: `200` healthy, `503` when a relayable root is late or the relay has stalled. |
+| `/api/cron/relay` | Vercel Cron target (every 5 min, `Bearer $CRON_SECRET`): one relay pass with `RELAYER_PRIVATE_KEY`, optional GitHub dispatch, alert webhook. |
 
 ---
 

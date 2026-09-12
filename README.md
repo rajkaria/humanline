@@ -157,6 +157,16 @@ earlier, holding 0.05 faucet tCTC, carried Sepolia root `0x041e604b…` to Credi
 (278,292 gas), ahead of the scheduled relayer. The row is in
 [`evidence/self-relay.jsonl`](evidence/self-relay.jsonl).
 
+**Three relayers, measured.** Vercel Cron calls `/api/cron/relay` every 5 minutes (bearer
+`CRON_SECRET`), which runs one pass for both source chains through the same planner and proof code
+as self-relay; the GitHub Actions workflow is the backup, and the cron route can dispatch it too.
+`/relay` publishes the track record recomputed from chain data: end-to-end latency (source block →
+root on Creditcoin) and relay delay (first moment the finality guard allowed it → relayed) as
+p50/p95/max, uptime against a 10-minute target over 24 h and 7 d, and which relays came from
+wallets that are not ours. `GET /api/relay/health` is the watchdog: `200` when every relayable root
+is on Creditcoin within the target, `503` with the waiting time when one is late or the relay has
+stalled, and the cron route posts to `RELAY_ALERT_WEBHOOK` when it crosses either threshold.
+
 ## Built with
 
 - **[Attestcoin Protocol](docs/ATTESTCOIN_INTEGRATION.md)** is the foundation, not a checkbox. Ten
@@ -296,7 +306,7 @@ cd web
 cp .env.example .env.local                 # WORLD_RP_SIGNER_PRIVATE_KEY is server-side only
 bun run dev                                # http://localhost:3000
 bun run build
-bun test                                   # 267 tests
+bun test                                   # 292 tests
 bun run scripts/self-relay.ts              # plan + proof + eth_call for the newest World update
 ```
 
@@ -312,7 +322,7 @@ See [`web/README.md`](web/README.md).
 |---|---|---|
 | Contracts (Foundry) | 101, including 7 that run against the live CC3 node | `cd contracts && CC3_FORK=1 forge test` |
 | Worker (Bun) | 202, no network | `cd worker && bun test` |
-| Web (Bun) | 267, including the self-relay planner and real-proof encoding | `cd web && bun test` |
+| Web (Bun) | 292, including the self-relay planner, real-proof encoding and relay statistics | `cd web && bun test` |
 | Everything | contracts + worker + web, typecheck and lint | `bash scripts/verify.sh` |
 
 The 7 fork tests are the ones worth reading: they confirm that the real `0x0FD2` returns `true` for
