@@ -7,6 +7,7 @@ import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 import { explorerUrl } from "@/lib/chains";
 import { describeError } from "@/lib/format";
+import { getPublicClient } from "@/lib/public-client";
 
 export type TxPhase = "idle" | "signing" | "pending" | "success" | "error";
 
@@ -101,6 +102,46 @@ export function useTx(options: {
     [label, writeContractAsync],
   );
 
+  /**
+   * Send, then wait for the receipt before resolving.
+   *
+   * `send` resolves at *submission*. That is fine for a single write — the
+   * component's own `useWaitForTransactionReceipt` drives the toasts — but it is
+   * wrong for a two-step flow: firing `repay` the instant `approve` is submitted
+   * makes the wallet estimate gas against an allowance that is still short, so
+   * MetaMask warns "this transaction is likely to fail" or refuses outright.
+   * That is the demo's repay step, so every approve-then-act path awaits this.
+   *
+   * Resolves `null` when the write was rejected or the transaction reverted, so
+   * a caller can simply bail without inspecting a receipt.
+   */
+  const sendAndWait = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async (request: any): Promise<Hex | null> => {
+      const sent = await send(request);
+      if (!sent) return null;
+      try {
+        const confirmed = await getPublicClient().waitForTransactionReceipt({
+          hash: sent,
+          timeout: 120_000,
+        });
+        if (confirmed.status !== "success") {
+          const message = "The transaction reverted on Creditcoin.";
+          setError(message);
+          toast.error(`${label} failed`, { description: message });
+          return null;
+        }
+        return sent;
+      } catch (cause) {
+        const message = describeError(cause);
+        setError(message);
+        toast.error(`${label} failed`, { description: message });
+        return null;
+      }
+    },
+    [label, send],
+  );
+
   const reset = useCallback(() => {
     setError(null);
     notified.current = null;
@@ -120,6 +161,7 @@ export function useTx(options: {
 
   return {
     send,
+    sendAndWait,
     reset,
     hash,
     error,

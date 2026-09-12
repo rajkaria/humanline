@@ -10,14 +10,20 @@ import {
   formatRelativeTime,
   formatTerm,
   formatTimestamp,
+  formatShares,
   formatUnits,
   formatUsd,
+  formatUsdExact,
   groupDigits,
   isAddress,
   isTxHash,
   joinNonEmpty,
+  parseShares,
   parseUnits,
   parseUsd,
+  sharesToAssets,
+  assetsToShares,
+  VIRTUAL_SHARES,
   toHex32,
   truncateAddress,
   truncateHex,
@@ -254,5 +260,89 @@ describe("misc", () => {
   test("joinNonEmpty drops falsy fragments", () => {
     expect(joinNonEmpty(["a", false, null, undefined, "b"])).toBe("a b");
     expect(joinNonEmpty([], ", ")).toBe("");
+  });
+});
+
+describe("formatUsdExact", () => {
+  test("keeps every base unit, because prefills feed straight back into a tx", () => {
+    // The bug this exists to prevent: formatUsd(20_205_000n) is "20.20", so the
+    // repay "All" button used to leave 5000 base units outstanding and the line
+    // silently never settled.
+    expect(formatUsd(20_205_000n)).toBe("20.20");
+    expect(formatUsdExact(20_205_000n)).toBe("20.205");
+    expect(parseUsd(formatUsdExact(20_205_000n))).toBe(20_205_000n);
+  });
+
+  test("round-trips any amount exactly", () => {
+    for (const value of [0n, 1n, 999_999n, 20_205_000n, 25_000_000n, 1_234_567_891n]) {
+      expect(parseUsd(formatUsdExact(value))).toBe(value);
+    }
+  });
+
+  test("drops trailing zeros and never groups", () => {
+    expect(formatUsdExact(25_000_000n)).toBe("25");
+    expect(formatUsdExact(1_234_567_000_000n)).toBe("1234567");
+    expect(formatUsdExact(0n)).toBe("0");
+  });
+});
+
+describe("pool shares", () => {
+  test("VIRTUAL_SHARES matches the contract's offset", () => {
+    expect(VIRTUAL_SHARES).toBe(1000n);
+  });
+
+  test("parseShares takes whole numbers only", () => {
+    expect(parseShares("60000000000")).toBe(60_000_000_000n);
+    expect(parseShares(" 500 ")).toBe(500n);
+    expect(parseShares("60,000,000,000")).toBe(60_000_000_000n);
+    for (const bad of ["", "1.5", "-1", "abc", "1e3", "0x10", "."]) {
+      expect(parseShares(bad), `${bad} should not parse`).toBeNull();
+    }
+  });
+
+  test("formatShares groups the raw integer", () => {
+    expect(formatShares(60_000_000_000n)).toBe("60,000,000,000");
+    expect(formatShares(0n)).toBe("0");
+  });
+
+  test("assetsToShares reproduces CreditLine.deposit", () => {
+    // shares = assets * (totalShares + VIRTUAL_SHARES) / (totalAssets + 1)
+    // The live e2e run deposited 60 hUSD into an empty pool and got 60e9 shares.
+    expect(assetsToShares(60_000_000n, 0n, 0n)).toBe(60_000_000_000n);
+  });
+
+  test("sharesToAssets reproduces CreditLine.withdraw", () => {
+    // assets = shares * (totalAssets + 1) / (totalShares + VIRTUAL_SHARES)
+    expect(sharesToAssets(60_000_000_000n, 60_000_000n, 60_000_000_000n)).toBe(60_000_000n);
+  });
+
+  test("the two directions round-trip within rounding", () => {
+    const totalAssets = 60_200_000n;
+    const totalShares = 60_000_000_000n;
+    for (const assets of [1_000_000n, 20_000_000n, 60_000_000n]) {
+      const shares = assetsToShares(assets, totalAssets, totalShares);
+      const back = sharesToAssets(shares, totalAssets, totalShares);
+      // Integer division only ever loses, never gains — a lender can never
+      // redeem more than they put in through a rounding gap.
+      expect(back).toBeLessThanOrEqual(assets);
+      expect(assets - back).toBeLessThanOrEqual(2n);
+    }
+  });
+
+  test("a share count is NOT a 6-decimal amount", () => {
+    // The bug this replaces: 60e9 shares rendered through formatUsd read
+    // "60,000.00", so a lender who deposited 60 hUSD typed "60" to get it back —
+    // and 60 shares out of 60e9 redeems literally nothing.
+    const shares = assetsToShares(60_000_000n, 0n, 0n);
+    expect(formatUsd(shares)).toBe("60,000.00");
+    expect(formatShares(shares)).toBe("60,000,000,000");
+    expect(sharesToAssets(60n, 60_000_000n, shares)).toBe(0n);
+    // Withdrawing the whole position is what actually returns the deposit.
+    expect(sharesToAssets(shares, 60_000_000n, shares)).toBe(60_000_000n);
+  });
+
+  test("an empty pool redeems nothing rather than dividing by zero", () => {
+    expect(sharesToAssets(0n, 0n, 0n)).toBe(0n);
+    expect(sharesToAssets(100n, 0n, 0n)).toBe(0n);
   });
 });

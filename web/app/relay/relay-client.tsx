@@ -315,7 +315,7 @@ function RelayTable() {
     );
   }
 
-  if (!data || data.length === 0) {
+  if (!data || data.rows.length === 0) {
     return (
       <Card>
         <CardContent className="flex flex-col items-center gap-2 py-10 text-center">
@@ -347,14 +347,17 @@ function RelayTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((row) => (
+            {data.rows.map((row) => (
               <RelayTableRow key={`${row.creditcoinTxHash}-${row.logIndex}`} row={row} />
             ))}
           </TableBody>
         </Table>
       </div>
       <p className="text-xs text-muted-foreground">
-        {data.length} root{data.length === 1 ? "" : "s"} shown
+        {data.rows.length} root{data.rows.length === 1 ? "" : "s"} shown
+        {data.bounded
+          ? ` · scanned blocks ${formatCount(data.scannedFrom)}–${formatCount(data.tip)}, not all history`
+          : ""}
         {isFetching ? " · refreshing…" : " · refreshes every 15s"}
       </p>
     </div>

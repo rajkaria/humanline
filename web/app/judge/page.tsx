@@ -7,6 +7,7 @@ import {
 import type { Metadata } from "next";
 
 import { CommandBlock } from "@/components/command-block";
+import { E2eEvidence } from "@/components/e2e-evidence";
 import { EvidenceLog } from "@/components/evidence-log";
 import { HashLink } from "@/components/hash-link";
 import { PageHeader, PageShell, SectionHeading } from "@/components/page-shell";
@@ -32,7 +33,7 @@ import {
   TREE_CHANGED_TOPIC,
 } from "@/lib/chains";
 import { CONTRACT_LIST, WORLD_ACTION, WORLD_APP_ID, WORLD_RP_ID } from "@/lib/contracts";
-import { NEGATIVE_PATHS } from "@/lib/negative-paths";
+import { NEGATIVE_PATHS, NEGATIVE_PATH_FILTER } from "@/lib/negative-paths";
 
 export const metadata: Metadata = {
   title: "Judge",
@@ -58,6 +59,15 @@ export default async function JudgePage() {
       />
 
       <Addresses />
+
+      <section className="flex flex-col gap-4">
+        <SectionHeading
+          id="happened"
+          title="What has already happened"
+          description="Not instructions — receipts. A real World ID identity verified on Creditcoin, and a full borrow-and-repay cycle, both with transaction hashes you can open."
+        />
+        <E2eEvidence />
+      </section>
 
       <section className="flex flex-col gap-4">
         <SectionHeading
@@ -301,8 +311,13 @@ function VerifyCommands() {
           />
           <CommandBlock
             title="Only the negative paths"
-            description="Each one should revert with the named custom error listed below."
-            command={`cd contracts && ../.tools/forge test --match-test "RevertWhen" -vvv`}
+            description="52 tests. Each one should reject the attack listed below, most with a named custom error."
+            command={`cd contracts && ../.tools/forge test --match-test "${NEGATIVE_PATH_FILTER}" -vvv`}
+          />
+          <CommandBlock
+            title="One row from the table below"
+            description="Every test name in that table is checked against contracts/test/*.t.sol by web's own test suite, so none of them can be invented."
+            command={`cd contracts && ../.tools/forge test --match-test "^test_RevertsOnThinAttestorQuorum$" -vvv`}
           />
           <CommandBlock
             title="Fork tests against live CC3 state"

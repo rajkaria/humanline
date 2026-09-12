@@ -17,19 +17,26 @@ import { deploymentBlockOf, deploymentTxHashOf, type ContractKey } from "@/lib/c
  * `NEXT_PUBLIC_DEPLOYMENT_BLOCK`, or 0) when there is no hash or the lookup
  * fails.
  */
-const cache = new Map<ContractKey, bigint>();
+export type DeploymentFloor = {
+  block: bigint;
+  /** `true` when this really is the deployment block, not a fallback. */
+  exact: boolean;
+};
+
+const cache = new Map<ContractKey, DeploymentFloor>();
 
 export async function resolveDeploymentBlock(
   client: PublicClient,
   key: ContractKey,
-): Promise<bigint> {
+): Promise<DeploymentFloor> {
   const cached = cache.get(key);
   if (cached !== undefined) return cached;
 
   const declared = deploymentBlockOf(key);
   if (declared > 0n) {
-    cache.set(key, declared);
-    return declared;
+    const floor = { block: declared, exact: true };
+    cache.set(key, floor);
+    return floor;
   }
 
   const hash = deploymentTxHashOf(key);
@@ -37,14 +44,16 @@ export async function resolveDeploymentBlock(
     try {
       const receipt = await client.getTransactionReceipt({ hash });
       if (receipt.blockNumber !== null && receipt.blockNumber !== undefined) {
-        cache.set(key, receipt.blockNumber);
-        return receipt.blockNumber;
+        const floor = { block: receipt.blockNumber, exact: true };
+        cache.set(key, floor);
+        return floor;
       }
     } catch {
-      // A pruned receipt or an unreachable RPC just means we scan wider.
+      // A pruned receipt or an unreachable RPC just means we scan a bounded
+      // look-back instead, and the caller labels the table accordingly.
     }
   }
 
-  cache.set(key, declared);
-  return declared;
+  // Not cached: a later call may well reach the RPC and get the real block.
+  return { block: 0n, exact: false };
 }

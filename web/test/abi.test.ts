@@ -15,6 +15,8 @@
  */
 
 import { describe, expect, test } from "bun:test";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 
 import {
   attestedWorldIdAbi,
@@ -24,7 +26,7 @@ import {
   husdAbi,
 } from "@/lib/abi";
 import artifacts from "@/lib/generated/abi.json";
-import { NEGATIVE_PATHS } from "@/lib/negative-paths";
+import { NEGATIVE_PATHS, NEGATIVE_PATH_FILTER } from "@/lib/negative-paths";
 
 type AbiParam = { type: string; components?: AbiParam[] };
 type AbiEntry = {
@@ -153,4 +155,72 @@ describe("the /judge negative-path table names real custom errors", () => {
       ).toBe(true);
     });
   }
+});
+
+/**
+ * The `test` column on `/judge` must name Foundry tests that actually exist.
+ *
+ * The first version of this table used a plausible-looking `test_RevertWhen_*`
+ * convention that the suite does not use — 26 invented names on the one page
+ * whose premise is "check it yourself", plus a `--match-test` filter that
+ * matched nothing. This reads the Solidity sources directly (no snapshot to go
+ * stale) and fails if any advertised name is missing, or if the filter the page
+ * prints would not select it.
+ */
+describe("the /judge negative-path table names real Foundry tests", () => {
+  const testDir = join(import.meta.dir, "..", "..", "contracts", "test");
+  const available = new Map<string, Set<string>>();
+
+  if (existsSync(testDir)) {
+    for (const file of readdirSync(testDir)) {
+      if (!file.endsWith(".t.sol")) continue;
+      const source = readFileSync(join(testDir, file), "utf8");
+      const names = new Set(
+        [...source.matchAll(/function\s+(test[A-Za-z0-9_]*)\s*\(/g)].map((m) => m[1]),
+      );
+      available.set(file.replace(/\.t\.sol$/, ""), names);
+    }
+  }
+
+  const haveSources = available.size > 0;
+  const filter = new RegExp(NEGATIVE_PATH_FILTER);
+
+  test("the Foundry sources are readable", () => {
+    if (!haveSources) {
+      console.warn(`[abi.test] no contracts/test/*.t.sol found at ${testDir}`);
+    }
+    expect(haveSources).toBe(true);
+  });
+
+  for (const path of NEGATIVE_PATHS) {
+    test.skipIf(!haveSources)(`${path.suite}.t.sol :: ${path.test}`, () => {
+      const names = available.get(path.suite);
+      expect(names, `no ${path.suite}.t.sol among ${[...available.keys()].join(", ")}`).toBeDefined();
+      expect(
+        names!.has(path.test),
+        `${path.suite}.t.sol does not define ${path.test} (listed for "${path.threat}")`,
+      ).toBe(true);
+    });
+  }
+
+  test.skipIf(!haveSources)("the printed --match-test filter selects every listed test", () => {
+    for (const path of NEGATIVE_PATHS) {
+      expect(
+        filter.test(path.test),
+        `--match-test "${NEGATIVE_PATH_FILTER}" would not select ${path.test}`,
+      ).toBe(true);
+    }
+  });
+
+  test.skipIf(!haveSources)("the filter does not select happy-path tests", () => {
+    // A filter that matched everything would be useless as a "negative paths"
+    // command. Spot-check the suite's clearly-positive tests.
+    for (const positive of [
+      "test_RelaysTheRealMainnetRoot",
+      "test_FullLifecycleRepaidOnTimeRaisesTheLimit",
+      "test_FaucetMintsOneHundred",
+    ]) {
+      expect(filter.test(positive), `${positive} should not match the filter`).toBe(false);
+    }
+  });
 });

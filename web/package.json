@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "bun test test/"
+    "test": "bun run scripts/sync-artifacts.ts && bun test test/",
+    "sync:check": "bun run scripts/sync-artifacts.ts --check"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

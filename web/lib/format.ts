@@ -135,6 +135,77 @@ export function formatRatio(numerator: bigint, denominator: bigint, fractionDigi
   return `${(Number(scaled) / 100).toFixed(fractionDigits)}%`;
 }
 
+/**
+ * Render an amount at full precision, ungrouped — for prefilling an input.
+ *
+ * `formatUsd` defaults to two fraction digits because that is what reads well in
+ * a table. Prefilling a form with it silently truncates: a principal of
+ * 20.205000 hUSD becomes "20.20", `repay` leaves 5000 base units outstanding,
+ * and `CreditLine.repay` only settles the loan when the remainder reaches zero —
+ * so the limit does not grow and the line does not close, with nothing on screen
+ * explaining why. Every "Max" / "All" button uses this instead.
+ */
+export function formatUsdExact(value: bigint): string {
+  return formatUnits(value, HUSD_DECIMALS, {
+    maxFraction: HUSD_DECIMALS,
+    minFraction: 0,
+    group: false,
+  });
+}
+
+/**
+ * Pool shares are a raw integer, not a fixed-point token amount.
+ *
+ * `CreditLine.deposit` mints `assets * (totalShares + VIRTUAL_SHARES) / (totalAssets + 1)`
+ * with `VIRTUAL_SHARES = 1e3`, so a first deposit of 60 hUSD (60,000,000 base
+ * units) mints 60,000,000,000 shares — a thousand times the asset base units.
+ * Formatting them with `formatUsd` showed "60,000.00" and invited a lender to
+ * type "60" into the withdraw field, redeeming 0.06 hUSD.
+ */
+export const VIRTUAL_SHARES = 1000n;
+
+/** Grouped integer: `60000000000` → `60,000,000,000`. */
+export function formatShares(shares: bigint): string {
+  return groupDigits(shares.toString());
+}
+
+/** Parse a raw share count. Rejects decimals — shares have no fractional part. */
+export function parseShares(input: string): bigint | null {
+  const trimmed = input.trim().replace(/,/g, "");
+  if (!/^\d+$/.test(trimmed)) return null;
+  try {
+    return BigInt(trimmed);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Assets a share count redeems for, matching `CreditLine.withdraw` exactly:
+ * `assets = shares * (totalAssets + 1) / (totalShares + VIRTUAL_SHARES)`.
+ */
+export function sharesToAssets(
+  shares: bigint,
+  totalAssets: bigint,
+  totalShares: bigint,
+): bigint {
+  const denominator = totalShares + VIRTUAL_SHARES;
+  if (denominator === 0n) return 0n;
+  return (shares * (totalAssets + 1n)) / denominator;
+}
+
+/**
+ * The inverse, matching `CreditLine.deposit`:
+ * `shares = assets * (totalShares + VIRTUAL_SHARES) / (totalAssets + 1)`.
+ */
+export function assetsToShares(
+  assets: bigint,
+  totalAssets: bigint,
+  totalShares: bigint,
+): bigint {
+  return (assets * (totalShares + VIRTUAL_SHARES)) / (totalAssets + 1n);
+}
+
 const SECOND = 1;
 const MINUTE = 60;
 const HOUR = 60 * MINUTE;

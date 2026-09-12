@@ -9,7 +9,11 @@
  * into `web/lib/generated/*.json`, which always exist and are committed with
  * empty defaults.
  *
- * Run automatically by `bun run dev` and `bun run build`; safe to run any time.
+ * Run automatically by `bun run dev`, `bun run build` and `bun run test`; safe to
+ * run any time. `--check` regenerates into memory and exits non-zero if the
+ * committed snapshots differ, so a stale snapshot — which would silently point
+ * the app at dead contracts — is a build failure rather than a demo failure.
+ * `test/generated.test.ts` asserts the same thing inside `bun test`.
  */
 
 import { mkdirSync, existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -21,10 +25,21 @@ const webRoot = resolve(here, "..");
 const repoRoot = resolve(webRoot, "..");
 const outDir = join(webRoot, "lib", "generated");
 
+const checkOnly = process.argv.includes("--check");
+const stale: string[] = [];
+
 mkdirSync(outDir, { recursive: true });
 
 function write(name: string, value: unknown) {
-  writeFileSync(join(outDir, name), `${JSON.stringify(value, null, 2)}\n`, "utf8");
+  const next = `${JSON.stringify(value, null, 2)}\n`;
+  const path = join(outDir, name);
+  const current = existsSync(path) ? readFileSync(path, "utf8") : null;
+  if (current === next) return;
+  if (checkOnly) {
+    stale.push(name);
+    return;
+  }
+  writeFileSync(path, next, "utf8");
 }
 
 // ---------------------------------------------------------------- deployments
@@ -87,6 +102,38 @@ for (const doc of DOCS) {
 }
 write("docs.json", docs);
 
+// -------------------------------------------------------------- e2e evidence
+// The live proof-of-personhood and credit-loop runs. `/judge` renders these as
+// "this actually happened", with explorer links, so they must travel with the
+// build the same way the relay log does.
+const E2E: Array<{ file: string; key: string; json?: boolean }> = [
+  { file: "e2e-worldid-staging.md", key: "worldIdStaging" },
+  { file: "e2e-worldid-staging-result.json", key: "worldIdStagingResult", json: true },
+  { file: "e2e-credit-loop.log", key: "creditLoop" },
+];
+
+const e2e: Record<string, unknown> = {};
+for (const entry of E2E) {
+  const path = join(repoRoot, "evidence", entry.file);
+  if (!existsSync(path)) {
+    console.log(`[sync-artifacts] e2e/${entry.file} — not found`);
+    continue;
+  }
+  const text = readFileSync(path, "utf8");
+  if (entry.json) {
+    try {
+      e2e[entry.key] = JSON.parse(text);
+    } catch (error) {
+      console.warn(`[sync-artifacts] e2e/${entry.file} is not valid JSON: ${String(error)}`);
+      continue;
+    }
+  } else {
+    e2e[entry.key] = text;
+  }
+  console.log(`[sync-artifacts] e2e/${entry.file} ← ${path}`);
+}
+write("e2e.json", e2e);
+
 // ------------------------------------------------------------------- evidence
 const evidencePath = join(repoRoot, "evidence", "relay-log.jsonl");
 if (existsSync(evidencePath)) {
@@ -106,4 +153,14 @@ if (existsSync(evidencePath)) {
 } else {
   if (!existsSync(join(outDir, "evidence.json"))) write("evidence.json", []);
   console.log("[sync-artifacts] evidence     — not found, using empty snapshot");
+}
+
+if (checkOnly) {
+  if (stale.length > 0) {
+    console.error(
+      `[sync-artifacts] STALE: ${stale.join(", ")} — run \`bun run sync\` and commit the result.`,
+    );
+    process.exit(1);
+  }
+  console.log("[sync-artifacts] snapshots are up to date");
 }

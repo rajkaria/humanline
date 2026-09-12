@@ -12,6 +12,27 @@ import type { AbiEvent, Address, Log, PublicClient } from "viem";
 
 export const DEFAULT_WINDOW = 50_000n;
 
+/**
+ * Hard ceiling on how many windows one scan may walk.
+ *
+ * `limit` alone is not a bound: a feed with five events never reaches it, so a
+ * scan whose floor fell back to block 0 would walk the whole chain — on a 15s
+ * refresh timer, across two contracts, and again across five event types for the
+ * loan history. 40 x 50k covers the most recent 2,000,000 blocks, which is far
+ * more history than any of these views needs, and {@link ScanResult.truncated}
+ * tells the caller when the cap cut the range short so the UI can say "the last
+ * N blocks" rather than implying it saw everything.
+ */
+export const DEFAULT_MAX_WINDOWS = 40;
+
+export type ScanResult<TLog> = {
+  logs: TLog[];
+  /** The oldest block actually scanned. */
+  scannedFrom: bigint;
+  /** `true` when the window cap stopped the scan before `fromBlock`. */
+  truncated: boolean;
+};
+
 export type ScanOptions = {
   client: PublicClient;
   address: Address | Address[];
@@ -22,13 +43,22 @@ export type ScanOptions = {
   window?: bigint;
   /** Stop early once this many logs have been collected (newest scan first). */
   limit?: number;
+  /** Ceiling on windows walked. Defaults to {@link DEFAULT_MAX_WINDOWS}. */
+  maxWindows?: number;
   /** Scan newest-first, which is what every table on this site wants. */
   descending?: boolean;
   signal?: AbortSignal;
 };
 
-/** Logs are returned in ascending block order unless `descending` is set. */
-export async function scanLogs<TLog = Log>(options: ScanOptions): Promise<TLog[]> {
+/**
+ * Scan a block range for one event.
+ *
+ * Logs come back in ascending block order unless `descending` is set, and the
+ * result says how far back the scan actually reached.
+ */
+export async function scanLogs<TLog = Log>(
+  options: ScanOptions,
+): Promise<ScanResult<TLog>> {
   const {
     client,
     address,
@@ -38,14 +68,21 @@ export async function scanLogs<TLog = Log>(options: ScanOptions): Promise<TLog[]
     toBlock,
     window = DEFAULT_WINDOW,
     limit,
+    maxWindows = DEFAULT_MAX_WINDOWS,
     descending = true,
     signal,
   } = options;
 
-  if (toBlock < fromBlock) return [];
+  if (toBlock < fromBlock) {
+    return { logs: [], scannedFrom: toBlock, truncated: false };
+  }
+
+  const allRanges = buildRanges(fromBlock, toBlock, window, descending);
+  const ranges = allRanges.slice(0, Math.max(1, maxWindows));
+  const truncated = ranges.length < allRanges.length;
 
   const collected: TLog[] = [];
-  const ranges = buildRanges(fromBlock, toBlock, window, descending);
+  let scannedFrom = descending ? toBlock : fromBlock;
 
   for (const range of ranges) {
     if (signal?.aborted) break;
@@ -59,20 +96,19 @@ export async function scanLogs<TLog = Log>(options: ScanOptions): Promise<TLog[]
       window,
     });
     collected.push(...(logs as TLog[]));
+    if (range.from < scannedFrom) scannedFrom = range.from;
     if (limit !== undefined && collected.length >= limit) break;
   }
 
-  // Within a window viem returns ascending order; flip each window's contents
-  // when scanning newest-first so the overall sequence is monotonic.
-  if (descending) {
-    collected.reverse();
-    // `collected` is now [oldest…newest] reversed per-window; sort to be exact.
-    collected.sort((a, b) => compareLogs(b, a));
-  } else {
-    collected.sort((a, b) => compareLogs(a, b));
-  }
+  // Sort into a single monotonic sequence; each window arrives ascending, and
+  // when scanning newest-first the windows themselves arrive in reverse.
+  collected.sort((a, b) => (descending ? compareLogs(b, a) : compareLogs(a, b)));
 
-  return limit === undefined ? collected : collected.slice(0, limit);
+  return {
+    logs: limit === undefined ? collected : collected.slice(0, limit),
+    scannedFrom,
+    truncated,
+  };
 }
 
 function compareLogs(a: unknown, b: unknown): number {

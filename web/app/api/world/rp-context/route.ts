@@ -2,6 +2,7 @@ import { signRequest } from "@worldcoin/idkit-core/signing";
 import { NextResponse } from "next/server";
 
 import { WORLD_ACTION, WORLD_RP_ID } from "@/lib/contracts";
+import { clientKey, isSameOrigin, rateLimit, tooManyRequests } from "@/lib/rate-limit";
 
 /**
  * Sign a World ID proof request as the relying party.
@@ -23,6 +24,23 @@ export const dynamic = "force-dynamic";
 type Body = { action?: unknown };
 
 export async function POST(request: Request) {
+  // This route produces a signature, so it is the one worth guarding hardest:
+  // same-origin only, and a tight bucket. Neither is a security boundary — the
+  // key never leaves the server and the action is pinned below — but together
+  // they stop it being used as an open signing oracle.
+  if (!isSameOrigin(request)) {
+    return NextResponse.json(
+      { error: "cross_origin", message: "This endpoint only serves Humanline's own pages." },
+      { status: 403, headers: { "cache-control": "no-store" } },
+    );
+  }
+
+  const limited = rateLimit(`rp-context:${clientKey(request)}`, {
+    limit: 10,
+    windowMs: 60_000,
+  });
+  if (!limited.ok) return tooManyRequests(limited);
+
   const signingKeyHex = process.env.WORLD_RP_SIGNER_PRIVATE_KEY;
 
   if (!signingKeyHex) {

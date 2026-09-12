@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { PROOF_BUILDER_URL } from "@/lib/chains";
+import { clientKey, rateLimit, tooManyRequests } from "@/lib/rate-limit";
 
 /**
  * Proxy the CC3 proof builder.
@@ -20,6 +21,12 @@ export const dynamic = "force-dynamic";
 const ALLOWED_CHAIN_KEYS = new Set([1, 3]);
 
 export async function GET(request: Request) {
+  // Proof building is expensive for the CC3 prover, so cap what one caller can
+  // ask for. Deliberately not origin-locked: a judge pasting this URL into a
+  // terminal is a use we want to support.
+  const limited = rateLimit(`proof:${clientKey(request)}`, { limit: 20, windowMs: 60_000 });
+  if (!limited.ok) return tooManyRequests(limited);
+
   const url = new URL(request.url);
   const chainKeyRaw = url.searchParams.get("chainKey");
   const txHash = url.searchParams.get("txHash")?.trim() ?? "";

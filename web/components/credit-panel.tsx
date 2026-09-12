@@ -35,6 +35,7 @@ import {
   formatTerm,
   formatTimestamp,
   formatUsd,
+  formatUsdExact,
   parseUsd,
 } from "@/lib/format";
 import type { CreditLineTerms, Line } from "@/lib/hooks/use-credit-line";
@@ -127,7 +128,9 @@ export function CreditPanel({
   const repay = useCallback(async () => {
     if (!creditLine || !husd || repayAmount === null || repayAmount <= 0n) return;
     if (allowance < repayAmount) {
-      const approved = await approveTx.send({
+      // Wait for the allowance to actually land: `repay` would otherwise be
+      // gas-estimated against the old allowance and flagged as likely-to-fail.
+      const approved = await approveTx.sendAndWait({
         address: husd,
         abi: husdAbi,
         functionName: "approve",
@@ -320,7 +323,7 @@ export function CreditPanel({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setBorrowInput(formatUsd(available, { group: false }))}
+                onClick={() => setBorrowInput(formatUsdExact(available))}
                 disabled={available === 0n}
               >
                 Max
@@ -384,7 +387,7 @@ export function CreditPanel({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setRepayInput(formatUsd(line.principal, { group: false }))}
+                onClick={() => setRepayInput(formatUsdExact(line.principal))}
                 disabled={line.principal === 0n}
               >
                 All

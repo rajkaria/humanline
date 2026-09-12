@@ -1,0 +1,22 @@
+{
+  "worldIdStaging": "# End-to-end: World ID (staging, simulator) → Creditcoin CC3 — 2026-09-12 09:27 UTC\n\n- Request: IDKit 4.2 `IDKit.request({... allow_legacy_proofs: true, environment: \"staging\"}).preset(orbLegacy({ signal: wallet }))`, rp_context signed with the Humanline RP key (rp_84b02642423cadf5).\n- Identity: World simulator \"Identity #0\" (Orb level). Response protocol_version 3.0, fields identifier / merkle_root / nullifier / proof / signal_hash (see e2e-worldid-staging-result.json).\n- merkle_root 0x0de7c26c4679912f801c48db0dc1907f6b0ecfacad4e6c1f2b4ad203e9d9fca9 = the Sepolia staging root relayed by Attestcoin into AttestedWorldIDSepolia 0x3a7c3cc67034197208923587b8dc5c4674cbcef7 (isValidRoot → true).\n- HumanRegistry.register on CC3: tx 0x930a22ebeb19e5c46609c3ab67a073f7c8dc6501c5ab33735e8ea1fe588f6ebf, status 1, gas 336,396 (Groth16 verification on bn128 + binding).\n- Result: isHuman(0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3) = true, humanOf = 0x06d6d24ba1cb97b3d3456e9a3bdfc4f707072ecd96e79998dfb7dce49529b6d4.\n- Script: web/scripts/e2e-worldid.ts\n",
+  "worldIdStagingResult": {
+    "success": true,
+    "result": {
+      "action": "humanline-register",
+      "environment": "staging",
+      "nonce": "0x003b50680658014be569509a6a43f60c879041d8d9304d74d8e1bcaef01c1a95",
+      "protocol_version": "3.0",
+      "responses": [
+        {
+          "identifier": "orb",
+          "merkle_root": "0x0de7c26c4679912f801c48db0dc1907f6b0ecfacad4e6c1f2b4ad203e9d9fca9",
+          "nullifier": "0x06d6d24ba1cb97b3d3456e9a3bdfc4f707072ecd96e79998dfb7dce49529b6d4",
+          "proof": "0x2706a3dba9eb18fb41b470f9ebba9aba71f124a352f90f851287d1c9bea78ea30996b5f41c6238229f8d5d2c95bfb438982242a2e9ba9464dbb5e52c35654b3e168fa94ab825a927da6d4d8364f1f2175bc977e47f986232cacf1276bf3a55ef23d33e043d563b6dfad0c74761e18bbd1face8393642ae8e2a2db85d46b2377c21e5543fbce03560e593f5a4447b756783fe21eafbbe1a0a78b04e7631f3d7b818639e7a16f45b3c4d160aad3d68f61d6cee1ce2dcc09e98da847886c2141ce409bb6f31e054fc9703193c33a9a7ae9f61085eeb00d14dd700df380585f686091656a22821cf775292cb08027cc04f4f87660ff25886e6db20684e62fbb9451d",
+          "signal_hash": "0x0088cf232ba07d9b4a8749e13a5f3f08f22be325e603242c54b95efb9bc815fa"
+        }
+      ]
+    }
+  },
+  "creditLoop": "human: 0x6d6d24ba1cb97b3d3456e9a3bdfc4f707072ecd96e79998dfb7dce49529b6d4\nhUSD before: 0\nfaucet: 0xb7afb7179125cf18bfa9eedeeaa9723f5ca500f01ec6918c09b1ef3eab1d8ce8 status=1 gas=91379\nhUSD after faucet: 100000000\napprove: 0x889abcd891796d2d94591d9a9495872cb2c2f4f713de6bde40406a6eb2fd79fb status=1 gas=46005\ndeposit 60 hUSD (lender): 0x0661af1a1ceea6b75693048cff13e6ee3f9fba4dfdc9ec8adc89549df7e6cbea status=1 gas=125538\npool totalAssets: 60000000 shares: 60000000000\nopenLine: 0x8734ce7831303f75b7f02af8dfb012a411d3c6a18a8aa7c1b77eb13f5160a2d1 status=1 gas=112896\nline: {\n  limit: \"25000000\",\n  principal: \"0\",\n  dueAt: 0,\n}\nborrow 20 hUSD: 0xf766834bd3b20cd31444f235a0314496afe1b05ae1367f50d73867e1fc24e960 status=1 gas=157682\nafter borrow: {\n  limit: \"25000000\",\n  principal: \"20200000\",\n  dueAt: 1789206000,\n  available: \"4800000\",\n  totalBorrowed: \"20000000\",\n}\nrepay 20.2 hUSD (principal + 1% fee): 0xc7c1c7c8754832a8d4b915a65e0e642880ed0297d4d8e86585105d32136b0ec1 status=1 gas=158004\nafter repay: {\n  limit: \"31250000\",\n  principal: \"0\",\n  loansRepaid: 1,\n  totalAssets: \"60200000\",\n}\n"
+}

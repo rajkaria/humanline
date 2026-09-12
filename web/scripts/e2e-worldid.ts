@@ -17,7 +17,7 @@ console.log("wallet (signal):", wallet.address, "env:", env, "app:", APP_ID);
 
 const { sig, nonce, createdAt, expiresAt } = signRequest({ signingKeyHex: secrets.WORLD_RP_SIGNER_PRIVATE_KEY, action: ACTION });
 const rp_context = { rp_id: RP_ID, nonce, created_at: createdAt, expires_at: expiresAt, signature: sig };
-const request = await IDKit.request({ app_id: APP_ID as any, action: ACTION, rp_context, allow_legacy_proofs: true, environment: env }).preset(orbLegacy({ signal: wallet.address }));
+const request = await IDKit.request({ app_id: APP_ID as any, action: ACTION, rp_context, allow_legacy_proofs: true, environment: env as "staging" | "production" | "sandbox" }).preset(orbLegacy({ signal: wallet.address }));
 writeFileSync(out + "-uri.txt", request.connectorURI);
 console.log("requestId:", request.requestId);
 console.log("connectorURI written to", out + "-uri.txt");

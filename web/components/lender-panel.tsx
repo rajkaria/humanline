@@ -19,7 +19,15 @@ import { Progress } from "@/components/ui/progress";
 import { creditLineAbi, husdAbi } from "@/lib/abi";
 import { creditcoinTestnet } from "@/lib/chains";
 import { CONTRACTS } from "@/lib/contracts";
-import { formatRatio, formatUsd, parseUsd } from "@/lib/format";
+import {
+  formatRatio,
+  formatShares,
+  formatUsd,
+  formatUsdExact,
+  parseShares,
+  parseUsd,
+  sharesToAssets,
+} from "@/lib/format";
 import type { PoolStats } from "@/lib/hooks/use-credit-line";
 import { useTx } from "@/lib/hooks/use-tx";
 
@@ -55,7 +63,8 @@ export function LenderPanel({
   const withdrawTx = useTx({ label: "Withdrawing", onConfirmed: onChanged });
 
   const depositAmount = useMemo(() => parseUsd(depositInput), [depositInput]);
-  const withdrawShares = useMemo(() => parseUsd(withdrawInput), [withdrawInput]);
+  // Shares are a raw integer, not a 6-decimal amount — see lib/format.ts.
+  const withdrawShares = useMemo(() => parseShares(withdrawInput), [withdrawInput]);
 
   const totalAssets = pool.totalAssets ?? 0n;
   const totalBorrowed = pool.totalBorrowed ?? 0n;
@@ -66,14 +75,24 @@ export function LenderPanel({
   // them. So this subtraction is exactly the cash still sitting in the pool.
   const idle = totalAssets > totalBorrowed ? totalAssets - totalBorrowed : 0n;
 
-  // Share price is `totalAssets / totalShares`; the pool absorbs write-offs, so
-  // this is the number that actually moves for a lender.
-  const lenderValue = totalShares === 0n ? 0n : (shares * totalAssets) / totalShares;
+  // What the lender's shares are worth right now, priced exactly as
+  // `CreditLine.withdraw` would price them. The pool absorbs write-offs, so this
+  // is the number that actually moves for a lender.
+  const lenderValue = sharesToAssets(shares, totalAssets, totalShares);
+
+  // Live preview of what the typed share count redeems for, and whether the pool
+  // can actually pay it out today.
+  const withdrawAssets =
+    withdrawShares === null ? null : sharesToAssets(withdrawShares, totalAssets, totalShares);
+  const overHeld = withdrawShares !== null && withdrawShares > shares;
+  const overIdle = withdrawAssets !== null && withdrawAssets > idle;
 
   const deposit = useCallback(async () => {
     if (!creditLine || !husd || depositAmount === null || depositAmount <= 0n) return;
     if (allowance < depositAmount) {
-      const approved = await approveTx.send({
+      // See credit-panel: the deposit must not be estimated against a stale
+      // allowance, so wait for the approve receipt first.
+      const approved = await approveTx.sendAndWait({
         address: husd,
         abi: husdAbi,
         functionName: "approve",
@@ -126,7 +145,7 @@ export function LenderPanel({
           <Stat
             label="Your position"
             value={formatUsd(lenderValue)}
-            hint={`${formatUsd(shares)} shares`}
+            hint={`${formatShares(shares)} shares`}
           />
         </dl>
 
@@ -168,7 +187,7 @@ export function LenderPanel({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setDepositInput(formatUsd(balance, { group: false }))}
+                onClick={() => setDepositInput(formatUsdExact(balance))}
                 disabled={balance === 0n}
               >
                 Max
@@ -216,25 +235,51 @@ export function LenderPanel({
             <div className="flex gap-2">
               <Input
                 id="withdraw-shares"
-                inputMode="decimal"
-                placeholder="500.00"
+                inputMode="numeric"
+                placeholder={shares === 0n ? "0" : shares.toString()}
                 value={withdrawInput}
                 onChange={(e) => setWithdrawInput(e.target.value)}
                 className="font-mono"
-                aria-invalid={withdrawInput !== "" && withdrawShares === null}
+                aria-invalid={withdrawInput !== "" && (withdrawShares === null || overHeld)}
+                aria-describedby="withdraw-hint"
               />
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setWithdrawInput(formatUsd(shares, { group: false }))}
+                onClick={() => setWithdrawInput(shares.toString())}
                 disabled={shares === 0n}
               >
                 All
               </Button>
             </div>
-            <p className="min-h-4 text-xs text-muted-foreground">
-              Withdrawals are limited by idle liquidity: {formatUsd(idle)} {symbol}.
+            <p id="withdraw-hint" className="min-h-8 text-xs text-muted-foreground">
+              {overHeld ? (
+                <span className="text-warning">
+                  You hold {formatShares(shares)} shares.
+                </span>
+              ) : overIdle ? (
+                <span className="text-warning">
+                  That redeems {formatUsd(withdrawAssets!)} {symbol}, but only{" "}
+                  {formatUsd(idle)} {symbol} is idle — the rest is out on loan until it is
+                  repaid.
+                </span>
+              ) : withdrawAssets !== null && withdrawAssets > 0n ? (
+                <>
+                  Redeems{" "}
+                  <span className="font-mono">
+                    {formatUsd(withdrawAssets)} {symbol}
+                  </span>
+                  . You hold {formatShares(shares)} shares, worth{" "}
+                  {formatUsd(lenderValue)} {symbol}.
+                </>
+              ) : (
+                <>
+                  Shares are whole numbers, not {symbol}. You hold{" "}
+                  {formatShares(shares)}, worth {formatUsd(lenderValue)} {symbol}; idle
+                  liquidity is {formatUsd(idle)} {symbol}.
+                </>
+              )}
             </p>
             <Button
               type="submit"
@@ -245,7 +290,9 @@ export function LenderPanel({
                 withdrawTx.isBusy ||
                 withdrawShares === null ||
                 withdrawShares <= 0n ||
-                shares === 0n
+                shares === 0n ||
+                overHeld ||
+                overIdle
               }
             >
               <MinusIcon />
@@ -259,7 +306,7 @@ export function LenderPanel({
 
         <StatRow
           label="Shares outstanding"
-          value={totalShares === 0n ? "—" : formatUsd(totalShares)}
+          value={totalShares === 0n ? "—" : formatShares(totalShares)}
           className="border-t border-foreground/10 pt-3"
         />
       </CardContent>

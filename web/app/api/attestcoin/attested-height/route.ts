@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { PROOF_BUILDER_URL } from "@/lib/chains";
+import { clientKey, rateLimit, tooManyRequests } from "@/lib/rate-limit";
 
 /**
  * Proxy the proof builder's attested-height endpoint.
@@ -17,6 +18,11 @@ export const dynamic = "force-dynamic";
 const ALLOWED_CHAIN_KEYS = new Set([1, 3]);
 
 export async function GET(request: Request) {
+  // Cheap upstream, but still someone else's quota. /relay polls this at most
+  // twice per 30s per viewer, so 60/min leaves plenty of headroom.
+  const limited = rateLimit(`height:${clientKey(request)}`, { limit: 60, windowMs: 60_000 });
+  if (!limited.ok) return tooManyRequests(limited);
+
   const chainKey = Number(new URL(request.url).searchParams.get("chainKey"));
   if (!Number.isInteger(chainKey) || !ALLOWED_CHAIN_KEYS.has(chainKey)) {
     return NextResponse.json({ error: "bad_chain_key" }, { status: 400 });

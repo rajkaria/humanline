@@ -28,6 +28,9 @@ export type LineEvent = {
   timestamp?: bigint;
 };
 
+/** How far back to look when the deployment block cannot be resolved. */
+const LOOKBACK = 2_000_000n;
+
 const EVENTS: LineEventKind[] = [
   "LineOpened",
   "Borrowed",
@@ -54,15 +57,18 @@ export function useLineEvents(human: bigint, options: { limit?: number } = {}) {
     queryFn: async (): Promise<LineEvent[]> => {
       if (!creditLine || human === 0n) return [];
       const client = getPublicClient();
-      const [tip, from] = await Promise.all([
+      const [tip, floor] = await Promise.all([
         client.getBlockNumber(),
         resolveDeploymentBlock(client, "creditLine"),
       ]);
+      // A bounded look-back when the deployment block is unknown: five event
+      // types on a 20s timer must never turn into five full-chain rescans.
+      const from = floor.exact ? floor.block : tip > LOOKBACK ? tip - LOOKBACK : 0n;
 
       const batches = await Promise.all(
         EVENTS.map(async (kind) => {
           const event = getAbiItem({ abi: creditLineAbi, name: kind }) as AbiEvent;
-          const logs = await scanLogs({
+          const scan = await scanLogs({
             client,
             address: creditLine,
             event,
@@ -71,7 +77,7 @@ export function useLineEvents(human: bigint, options: { limit?: number } = {}) {
             toBlock: tip,
             limit,
           });
-          return logs.map((log) => toLineEvent(kind, log));
+          return scan.logs.map((log) => toLineEvent(kind, log));
         }),
       );
 

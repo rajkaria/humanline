@@ -30,7 +30,19 @@ export type RelayRow = {
   sourceTxHash?: `0x${string}`;
 };
 
+export type RelayFeed = {
+  rows: RelayRow[];
+  /** `true` when the scan covered a bounded look-back, not all history. */
+  bounded: boolean;
+  /** The oldest block the scan actually reached. */
+  scannedFrom: bigint;
+  tip: bigint;
+};
+
 const ROOT_RELAYED = getAbiItem({ abi: attestedWorldIdAbi, name: "RootRelayed" }) as AbiEvent;
+
+/** How far back to look when a contract's deployment block cannot be resolved. */
+const LOOKBACK = 2_000_000n;
 
 /**
  * The `RootRelayed` feed across both `AttestedWorldID` instances.
@@ -57,14 +69,24 @@ export function useRelayFeed(options: { limit?: number; refetchInterval?: number
     ],
     enabled: addresses.length > 0,
     refetchInterval: options.refetchInterval ?? 15_000,
-    queryFn: async (): Promise<RelayRow[]> => {
+    queryFn: async (): Promise<RelayFeed> => {
       const client = getPublicClient();
       const tip = await client.getBlockNumber();
+      let bounded = false;
+      let scannedFrom = tip;
 
       const batches = await Promise.all(
         addresses.map(async ({ chainKey, contractKey, address }) => {
-          const fromBlock = await resolveDeploymentBlock(client, contractKey);
-          const logs = await scanLogs({
+          const floor = await resolveDeploymentBlock(client, contractKey);
+          // When the deployment block is unknown, scan a bounded look-back
+          // rather than the whole chain — and say so in the footer.
+          const fromBlock = floor.exact
+            ? floor.block
+            : tip > LOOKBACK
+              ? tip - LOOKBACK
+              : 0n;
+          if (!floor.exact) bounded = true;
+          const scan = await scanLogs({
             client,
             address: address!,
             event: ROOT_RELAYED,
@@ -72,7 +94,9 @@ export function useRelayFeed(options: { limit?: number; refetchInterval?: number
             toBlock: tip,
             limit,
           });
-          return logs.map((log) => toRelayRow(chainKey, log));
+          if (scan.truncated) bounded = true;
+          if (scan.scannedFrom < scannedFrom) scannedFrom = scan.scannedFrom;
+          return scan.logs.map((log) => toRelayRow(chainKey, log));
         }),
       );
 
@@ -100,10 +124,15 @@ export function useRelayFeed(options: { limit?: number; refetchInterval?: number
         }),
       );
 
-      return merged.map((row) => ({
-        ...row,
-        timestamp: timestamps.get(row.creditcoinBlock),
-      }));
+      return {
+        rows: merged.map((row) => ({
+          ...row,
+          timestamp: timestamps.get(row.creditcoinBlock),
+        })),
+        bounded,
+        scannedFrom,
+        tip,
+      };
     },
   });
 }
