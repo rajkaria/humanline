@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { formatDuration } from "@/lib/format";
+import { formatCtc, formatDuration } from "@/lib/format";
 import type { SelfRelayPhase, SelfRelayProgress } from "@/lib/hooks/use-self-relay";
 import type { RelayPlan } from "@/lib/relay/plan";
 import { cn } from "@/lib/utils";
@@ -45,7 +45,12 @@ export function SelfRelayPanel({
   canSend,
   sourceLabel,
   onRelay,
+  rewardPerRoot,
+  vaultAvailable,
 }: {
+  /** RelayReward vault terms; omitted when no vault is deployed. */
+  rewardPerRoot?: bigint;
+  vaultAvailable?: bigint;
   plan: RelayPlan | undefined;
   planLoading: boolean;
   planError: string | null;
@@ -100,6 +105,16 @@ export function SelfRelayPanel({
           {updates === 1 ? "1 World ID update" : `${updates} World ID updates`} to carry ·{" "}
           {batches === 1 ? "1 transaction" : `${batches} transactions`} · under 0.001 tCTC gas
           (topped up for you if the wallet is empty)
+          {rewardPerRoot !== undefined && rewardPerRoot > 0n ? (
+            <span className="block pt-0.5 text-success" data-testid="self-relay-reward">
+              Earn up to {formatCtc(rewardPerRoot * BigInt(Math.min(updates, 10)))} tCTC from the
+              RelayReward vault for carrying {updates === 1 ? "it" : "them"}
+              {vaultAvailable !== undefined && vaultAvailable < rewardPerRoot * BigInt(updates)
+                ? " (the vault is running low, so it may pay less)"
+                : ""}
+              .
+            </span>
+          ) : null}
         </p>
       ) : null}
 

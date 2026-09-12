@@ -4,9 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { Hex } from "viem";
-import { useAccount, useWriteContract } from "wagmi";
+import { useAccount, useReadContracts, useWriteContract } from "wagmi";
 
-import { attestedWorldIdAbi } from "@/lib/abi";
+import { attestedWorldIdAbi, relayRewardAbi } from "@/lib/abi";
+import { CONTRACTS } from "@/lib/contracts";
 import { creditcoinTestnet, explorerUrl, type SourceChainKey } from "@/lib/chains";
 import { describeError } from "@/lib/format";
 import { getPublicClient } from "@/lib/public-client";
@@ -60,6 +61,21 @@ export function useSelfRelay(options: {
   const { chainKey, root, enabled, onRelayed } = options;
   const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
+
+  const vault = CONTRACTS.relayReward.address;
+  const vaultReads = useReadContracts({
+    contracts: vault
+      ? ([
+          { address: vault, abi: relayRewardAbi, functionName: "REWARD_PER_ROOT", chainId: creditcoinTestnet.id },
+          { address: vault, abi: relayRewardAbi, functionName: "available", chainId: creditcoinTestnet.id },
+        ] as const)
+      : [],
+    query: { enabled: Boolean(vault) && enabled, refetchInterval: 60_000 },
+  });
+  const rewardPerRoot =
+    vaultReads.data?.[0]?.status === "success" ? (vaultReads.data[0].result as bigint) : undefined;
+  const vaultAvailable =
+    vaultReads.data?.[1]?.status === "success" ? (vaultReads.data[1].result as bigint) : undefined;
 
   const [phase, setPhase] = useState<SelfRelayPhase>("idle");
   const [progress, setProgress] = useState<SelfRelayProgress | null>(null);
@@ -148,17 +164,28 @@ export function useSelfRelay(options: {
         }
         const args = argsFromJson(body.args);
 
-        // Dry-run first: a revert here costs nothing, and it names the reason.
+        // Through the RelayReward vault when one is deployed (the user is paid for fresh roots),
+        // straight to AttestedWorldID otherwise. Dry-run first either way: a revert here costs
+        // nothing, and it names the reason.
         setPhase("simulating");
+        const vaultArgs = [data.contract, ...args] as const;
         let gas: bigint;
         try {
-          gas = await client.estimateContractGas({
-            account: address,
-            address: data.contract,
-            abi: attestedWorldIdAbi,
-            functionName: "executeBatch",
-            args,
-          });
+          gas = vault
+            ? await client.estimateContractGas({
+                account: address,
+                address: vault,
+                abi: relayRewardAbi,
+                functionName: "relay",
+                args: vaultArgs,
+              })
+            : await client.estimateContractGas({
+                account: address,
+                address: data.contract,
+                abi: attestedWorldIdAbi,
+                functionName: "executeBatch",
+                args,
+              });
         } catch (cause) {
           const message = describeError(cause);
           if (ALREADY_RELAYED.test(message) || ALREADY_RELAYED.test(String((cause as Error)?.message))) {
@@ -168,14 +195,24 @@ export function useSelfRelay(options: {
         }
 
         setPhase("signing");
-        const hash = await writeContractAsync({
-          address: data.contract,
-          abi: attestedWorldIdAbi,
-          functionName: "executeBatch",
-          args,
-          chainId: creditcoinTestnet.id,
-          gas: (gas * 13n) / 10n,
-        });
+        const limit = (gas * 13n) / 10n;
+        const hash = vault
+          ? await writeContractAsync({
+              address: vault,
+              abi: relayRewardAbi,
+              functionName: "relay",
+              args: vaultArgs,
+              chainId: creditcoinTestnet.id,
+              gas: limit,
+            })
+          : await writeContractAsync({
+              address: data.contract,
+              abi: attestedWorldIdAbi,
+              functionName: "executeBatch",
+              args,
+              chainId: creditcoinTestnet.id,
+              gas: limit,
+            });
         setTxs((prev) => [...prev, hash]);
 
         setPhase("confirming");
@@ -201,7 +238,7 @@ export function useSelfRelay(options: {
       running.current = false;
       setProgress(null);
     }
-  }, [address, chainKey, ensureGas, onRelayed, query, writeContractAsync]);
+  }, [address, chainKey, ensureGas, onRelayed, query, vault, writeContractAsync]);
 
   const reset = useCallback(() => {
     setPhase("idle");
@@ -219,6 +256,10 @@ export function useSelfRelay(options: {
     txs,
     txUrls: txs.map((h) => explorerUrl("creditcoin", "tx", h)),
     error,
+    /** tCTC wei the RelayReward vault pays per fresh root, when a vault is deployed. */
+    rewardPerRoot,
+    /** The vault's unreserved balance; a reward is capped by it. */
+    vaultAvailable,
     busy: phase !== "idle" && phase !== "done" && phase !== "error",
     run,
     reset,

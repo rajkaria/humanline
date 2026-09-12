@@ -31,6 +31,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and 7 d, pending relayable roots, and which relays came from non-operator wallets. All
   recomputed from `RootRelayed`, CC3 and source block timestamps, and `TreeChanged`.
 - **`/api/relay/health`**, a watchdog for uptime monitors: `200` ok, `503` late or stalled.
+- **`RelayReward`**, a permissionless relayer vault on CC3 testnet
+  (`0x9766480a872ad7df2a5cf86f9e307804a3f7afe0`, Blockscout-verified, funded 25 tCTC). It forwards
+  to `AttestedWorldID.executeBatch` and pays 0.002 tCTC per root the call recorded, only when the
+  call moves the tip to a root younger than 6 h by its source block, capped at 10 roots per call.
+  Non-reentrant, no owner, pull-payment fallback for relayers that cannot receive. 17 Foundry
+  tests including a fuzz test that it never pays more than it holds or owes.
+  `contracts/script/deploy-relay-reward.sh` deploys, funds and records it in both deployment files;
+  `verify-blockscout.sh` and `export-abi.sh` know it. Self-relay in the app and
+  `scripts/self-relay.ts` go through it and report the reward; `/relay` shows the vault's terms,
+  balance and payouts, and relay statistics credit vault relays to the actual sender.
 - **`scripts/verify.sh`**, one command for contracts, worker and web (tests, typecheck, lint).
 - 38 tests for the planner and for encoding real proof fixtures as `executeBatch` calldata.
 

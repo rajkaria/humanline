@@ -7,7 +7,8 @@
     "HUSD": "0x4bd7f4c6648deb8f107932572ce7e85aca259640",
     "HumanRegistry": "0x62c2fd99ea587e4b466175ad248468782bd5298d",
     "CreditLine": "0x1bd40163e41e44d2f139d95de88b640f6ea461f7",
-    "HumanGate": "0xa3e021de49cec8819ea1bd37a8b5a9df005b776c"
+    "HumanGate": "0xa3e021de49cec8819ea1bd37a8b5a9df005b776c",
+    "RelayReward": "0x9766480a872ad7df2a5cf86f9e307804a3f7afe0"
   },
   "txHashes": {
     "AttestedWorldIDMainnet": "0x04bb7e2ed8f5be32d6f4163bb6a74e3410c895406c068b00f23454e079dd827a",
@@ -15,7 +16,8 @@
     "HUSD": "0x83194732dbff9c49f8e7dff7f18bfbd7793aa5dc69ef69507b43b7d7a7a74c86",
     "HumanRegistry": "0x078308c11d3c9e2d6080d6f8b2b61a3a2d4eefee7ba5538f67af595eb4e8705b",
     "CreditLine": "0x7cbc9fb216e75ea37e0c233af26a6c3bc456686c8298318d6e0b48b32725170b",
-    "HumanGate": "0x3c5ef7e76ef28d4672064dc17e19e099bf94930eaf7b2e19d0d1eeb4f3d94956"
+    "HumanGate": "0x3c5ef7e76ef28d4672064dc17e19e099bf94930eaf7b2e19d0d1eeb4f3d94956",
+    "RelayReward": "0x97daaf15b3113baf1bcb72ebc862e7d9d2677978a81cdeabd6950db2900280e3"
   },
   "config": {
     "worldIdSource": "sepolia",
@@ -26,7 +28,13 @@
     "initialLimit": 25000000,
     "maxLimit": 2000000000,
     "feeBps": 100,
-    "sourceBlockTime": 12
+    "sourceBlockTime": 12,
+    "relayReward": {
+      "rewardPerRootWei": "2000000000000000",
+      "maxRootAgeSeconds": 21600,
+      "initialFundingTctc": 25,
+      "fundingTx": "0x086dd17c4a972d888685c2b9a362e75e290c3f4ce0ac121a0035cd9c335ea5c3"
+    }
   },
   "deployedAt": 1789204231,
   "deployer": "0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3"

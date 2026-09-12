@@ -41,6 +41,7 @@ const ENV_ADDRESSES: Record<ContractKey, string | undefined> = {
   creditLine: process.env.NEXT_PUBLIC_CREDIT_LINE_ADDRESS,
   husd: process.env.NEXT_PUBLIC_HUSD_ADDRESS,
   humanGate: process.env.NEXT_PUBLIC_HUMAN_GATE_ADDRESS,
+  relayReward: process.env.NEXT_PUBLIC_RELAY_REWARD_ADDRESS,
 };
 
 export const DEFAULT_DEPLOYMENT = buildDeployment(rawDeployments as unknown, ENV_ADDRESSES);

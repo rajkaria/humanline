@@ -46,6 +46,7 @@ proof and `executeBatch` code as the verify card's *Relay it now from your walle
 | `cc3TxHash`, `status`, `gasUsed` | the Creditcoin `executeBatch` transaction |
 | `sourceTxHashes`, `postRoots` | the World ID updates it carried, oldest first |
 | `roots` | `RootRelayed` events in the receipt |
+| `vault`, `rewardedRoots`, `rewardPaidWei`, `netBalanceChangeWei` | when sent through `RelayReward`: the vault, roots it paid for, the reward, and the relayer's balance change net of gas |
 | `chainKey`, `contract`, `at` | source chain, receiving `AttestedWorldID`, and when |
 
 ## The rest

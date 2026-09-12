@@ -313,6 +313,8 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
                 canSend={isConnected && onRightChain}
                 sourceLabel={sourceChainKey === 3 ? "Ethereum mainnet" : "Ethereum Sepolia"}
                 onRelay={() => void selfRelay.run()}
+                rewardPerRoot={selfRelay.rewardPerRoot}
+                vaultAvailable={selfRelay.vaultAvailable}
               />
             </RelayWaitPanel>
             <Button size="lg" disabled>

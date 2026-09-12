@@ -19,6 +19,7 @@ CONTRACTS=(
   CreditLine
   HUSD
   HumanGate
+  RelayReward
   IAttestedWorldID
 )
 

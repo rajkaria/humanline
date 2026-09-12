@@ -27,7 +27,8 @@ export type ContractKey =
   | "humanRegistry"
   | "creditLine"
   | "husd"
-  | "humanGate";
+  | "humanGate"
+  | "relayReward";
 
 export type ContractMeta = {
   key: ContractKey;
@@ -100,6 +101,14 @@ export const CONTRACT_META: ContractMeta[] = [
       "Twenty-line example integration: claim once per human. The pattern any Creditcoin contract can copy.",
     envVar: "NEXT_PUBLIC_HUMAN_GATE_ADDRESS",
     aliases: ["humangate", "gate", "example"],
+  },
+  {
+    key: "relayReward",
+    name: "RelayReward",
+    blurb:
+      "Permissionless relayer vault: pays tCTC per fresh World ID root carried through it, so root liveness never depends on one operator.",
+    envVar: "NEXT_PUBLIC_RELAY_REWARD_ADDRESS",
+    aliases: ["relayreward", "relay_reward", "rewardvault", "relayvault"],
   },
 ];
 

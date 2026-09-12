@@ -113,6 +113,21 @@ export async function collectTrack(client: PublicClient, chainKey: SourceChainKe
   const sourceBlocks = [...new Set(logs.map((l) => Number(l.args.sourceBlock)))];
   await mapLimit(sourceBlocks, 6, (b) => sourceTimestamp(chainKey, b));
 
+  // A relay through the RelayReward vault records the vault as `relayer`; the person who did
+  // the work is the transaction's sender.
+  const vault = CONTRACTS.relayReward.address?.toLowerCase();
+  const senders = new Map<Hex, Hex>();
+  if (vault) {
+    const viaVault = [...new Set(logs.filter((l) => l.args.relayer.toLowerCase() === vault).map((l) => l.transactionHash))];
+    await mapLimit(viaVault, 6, async (hash) => {
+      try {
+        senders.set(hash, (await client.getTransaction({ hash })).from);
+      } catch {
+        // keep the vault as the relayer rather than guess
+      }
+    });
+  }
+
   const samples: RelaySample[] = [];
   for (const l of logs) {
     const relayedAt = ccTimes.get(l.blockNumber);
@@ -123,7 +138,7 @@ export async function collectTrack(client: PublicClient, chainKey: SourceChainKe
       sourceBlock: Number(l.args.sourceBlock),
       sourceTimestamp: srcTs,
       relayedAt,
-      relayer: l.args.relayer,
+      relayer: senders.get(l.transactionHash) ?? l.args.relayer,
       creditcoinTxHash: l.transactionHash,
     });
   }

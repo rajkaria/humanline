@@ -173,6 +173,113 @@ export const attestedWorldIdAbi = [
   },
 ] as const;
 
+/**
+ * `RelayReward` — the permissionless relayer vault. `relay` takes `executeBatch`'s
+ * arguments behind a target instance and pays per fresh root it moved the tip by.
+ */
+export const relayRewardAbi = [
+  { type: "error", name: "UnknownRelay", inputs: [{ name: "relay", type: "address" }] },
+  { type: "error", name: "NoRelays", inputs: [] },
+  { type: "error", name: "Reentrancy", inputs: [] },
+  { type: "error", name: "NothingToClaim", inputs: [] },
+  { type: "error", name: "ClaimFailed", inputs: [] },
+  { type: "error", name: "ZeroReward", inputs: [] },
+  {
+    type: "event",
+    name: "Funded",
+    inputs: [
+      { name: "from", type: "address", indexed: true },
+      { name: "amount", type: "uint256", indexed: false },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "Relayed",
+    inputs: [
+      { name: "relayer", type: "address", indexed: true },
+      { name: "relay", type: "address", indexed: true },
+      { name: "roots", type: "uint256", indexed: false },
+      { name: "rewardedRoots", type: "uint256", indexed: false },
+      { name: "paid", type: "uint256", indexed: false },
+      { name: "credited", type: "uint256", indexed: false },
+      { name: "shortfall", type: "uint256", indexed: false },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "Claimed",
+    inputs: [
+      { name: "relayer", type: "address", indexed: true },
+      { name: "amount", type: "uint256", indexed: false },
+    ],
+    anonymous: false,
+  },
+  { type: "function", name: "REWARD_PER_ROOT", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "MAX_ROOT_AGE", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "MAX_REWARDED_ROOTS", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "available", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "totalRewarded", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "rootsRewarded", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "totalClaimable", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  {
+    type: "function",
+    name: "isRelay",
+    stateMutability: "view",
+    inputs: [{ name: "relay", type: "address" }],
+    outputs: [{ type: "bool" }],
+  },
+  {
+    type: "function",
+    name: "claimable",
+    stateMutability: "view",
+    inputs: [{ name: "relayer", type: "address" }],
+    outputs: [{ name: "amount", type: "uint256" }],
+  },
+  { type: "function", name: "relays", stateMutability: "view", inputs: [], outputs: [{ type: "address[]" }] },
+  { type: "function", name: "fund", stateMutability: "payable", inputs: [], outputs: [] },
+  { type: "function", name: "claim", stateMutability: "nonpayable", inputs: [], outputs: [] },
+  {
+    type: "function",
+    name: "relay",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "target", type: "address" },
+      { name: "chainKey", type: "uint64" },
+      { name: "blockHeights", type: "uint64[]" },
+      { name: "encodedTransactions", type: "bytes[]" },
+      {
+        name: "merkleProofs",
+        type: "tuple[]",
+        components: [
+          { name: "root", type: "bytes32" },
+          {
+            name: "siblings",
+            type: "tuple[]",
+            components: [
+              { name: "hash", type: "bytes32" },
+              { name: "isLeft", type: "bool" },
+            ],
+          },
+        ],
+      },
+      {
+        name: "sharedContinuityProof",
+        type: "tuple",
+        components: [
+          { name: "lowerEndpointDigest", type: "bytes32" },
+          { name: "roots", type: "bytes32[]" },
+        ],
+      },
+    ],
+    outputs: [
+      { name: "roots", type: "uint256" },
+      { name: "rewardedRoots", type: "uint256" },
+    ],
+  },
+] as const;
+
 /** `IHumanRegistry` — nullifier ⇄ wallet binding. */
 export const humanRegistryAbi = [
   {

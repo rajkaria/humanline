@@ -7,7 +7,8 @@
     "HUSD": "0x4bd7f4c6648deb8f107932572ce7e85aca259640",
     "HumanRegistry": "0x53fcba2cd9296b22635c67d5e73777b4e5db96af",
     "CreditLine": "0x86e38ce7173288372b638c0b1839fc9c6923ab82",
-    "HumanGate": "0x544264e52a12fffa5c8640eb5a91b7f4628d5b93"
+    "HumanGate": "0x544264e52a12fffa5c8640eb5a91b7f4628d5b93",
+    "RelayReward": "0x9766480a872ad7df2a5cf86f9e307804a3f7afe0"
   },
   "txHashes": {
     "AttestedWorldIDMainnet": "0x04bb7e2ed8f5be32d6f4163bb6a74e3410c895406c068b00f23454e079dd827a",
@@ -15,7 +16,8 @@
     "HUSD": "0x83194732dbff9c49f8e7dff7f18bfbd7793aa5dc69ef69507b43b7d7a7a74c86",
     "HumanRegistry": "0x630fa7d45a21feb9aa0afff9c1171161356fdf936da43f039e16f562f54efdb3",
     "CreditLine": "0xeedafee0427327a34762aaade4a3cf3c563dee27314bad5d784c5b54dfa12347",
-    "HumanGate": "0x793e5db5694203411d15d55c94733459294fd9cc487dab35e03591b08cced68f"
+    "HumanGate": "0x793e5db5694203411d15d55c94733459294fd9cc487dab35e03591b08cced68f",
+    "RelayReward": "0x97daaf15b3113baf1bcb72ebc862e7d9d2677978a81cdeabd6950db2900280e3"
   },
   "config": {
     "worldIdSource": "mainnet",
@@ -26,7 +28,13 @@
     "initialLimit": 25000000,
     "maxLimit": 2000000000,
     "feeBps": 100,
-    "sourceBlockTime": 12
+    "sourceBlockTime": 12,
+    "relayReward": {
+      "rewardPerRootWei": "2000000000000000",
+      "maxRootAgeSeconds": 21600,
+      "initialFundingTctc": 25,
+      "fundingTx": "0x086dd17c4a972d888685c2b9a362e75e290c3f4ce0ac121a0035cd9c335ea5c3"
+    }
   },
   "deployedAt": 1789217222,
   "deployer": "0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3"

@@ -16,7 +16,7 @@ FORGE="${FORGE:-$ROOT_DIR/.tools/forge}"
 CAST="${CAST:-$ROOT_DIR/.tools/cast}"
 VERIFIER_URL="${VERIFIER_URL:-https://creditcoin-testnet.blockscout.com/api}"
 DEPLOYMENT="${DEPLOYMENT:-$ROOT_DIR/deployments/cc3-testnet.json}"
-ONLY="${ONLY:-AttestedWorldIDMainnet AttestedWorldIDSepolia HUSD HumanRegistry CreditLine HumanGate}"
+ONLY="${ONLY:-AttestedWorldIDMainnet AttestedWorldIDSepolia HUSD HumanRegistry CreditLine HumanGate RelayReward}"
 
 MAINNET_CHAIN_KEY=3
 MAINNET_IDENTITY_MANAGER=0xf7134CE138832c1456F2a91D64621eE90c2bddEa
@@ -78,3 +78,11 @@ verify HumanRegistry src/HumanRegistry.sol:HumanRegistry "constructor(address,st
 verify CreditLine src/CreditLine.sol:CreditLine "constructor(address,address,uint256,uint256,uint256,uint64,uint64)" \
   "$HUSD_ADDR" "$REGISTRY_ADDR" "$INITIAL_LIMIT" "$MAX_LIMIT" "$FEE_BPS" "$TERM_SECONDS" "$GRACE_SECONDS"
 verify HumanGate src/examples/HumanGate.sol:HumanGate "constructor(address)" "$REGISTRY_ADDR"
+
+# RelayReward is shared by both profiles and recorded by script/deploy-relay-reward.sh; its
+# constructor arguments come from the same file, so a missing entry simply skips it.
+if REWARD_WEI="$(field config.relayReward.rewardPerRootWei 2>/dev/null)"; then
+  verify RelayReward src/RelayReward.sol:RelayReward "constructor(address[],uint256,uint256)" \
+    "[$(field contracts.AttestedWorldIDMainnet),$(field contracts.AttestedWorldIDSepolia)]" \
+    "$REWARD_WEI" "$(field config.relayReward.maxRootAgeSeconds)"
+fi

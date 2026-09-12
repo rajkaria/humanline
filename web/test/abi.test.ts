@@ -24,6 +24,7 @@ import {
   humanGateAbi,
   humanRegistryAbi,
   husdAbi,
+  relayRewardAbi,
 } from "@/lib/abi";
 import artifacts from "@/lib/generated/abi.json";
 import { NEGATIVE_PATHS, NEGATIVE_PATH_FILTER } from "@/lib/negative-paths";
@@ -58,6 +59,7 @@ const hasArtifacts = Object.keys(ARTIFACTS).length > 0;
 const PAIRS: Array<{ artifact: string; ours: readonly unknown[] }> = [
   { artifact: "AttestedWorldID", ours: attestedWorldIdAbi },
   { artifact: "HumanRegistry", ours: humanRegistryAbi },
+  { artifact: "RelayReward", ours: relayRewardAbi },
   { artifact: "CreditLine", ours: creditLineAbi },
   { artifact: "HUSD", ours: husdAbi },
   { artifact: "HumanGate", ours: humanGateAbi },

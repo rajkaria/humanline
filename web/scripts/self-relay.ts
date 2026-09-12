@@ -26,8 +26,9 @@ import {
 } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
-import { attestedWorldIdAbi } from "@/lib/abi";
+import { attestedWorldIdAbi, relayRewardAbi } from "@/lib/abi";
 import { creditcoinTestnet, type SourceChainKey } from "@/lib/chains";
+import { CONTRACTS } from "@/lib/contracts";
 import { getPublicClient } from "@/lib/public-client";
 import { attestedWorldIdFor, buildRelayPlan, newestFinalRoot } from "@/lib/relay/build-plan";
 import { toExecuteBatchArgs } from "@/lib/relay/proof";
@@ -58,6 +59,8 @@ const evidencePath = resolve(arg("evidence") ?? resolve(here, "..", "..", "evide
 const log = (...parts: unknown[]) => console.log(...parts);
 
 const client = getPublicClient();
+// `--direct` skips the RelayReward vault even when one is deployed.
+const vault = flag("direct") ? undefined : CONTRACTS.relayReward.address;
 const contract = attestedWorldIdFor(chainKey);
 if (!contract) throw new Error(`no AttestedWorldID for chainKey ${chainKey}`);
 
@@ -121,30 +124,27 @@ for (const [i, batch] of plan.batches.entries()) {
   const args = toExecuteBatchArgs(proof);
   log(`batch ${i + 1}: proof in ${Date.now() - t0} ms (${proof.members.length} members)`);
 
-  const simulated = await client
-    .simulateContract({ account: account.address, address: contract, abi: attestedWorldIdAbi, functionName: "executeBatch", args })
+  const vaultArgs = [contract, ...args] as const;
+  const via = vault ? `RelayReward ${vault}` : "AttestedWorldID.executeBatch";
+  const simulated = await (vault
+    ? client.simulateContract({ account: account.address, address: vault, abi: relayRewardAbi, functionName: "relay", args: vaultArgs })
+    : client.simulateContract({ account: account.address, address: contract, abi: attestedWorldIdAbi, functionName: "executeBatch", args })
+  )
     .then(() => "ok")
     .catch((e: Error) => `reverted: ${e.message.split("\n")[0]}`);
-  log(`  eth_call executeBatch: ${simulated}`);
+  log(`  eth_call via ${via}: ${simulated}`);
   if (simulated !== "ok") process.exit(1);
 
-  const gas = await client.estimateContractGas({
-    account: account.address,
-    address: contract,
-    abi: attestedWorldIdAbi,
-    functionName: "executeBatch",
-    args,
-  });
+  const gas = vault
+    ? await client.estimateContractGas({ account: account.address, address: vault, abi: relayRewardAbi, functionName: "relay", args: vaultArgs })
+    : await client.estimateContractGas({ account: account.address, address: contract, abi: attestedWorldIdAbi, functionName: "executeBatch", args });
   log(`  gas estimate ${gas}`);
   if (!send) continue;
 
-  const hash = await wallet.writeContract({
-    address: contract,
-    abi: attestedWorldIdAbi,
-    functionName: "executeBatch",
-    args,
-    gas: (gas * 13n) / 10n,
-  });
+  const balanceBefore = await client.getBalance({ address: account.address });
+  const hash = vault
+    ? await wallet.writeContract({ address: vault, abi: relayRewardAbi, functionName: "relay", args: vaultArgs, gas: (gas * 13n) / 10n })
+    : await wallet.writeContract({ address: contract, abi: attestedWorldIdAbi, functionName: "executeBatch", args, gas: (gas * 13n) / 10n });
   const receipt = await client.waitForTransactionReceipt({ hash });
   const relayed = receipt.logs
     .map((l) => {
@@ -155,7 +155,23 @@ for (const [i, batch] of plan.batches.entries()) {
       }
     })
     .filter((e) => e?.eventName === "RootRelayed");
+  const reward = receipt.logs
+    .map((l) => {
+      try {
+        return decodeEventLog({ abi: relayRewardAbi, data: l.data, topics: l.topics });
+      } catch {
+        return null;
+      }
+    })
+    .find((e) => e?.eventName === "Relayed");
+  const rewardArgs = reward?.eventName === "Relayed" ? reward.args : undefined;
+  const balanceAfter = await client.getBalance({ address: account.address });
   log(`  ${receipt.status} ${creditcoinTestnet.blockExplorers.default.url}/tx/${hash} gasUsed ${receipt.gasUsed} roots ${relayed.length}`);
+  if (rewardArgs) {
+    log(
+      `  vault: ${rewardArgs.rewardedRoots} root(s) rewarded, paid ${formatEther(rewardArgs.paid)} tCTC; net balance change ${formatEther(balanceAfter - balanceBefore)} tCTC`,
+    );
+  }
 
   const line = {
     kind: "self-relay",
@@ -170,6 +186,10 @@ for (const [i, batch] of plan.batches.entries()) {
     sourceTxHashes: hashes,
     postRoots: batch.changes.map((c) => `0x${c.postRoot.toString(16).padStart(64, "0")}`),
     roots: relayed.length,
+    vault: vault ?? null,
+    rewardedRoots: rewardArgs ? Number(rewardArgs.rewardedRoots) : null,
+    rewardPaidWei: rewardArgs ? rewardArgs.paid.toString() : null,
+    netBalanceChangeWei: (balanceAfter - balanceBefore).toString(),
   };
   appendFileSync(evidencePath, `${JSON.stringify(line)}\n`);
   log(`  evidence → ${evidencePath}`);

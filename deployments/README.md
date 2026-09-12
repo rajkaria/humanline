@@ -16,7 +16,8 @@ as generated output, not something to hand-edit.
     "HUSD": "0x…",
     "HumanRegistry": "0x…",
     "CreditLine": "0x…",
-    "HumanGate": "0x…"
+    "HumanGate": "0x…",
+    "RelayReward": "0x…"                // shared relayer vault, added by deploy-relay-reward.sh
   },
   "txHashes": { "…": "0x…" },           // deployment transaction per contract
   "config": {

@@ -7,6 +7,7 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { HashLink } from "@/components/hash-link";
 import { NotDeployedBanner } from "@/components/not-deployed-banner";
 import { RelayHealth } from "@/components/relay-health";
+import { RelayRewardCard } from "@/components/relay-reward-card";
 import { SectionHeading } from "@/components/page-shell";
 import { Stat } from "@/components/stat";
 import { Badge } from "@/components/ui/badge";
@@ -51,6 +52,9 @@ export function RelayClient() {
         />
         <ErrorBoundary title="Relay liveness">
           <RelayHealth />
+        </ErrorBoundary>
+        <ErrorBoundary title="Relay reward vault">
+          <RelayRewardCard />
         </ErrorBoundary>
       </section>
 

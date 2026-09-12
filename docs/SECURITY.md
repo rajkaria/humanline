@@ -81,6 +81,10 @@ Every error name in this table is the name in the shipped contract; `contracts/a
 | A relayer censoring or reordering roots | Reordering is refused by the chain rule. Censorship is a liveness issue, and anyone may relay the skipped root | `UnknownPreRoot(preRoot)` | `relay.test.ts :: `worker: "orders by block then log index regardless of input order" / test_BatchRelaysInArrayOrder`` |
 | A relayer front-running itself into wasted gas | The worker skips transactions whose `queryId` is already marked processed on chain before building a proof | none | `relay.test.ts :: `worker: "skips a decoy TreeChanged from another contract" + relay.test.ts already-processed classification`` |
 | A stale proof at submission time, because the attested window moved | The worker refetches the proof once and retries, then records the failure without dropping the transaction | none | `relay.test.ts :: `worker relay.test.ts retry policy (refetch once, then failed)`` |
+| A self-relay plan that asks a user to send something false | The plan only chooses what to send; `AttestedWorldID` re-checks every claim, and the app dry-runs the call with `eth_call` first | the contract's named revert | `web/test/relay-plan.test.ts`, `web/test/relay-proof.test.ts` |
+| Farming `RelayReward` by relaying roots that do not matter | Paid only when the call moves the tip, the new tip is younger than `MAX_ROOT_AGE` by its source block, and at most 10 roots per call; a root can be relayed once | none (paid 0) | `RelayReward.t.sol :: test_ASideFillThatDoesNotMoveTheTipEarnsNothing, test_AStaleTipEarnsNothing, test_BootstrapThroughTheVaultPaysAtMostTenRoots, test_TheSameRootCannotBePaidTwice` |
+| Draining `RelayReward` by re-entering during payment | Non-reentrant `relay` and `claim`; a failed transfer is credited to `claimable` and reserved out of `available()` | `Reentrancy()` | `RelayReward.t.sol :: test_ReentryDuringPaymentIsRefusedAndTheRewardIsCredited, testFuzz_NeverPaysMoreThanItHoldsOrOwes` |
+| Triggering the scheduled relay to burn the relayer's gas | `/api/cron/relay` requires `Bearer $CRON_SECRET`, compared in constant time, and refuses everyone when the secret is unset | HTTP 401 | `web/test/relay-cron.test.ts` |
 
 ---
 
@@ -114,7 +118,7 @@ We also assume Creditcoin's bn128 precompiles at `0x06`, `0x07` and `0x08` imple
 
 If nobody runs the relay, no new roots arrive, the newest World ID users cannot register, and existing users cannot produce proofs against roots that have expired out of the one-week history. Nothing is lost, nothing is stolen, and the moment anyone runs the worker the chain of roots resumes from where it stopped.
 
-This is a liveness dependency, not a trust dependency, and the difference matters. We plan to run two independent relayers from different parties, but the correct fix is that the worker is public and the contract does not care who calls it.
+This is a liveness dependency, not a trust dependency, and the difference matters. It is now covered four ways, none of which needs the others: Vercel Cron runs a relay pass every five minutes; the GitHub Actions workflow is an independent backup; any user whose root has not arrived can relay it from their own wallet in the verify card; and the `RelayReward` vault pays anyone who carries a fresh root, so a third party has a reason to run the public worker. `/api/relay/health` reports when a relayable root has waited past the ten-minute target.
 
 ---
 

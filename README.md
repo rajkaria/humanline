@@ -47,6 +47,7 @@ Six contracts on the reproducible deployment, all verified on Blockscout:
 | `CreditLine` | [`0x1bd40163e41e44d2f139d95de88b640f6ea461f7`](https://creditcoin-testnet.blockscout.com/address/0x1bd40163e41e44d2f139d95de88b640f6ea461f7) |
 | `hUSD` (test stablecoin, 6 decimals) | [`0x4bd7f4c6648deb8f107932572ce7e85aca259640`](https://creditcoin-testnet.blockscout.com/address/0x4bd7f4c6648deb8f107932572ce7e85aca259640) |
 | `HumanGate` (example integration) | [`0xa3e021de49cec8819ea1bd37a8b5a9df005b776c`](https://creditcoin-testnet.blockscout.com/address/0xa3e021de49cec8819ea1bd37a8b5a9df005b776c) |
+| `RelayReward` (relayer vault, shared by both deployments) | [`0x9766480a872ad7df2a5cf86f9e307804a3f7afe0`](https://creditcoin-testnet.blockscout.com/address/0x9766480a872ad7df2a5cf86f9e307804a3f7afe0) |
 
 Three more for the Orb-tree deployment, also Blockscout-verified (hUSD and both
 `AttestedWorldID` instances are the contracts above):
@@ -166,6 +167,17 @@ p50/p95/max, uptime against a 10-minute target over 24 h and 7 d, and which rela
 wallets that are not ours. `GET /api/relay/health` is the watchdog: `200` when every relayable root
 is on Creditcoin within the target, `503` with the waiting time when one is late or the relay has
 stalled, and the cron route posts to `RELAY_ALERT_WEBHOOK` when it crosses either threshold.
+
+**A reason for strangers to relay.** `RelayReward`
+([`0x9766480a…`](https://creditcoin-testnet.blockscout.com/address/0x9766480a872ad7df2a5cf86f9e307804a3f7afe0),
+funded with 25 tCTC, Blockscout-verified) forwards `executeBatch` to `AttestedWorldID` and pays the
+caller 0.002 tCTC per root the call recorded, from anyone's donations. It never judges a proof: the
+precompile and the relay contract do, and the vault pays only for what they demonstrably changed
+(the `rootCount` delta). Farming is closed off by construction: a root can be relayed once, a call
+earns only if it moves the tip to a root younger than 6 hours by its source block, and at most 10
+roots are paid per call. No owner, no withdrawal; a relayer that cannot receive tCTC is credited and
+claims later. The verify card's self-relay goes through it, so a user who does not want to wait is
+paid for not waiting. The operator's cron relays directly and leaves the vault to everyone else.
 
 ## Built with
 
