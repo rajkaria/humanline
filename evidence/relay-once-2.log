@@ -1,0 +1,4 @@
+env: loaded 1 file(s) (values not printed)
+  rpc https://ethereum-rpc.publicnode.com failed (server response 403 Forbidden (request={  }, response={  }, error=null, info={ "requestUrl); trying the next endpoint
+mainnet: blocks 25959865..25960278 (head 25960348, attested tip 25960310, finality depth 32) — 0 TreeChanged tx(s)
+sepolia: blocks 11687748..11687888 (head 11687955, attested tip 11687920, finality depth 32) — 0 TreeChanged tx(s)
