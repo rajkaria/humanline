@@ -41,7 +41,21 @@ describe("formatEvidenceLine", () => {
       "gasUsed",
       "attestationLagSec",
       "at",
+      // Appended after the fact, so rows written before it still parse.
+      "contract",
     ]);
+  });
+
+  test("records the AttestedWorldID instance that received the root, lowercased", () => {
+    const line = formatEvidenceLine({
+      ...input,
+      contract: "0x1122EF3FA4AB0693809E42A00B2476EFCF4468AD",
+    });
+    expect(line.contract).toBe("0x1122ef3fa4ab0693809e42a00b2476efcf4468ad");
+  });
+
+  test("a row with no contract is null rather than absent, so every row has the key", () => {
+    expect(formatEvidenceLine(input).contract).toBeNull();
   });
 
   test("normalizes hashes to lowercase and roots to 32-byte hex", () => {

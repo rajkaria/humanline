@@ -18,6 +18,8 @@ export interface EvidenceInput {
   gasUsed: bigint | number | string | null;
   attestationLagSec: number | null;
   at?: string;
+  /** The AttestedWorldID instance that received this root. */
+  contract?: string | null;
 }
 
 export interface EvidenceLine {
@@ -33,6 +35,15 @@ export interface EvidenceLine {
   gasUsed: string | null;
   attestationLagSec: number | null;
   at: string;
+  /**
+   * The AttestedWorldID instance that received this root.
+   *
+   * Last, and nullable, so the rows written before the field existed still parse and
+   * the documented key order is unchanged. Without it a reader cannot tell which
+   * deployment a row belongs to after a redeploy — which is exactly the question a
+   * judge asks when the addresses in the docs do not match an old row.
+   */
+  contract: string | null;
 }
 
 function hex32(v: bigint | string): string {
@@ -55,6 +66,7 @@ export function formatEvidenceLine(input: EvidenceInput): EvidenceLine {
     gasUsed: input.gasUsed === null || input.gasUsed === undefined ? null : String(input.gasUsed),
     attestationLagSec: input.attestationLagSec ?? null,
     at: input.at ?? new Date().toISOString(),
+    contract: input.contract ? input.contract.toLowerCase() : null,
   };
 }
 

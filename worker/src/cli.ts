@@ -487,11 +487,17 @@ program
 
       const contexts: RelayContext[] = names.map((n) => {
         const source: SourceConfig = SOURCES[n];
+        const contractAddress = dep.ok ? attestedWorldIdAddress(dep.data, source) : undefined;
+        // A redeployed AttestedWorldID has relayed nothing; a cursor carried over from
+        // the previous instance would skip every root it still needs.
+        if (store.bindContract(source.name, contractAddress)) {
+          log(`${source.name}: AttestedWorldID changed to ${contractAddress} — relay state reset`);
+        }
         return {
           source,
           cc3,
           signer,
-          contractAddress: dep.ok ? attestedWorldIdAddress(dep.data, source) : undefined,
+          contractAddress,
           deploymentTxHash: dep.ok ? deploymentTxHash(dep.data, source) : undefined,
           store,
           dryRun: opts.dryRun,

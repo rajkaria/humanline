@@ -1029,6 +1029,7 @@ async function recordSuccess(
           cc3TxHash: res.cc3TxHash,
           gasUsed: res.gasUsed,
           attestationLagSec: lag,
+          contract: ctx.contractAddress ?? null,
         },
         ctx.evidenceFile,
       );

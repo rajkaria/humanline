@@ -131,3 +131,56 @@ describe("transactions", () => {
     expect(store.recent("sepolia", 2).map((r) => r.sourceBlock)).toEqual([300, 200]);
   });
 });
+
+describe("contract binding", () => {
+  test("first bind keeps existing state", () => {
+    const store = new RelayStore(":memory:");
+    store.setCursor("mainnet", 100);
+    expect(store.bindContract("mainnet", "0xAAaaAAaaAAaaAAaaAAaaAAaaAAaaAAaaAAaaAAaa")).toBe(false);
+    expect(store.getCursor("mainnet")).toBe(100);
+    store.close();
+  });
+
+  test("re-binding the same contract is a no-op, whatever the case", () => {
+    const store = new RelayStore(":memory:");
+    store.bindContract("mainnet", "0xAAaaAAaaAAaaAAaaAAaaAAaaAAaaAAaaAAaaAAaa");
+    store.setCursor("mainnet", 250);
+    expect(store.bindContract("mainnet", "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")).toBe(false);
+    expect(store.getCursor("mainnet")).toBe(250);
+    store.close();
+  });
+
+  test("a redeploy resets that source's cursor and transactions", () => {
+    const store = new RelayStore(":memory:");
+    store.bindContract("mainnet", "0xAAaaAAaaAAaaAAaaAAaaAAaaAAaaAAaaAAaaAAaa");
+    store.setCursor("mainnet", 500);
+    store.upsertPending("mainnet", "0xdead", 499, 3);
+
+    expect(store.bindContract("mainnet", "0xBBbbBBbbBBbbBBbbBBbbBBbbBBbbBBbbBBbbBBbb")).toBe(true);
+    expect(store.getCursor("mainnet")).toBeUndefined();
+    expect(store.get("mainnet", "0xdead")).toBeUndefined();
+    expect(store.boundContract("mainnet")).toBe("0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+    store.close();
+  });
+
+  test("a redeploy on one source leaves the other source alone", () => {
+    const store = new RelayStore(":memory:");
+    store.bindContract("mainnet", "0xAAaaAAaaAAaaAAaaAAaaAAaaAAaaAAaaAAaaAAaa");
+    store.bindContract("sepolia", "0xCCccCCccCCccCCccCCccCCccCCccCCccCCccCCcc");
+    store.setCursor("mainnet", 500);
+    store.setCursor("sepolia", 900);
+
+    store.bindContract("mainnet", "0xBBbbBBbbBBbbBBbbBBbbBBbbBBbbBBbbBBbbBBbb");
+    expect(store.getCursor("sepolia")).toBe(900);
+    store.close();
+  });
+
+  test("an unknown address binds nothing, so a missing deployment file cannot wipe state", () => {
+    const store = new RelayStore(":memory:");
+    store.bindContract("mainnet", "0xAAaaAAaaAAaaAAaaAAaaAAaaAAaaAAaaAAaaAAaa");
+    store.setCursor("mainnet", 500);
+    expect(store.bindContract("mainnet", undefined)).toBe(false);
+    expect(store.getCursor("mainnet")).toBe(500);
+    store.close();
+  });
+});

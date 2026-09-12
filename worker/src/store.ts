@@ -39,6 +39,10 @@ CREATE TABLE IF NOT EXISTS txs (
 );
 CREATE INDEX IF NOT EXISTS txs_by_block ON txs (source, source_block);
 CREATE INDEX IF NOT EXISTS txs_by_status ON txs (source, status);
+CREATE TABLE IF NOT EXISTS bindings (
+  source   TEXT PRIMARY KEY,
+  contract TEXT NOT NULL
+);
 `;
 
 export class RelayStore {
@@ -55,6 +59,50 @@ export class RelayStore {
 
   close(): void {
     this.db.close();
+  }
+
+  // --- contract binding ---
+
+  /**
+   * Tie this source's state to the AttestedWorldID instance it was gathered against,
+   * and drop that state when the instance changes.
+   *
+   * Cursors and processed-transaction rows are facts about *one contract*: after a
+   * redeploy the new instance has relayed nothing, but a cursor left at the old
+   * instance's height says every root up to there is already handled, so the new
+   * instance silently never receives them. Binding the state to the address turns a
+   * redeploy into an automatic reset instead of a manual `rm worker/data/relay.db`
+   * that someone has to remember.
+   *
+   * Returns `true` when state was reset.
+   */
+  bindContract(source: string, contract: string | undefined): boolean {
+    if (!contract) return false;
+    const address = contract.toLowerCase();
+    const row = this.db.query("SELECT contract FROM bindings WHERE source = ?").get(source) as
+      | { contract: string }
+      | null;
+
+    if (row?.contract === address) return false;
+
+    const changed = row !== null && row.contract !== address;
+    if (changed) {
+      this.db.run("DELETE FROM cursor WHERE source = ?", [source]);
+      this.db.run("DELETE FROM txs WHERE source = ?", [source]);
+    }
+    this.db.run(
+      "INSERT INTO bindings (source, contract) VALUES (?, ?) ON CONFLICT(source) DO UPDATE SET contract = excluded.contract",
+      [source, address],
+    );
+    return changed;
+  }
+
+  /** The contract this source's state belongs to, when it has been bound. */
+  boundContract(source: string): string | undefined {
+    const row = this.db.query("SELECT contract FROM bindings WHERE source = ?").get(source) as
+      | { contract: string }
+      | null;
+    return row?.contract;
   }
 
   // --- cursor ---
