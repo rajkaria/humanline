@@ -3,14 +3,18 @@ import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // `web` is a bun workspace member, so there is a lockfile here *and* at the
-  // repo root. Pin the tracing root to the repo so Next stops guessing.
+  // `web` is a bun workspace member, so its dependencies are hoisted into the repo
+  // root's `node_modules` — including the `next` runtime itself. The tracing root has
+  // to be the repo root, or the serverless bundle ships without the files the launcher
+  // requires and every API route answers 500 with
+  // "Cannot find module 'next/dist/compiled/source-map'".
   //
-  // On Vercel only `web/` is uploaded (the project's root directory is the app
-  // itself), so the repo root does not exist there: pointing the tracing root
-  // at `..` would be `/vercel`, and Next would nest the output one directory
-  // deeper than the builder looks for it (`/vercel/path0/path0/.next`).
-  outputFileTracingRoot: process.env.VERCEL ? __dirname : path.join(__dirname, ".."),
+  // On Vercel that works because the project's root directory is `web` while the whole
+  // repository is checked out, so `..` is the repo root (`/vercel/path0`). Deploying
+  // with `vercel deploy` *from inside `web/`* uploads only this directory, which makes
+  // `..` `/vercel` and nests the build output one level too deep — so deploy through the
+  // git integration (push to `main`), not from the CLI inside `web/`.
+  outputFileTracingRoot: path.join(__dirname, ".."),
 
   eslint: {
     dirs: ["app", "components", "lib", "scripts", "test"],

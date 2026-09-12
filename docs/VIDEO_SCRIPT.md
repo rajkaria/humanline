@@ -4,7 +4,7 @@ Target length 3:00. Delivery is calm and flat, about 150 words per minute. Total
 
 Follow SPEC §11. Every claim on screen must be a real transaction, and every transaction must be clicked through to an explorer at least once.
 
-Final URL: {{VIDEO_URL}} · Live app: https://humanline-alpha.vercel.app · Repo: https://github.com/rajkaria/humanline
+Final URL: {{VIDEO_URL}} · Live app: https://humanline.credit · Repo: https://github.com/rajkaria/humanline
 
 ---
 

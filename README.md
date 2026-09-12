@@ -17,14 +17,26 @@ BUIDL CTC 2026 Fall submission, DeFi track. Live on Creditcoin CC3 testnet (chai
 
 | | |
 |---|---|
-| Live app | https://humanline-alpha.vercel.app |
-| Judge page (no wallet needed) | https://humanline-alpha.vercel.app/judge |
-| Live relay feed | https://humanline-alpha.vercel.app/relay |
+| Live app | https://humanline.credit |
+| Judge page (no wallet needed) | https://humanline.credit/judge |
+| Live relay feed | https://humanline.credit/relay |
 | Attestcoin write-up (the required technical documentation) | [`docs/ATTESTCOIN_INTEGRATION.md`](docs/ATTESTCOIN_INTEGRATION.md) |
 | Relay evidence, one line per relayed root | [`evidence/relay-log.jsonl`](evidence/relay-log.jsonl) |
-| Deployment record | [`deployments/cc3-testnet.json`](deployments/cc3-testnet.json) |
+| Deployment record | [`deployments/cc3-testnet.json`](deployments/cc3-testnet.json) (staging tree) and [`deployments/cc3-testnet.production.json`](deployments/cc3-testnet.production.json) (Orb tree) |
 
-Six contracts, all verified on Blockscout:
+Humanline is deployed **twice** against the same Attestcoin-relayed roots, because "a real human
+can use this" and "you can check it yourself" need different trees:
+
+| Deployment | Verifies proofs against | Who can register | Terms | Open |
+|---|---|---|---|---|
+| Reproducible | World's **Sepolia staging** tree | anyone, via the [World ID Simulator](https://simulator.worldcoin.org) | 10 min / 5 min grace | [humanline.credit/app](https://humanline.credit/app) |
+| Real | World's **Ethereum mainnet Orb** tree | anyone with an Orb-verified World ID | 30 days / 7 days grace | [humanline.credit/app?profile=production](https://humanline.credit/app?profile=production) |
+
+Both share one hUSD and both read the same two `AttestedWorldID` instances, so every root on
+`/relay` backs both. The switch is on the page — you are not asked to trust that the other one
+exists.
+
+Six contracts on the reproducible deployment, all verified on Blockscout:
 
 | Contract | Address |
 |---|---|
@@ -35,10 +47,22 @@ Six contracts, all verified on Blockscout:
 | `hUSD` (test stablecoin, 6 decimals) | [`0x4bd7f4c6648deb8f107932572ce7e85aca259640`](https://creditcoin-testnet.blockscout.com/address/0x4bd7f4c6648deb8f107932572ce7e85aca259640) |
 | `HumanGate` (example integration) | [`0xa3e021de49cec8819ea1bd37a8b5a9df005b776c`](https://creditcoin-testnet.blockscout.com/address/0xa3e021de49cec8819ea1bd37a8b5a9df005b776c) |
 
+Three more for the Orb-tree deployment, also Blockscout-verified (hUSD and both
+`AttestedWorldID` instances are the contracts above):
+
+| Contract | Address |
+|---|---|
+| `HumanRegistry` (Orb tree) | [`0x53fcba2cd9296b22635c67d5e73777b4e5db96af`](https://creditcoin-testnet.blockscout.com/address/0x53fcba2cd9296b22635c67d5e73777b4e5db96af) |
+| `CreditLine` (30-day terms) | [`0x86e38ce7173288372b638c0b1839fc9c6923ab82`](https://creditcoin-testnet.blockscout.com/address/0x86e38ce7173288372b638c0b1839fc9c6923ab82) |
+| `HumanGate` (Orb tree) | [`0x544264e52a12fffa5c8640eb5a91b7f4628d5b93`](https://creditcoin-testnet.blockscout.com/address/0x544264e52a12fffa5c8640eb5a91b7f4628d5b93) |
+
 Three commands, no wallet, no funds:
 
 ```bash
-bun install
+# forge-std is a submodule, and the Solidity dependencies live next to the contracts.
+git clone --recurse-submodules https://github.com/rajkaria/humanline
+cd humanline
+bun install && (cd contracts && bun install)
 
 # All three Attestcoin precompiles, supported chains with attested tips and bonded attestor
 # counts, bn128 sanity, and the live state of both AttestedWorldID instances.
@@ -50,8 +74,10 @@ bun run worker/src/cli.ts prove \
   0x81ece3110019bf17255ee88a9728ce4327319d7622e528645e8253cf36fdc7e3 \
   --source mainnet --dry-run
 
-# 101 contract tests. Add CC3_FORK=1 to include the 7 that talk to the live Creditcoin node.
-cd contracts && ../.tools/forge test
+# 101 contract tests (94 unit + 7 live). Needs Foundry:
+#   curl -L https://foundry.paradigm.xyz | bash && foundryup
+# Add CC3_FORK=1 to include the 7 that talk to the live Creditcoin node.
+cd contracts && forge test
 ```
 
 A relayed root, end to end, on public explorers: Ethereum mainnet
@@ -193,8 +219,13 @@ to install. `bun install` at the repo root installs the `worker` and `web` works
 
 Two environment notes that will otherwise cost you ten minutes:
 
-- **Call Foundry as `../.tools/forge`**, not as `forge`. The vendored binary is pinned; a
-  system-wide Foundry may differ.
+- **Foundry is not vendored in the repo.** Install it once
+  (`curl -L https://foundry.paradigm.xyz | bash && foundryup`) and call `forge`/`cast`. The
+  scripts honour `FORGE=` and `CAST=` if you keep pinned binaries elsewhere.
+- **The Solidity dependencies are a separate install**: `cd contracts && bun install`. The root
+  `bun install` only covers the worker and the web app.
+- **`forge-std` is a git submodule**: clone with `--recurse-submodules`, or run
+  `git submodule update --init` in an existing clone.
 - **The shell here is bash 3.2** (the macOS default), so `contracts/script/deploy-cc3.sh` uses
   tab-separated rows instead of associative arrays. Keep it that way if you edit it.
 
@@ -202,12 +233,19 @@ Two environment notes that will otherwise cost you ten minutes:
 
 ```bash
 cd contracts
-../.tools/forge build
-../.tools/forge test                       # 101 tests, the 7 fork tests skip cleanly
-CC3_FORK=1 ../.tools/forge test            # includes the 7 live CC3 tests
-CC3_FORK=1 ../.tools/forge test --match-contract Fork -vv
+bun install                                # OpenZeppelin + @gluwa/asc-contracts
+forge build
+forge test                                 # 101 tests, the 7 fork tests skip cleanly
+CC3_FORK=1 forge test                      # includes the 7 live CC3 tests
+CC3_FORK=1 forge test --match-contract Fork -vv
 
 PROFILE=demo script/deploy-cc3.sh          # deploy your own copy (needs a funded CC3 key)
+# The Orb-tree profile, reusing the relayed AttestedWorldID instances and one hUSD:
+PROFILE=prod WORLD_ID_SOURCE=mainnet \
+  REUSE="AttestedWorldIDMainnet AttestedWorldIDSepolia HUSD" \
+  REUSE_FROM=../deployments/cc3-testnet.json \
+  DEPLOYMENT_OUT=../deployments/cc3-testnet.production.json script/deploy-cc3.sh
+DEPLOYMENT=../deployments/cc3-testnet.production.json script/verify-blockscout.sh
 script/export-abi.sh                       # refresh contracts/abi/*.json
 ```
 
@@ -241,20 +279,22 @@ cd web
 cp .env.example .env.local                 # WORLD_RP_SIGNER_PRIVATE_KEY is server-side only
 bun run dev                                # http://localhost:3000
 bun run build
-bun test                                   # 122 tests
+bun test                                   # 215 tests
 ```
 
-Set `NEXT_PUBLIC_WORLD_ENV=staging` and scan the QR code with the
-[World ID Simulator](https://simulator.worldcoin.org) to verify without an Orb. See
-[`web/README.md`](web/README.md).
+`/app` picks the deployment at runtime — the staging-tree profile (World ID Simulator, no Orb
+needed) by default, the Orb-tree profile at `?profile=production` — so no environment variable
+decides which tree you verify against. `GAS_FAUCET_PRIVATE_KEY` enables `/api/gas`, which drips
+CC3 gas to a first-time wallet; without it the card tells the user to use Creditcoin's own faucet.
+See [`web/README.md`](web/README.md).
 
 ## Tests
 
 | Suite | Count | Command |
 |---|---|---|
-| Contracts (Foundry) | 101, including 7 that run against the live CC3 node | `cd contracts && CC3_FORK=1 ../.tools/forge test` |
+| Contracts (Foundry) | 101, including 7 that run against the live CC3 node | `cd contracts && CC3_FORK=1 forge test` |
 | Worker (Bun) | 195, no network | `cd worker && bun test` |
-| Web (Bun) | 122 | `cd web && bun test` |
+| Web (Bun) | 215 | `cd web && bun test` |
 
 The 7 fork tests are the ones worth reading: they confirm that the real `0x0FD2` returns `true` for
 both proof fixtures and agrees the mainnet transaction index is 173, that the real `0x0FD3` tracks

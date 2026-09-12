@@ -4,7 +4,7 @@ BUIDL CTC 2026 Fall · Track: DeFi · Creditcoin & Credit Labs
 
 Twelve slides. Each H2 is one slide. The `visual:` line describes the graphic for that slide. The PDF built from this file is `docs/deck.pdf`.
 
-Live: https://humanline-alpha.vercel.app · Repo: https://github.com/rajkaria/humanline · Demo: {{VIDEO_URL}}
+Live: https://humanline.credit · Repo: https://github.com/rajkaria/humanline · Demo: {{VIDEO_URL}}
 
 Before sending the PDF, replace these tokens in `docs/deck-build.js` and rebuild: `{{LIVE_URL}}`, `https://github.com/rajkaria/humanline`, `{{VIDEO_URL}}` on slides 8 and 12, and `{{ROOTS}}`, `{{HUMANS}}`, `{{CREDIT}}` in the live counter block on slide 12. Read the counter values off the deployed landing page at record time and do not round up.
 
@@ -144,6 +144,6 @@ visual: A timeline across the bottom with three milestone markers. Above the mon
 - **A lender introduction**, to Aella or any Credal lender. The registry is one read call from being useful to a loan book that already exists.
 - **Engineering support** to build Periscope with the Creditcoin team, bringing World Chain and every other OP-Stack rollup under Attestcoin.
 - What we bring: infrastructure with no owner key, no upgrade path and no operator, that makes every other credit product on Creditcoin harder to defraud.
-- One human, one credit line. Live at https://humanline-alpha.vercel.app.
+- One human, one credit line. Live at https://humanline.credit.
 
 visual: Three ask cards side by side (capital, introduction, engineering), each with a one-line deliverable. Below them, the live counter block: roots relayed, humans registered, credit extended, and the line "zero trusted parties" in the position where a disclaimer usually goes.

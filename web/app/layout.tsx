@@ -37,7 +37,7 @@ const description =
  * `NEXT_PUBLIC_SITE_URL` when a custom domain replaces the Vercel one; the
  * fallback is the production deployment.
  */
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://humanline-alpha.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://humanline.credit";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
