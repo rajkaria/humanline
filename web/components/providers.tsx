@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import { useState } from "react";
 import { WagmiProvider } from "wagmi";
 
+import { NetworkGuard } from "@/components/network-guard";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { wagmiConfig } from "@/lib/wagmi";
 
@@ -34,7 +35,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     >
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
-          <TooltipProvider delay={200}>{children}</TooltipProvider>
+          <TooltipProvider delay={200}>
+            <NetworkGuard>{children}</NetworkGuard>
+          </TooltipProvider>
         </QueryClientProvider>
       </WagmiProvider>
     </ThemeProvider>

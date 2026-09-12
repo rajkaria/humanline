@@ -1,11 +1,21 @@
 "use client";
 
-import { AlertTriangleIcon, LogOutIcon, WalletIcon } from "lucide-react";
-import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
+import { ArrowLeftRightIcon, Loader2Icon, LogOutIcon, WalletIcon } from "lucide-react";
+import { useState } from "react";
+import { type Connector, useAccount, useConnect, useDisconnect } from "wagmi";
 
 import { CopyButton } from "@/components/copy-button";
+import { useNetwork } from "@/components/network-guard";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { creditcoinTestnet } from "@/lib/chains";
 import { useMounted } from "@/lib/hooks/use-mounted";
 import { describeError, truncateAddress } from "@/lib/format";
@@ -13,60 +23,61 @@ import { describeError, truncateAddress } from "@/lib/format";
 /**
  * Connect / wrong-network / connected, in one control.
  *
- * The "wrong network" state calls `switchChain`, which wagmi implements as
- * `wallet_switchEthereumChain` with an automatic `wallet_addEthereumChain`
- * fallback built from the chain definition — so a judge whose MetaMask has
- * never seen Creditcoin gets the add-network prompt without extra plumbing.
+ * Switching is owned by `NetworkGuard`, which prompts the wallet on its own the
+ * moment it connects on another network; this button is the manual retry. The
+ * wallet list comes from EIP-6963 discovery, so with MetaMask, Rabby and Phantom
+ * all installed the prompt goes to the wallet the user picked — not to whichever
+ * extension won the race to overwrite `window.ethereum`.
  */
 export function ConnectButton({ className }: { className?: string }) {
   const mounted = useMounted();
 
-  const { address, isConnected, chainId } = useAccount();
-  const { connectors, connect, isPending, error } = useConnect();
+  const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
-  const { switchChain, isPending: isSwitching } = useSwitchChain();
+  const network = useNetwork();
 
   // Rendered on the server and on the first client paint, before wagmi has
   // rehydrated — a skeleton avoids a hydration mismatch flash.
   if (!mounted) return <Skeleton className={className ?? "h-8 w-32"} />;
 
-  const injectedConnector = connectors.find((c) => c.id === "injected") ?? connectors[0];
+  if (!isConnected) return <ConnectWallet className={className} />;
 
-  if (!isConnected) {
+  const disconnectButton = (
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      onClick={() => disconnect()}
+      aria-label="Disconnect wallet"
+      title="Disconnect"
+    >
+      <LogOutIcon />
+    </Button>
+  );
+
+  if (network.wrongNetwork) {
     return (
-      <div className={className}>
-        <Button
-          onClick={() => injectedConnector && connect({ connector: injectedConnector })}
-          disabled={isPending || !injectedConnector}
-          size="sm"
-        >
-          <WalletIcon />
-          {isPending ? "Connecting…" : "Connect wallet"}
-        </Button>
-        {error ? (
-          <p className="mt-1 max-w-56 text-xs text-destructive">{describeError(error)}</p>
-        ) : null}
-        {!injectedConnector ? (
-          <p className="mt-1 max-w-56 text-xs text-muted-foreground">
-            No injected wallet detected. Install MetaMask or Rabby to continue.
-          </p>
-        ) : null}
+      <div className={`flex items-center gap-1 ${className ?? ""}`}>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                size="sm"
+                className="bg-warning text-background hover:bg-warning/90"
+                disabled={network.switching}
+                onClick={() => void network.switchToCc3()}
+              />
+            }
+          >
+            {network.switching ? <Loader2Icon className="animate-spin" /> : <ArrowLeftRightIcon />}
+            {network.switching ? "Confirm in wallet…" : "Switch to CC3"}
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            Your wallet is on {network.currentNetwork}. Humanline runs on {creditcoinTestnet.name}{" "}
+            (chainId {creditcoinTestnet.id}).
+          </TooltipContent>
+        </Tooltip>
+        {disconnectButton}
       </div>
-    );
-  }
-
-  if (chainId !== creditcoinTestnet.id) {
-    return (
-      <Button
-        variant="destructive"
-        size="sm"
-        className={className}
-        disabled={isSwitching}
-        onClick={() => switchChain({ chainId: creditcoinTestnet.id })}
-      >
-        <AlertTriangleIcon />
-        {isSwitching ? "Switching…" : "Switch to CC3"}
-      </Button>
     );
   }
 
@@ -77,15 +88,81 @@ export function ConnectButton({ className }: { className?: string }) {
         <span className="font-mono text-xs">{truncateAddress(address ?? "")}</span>
       </span>
       <CopyButton value={address ?? ""} label="Copy address" size="sm" />
+      {disconnectButton}
+    </div>
+  );
+}
+
+/** "Connect wallet", with a picker when more than one wallet is installed. */
+function ConnectWallet({ className }: { className?: string }) {
+  const { connectors, connect, isPending, error, variables } = useConnect();
+  const [open, setOpen] = useState(false);
+
+  // EIP-6963 announces each installed wallet as its own connector (id = rdns).
+  // The generic `injected` connector is only a fallback for wallets too old to
+  // announce themselves.
+  const announced = connectors.filter((c) => c.type === "injected" && c.id !== "injected");
+  const choices = announced.length > 0 ? announced : connectors;
+  const hasProvider =
+    announced.length > 0 || (typeof window !== "undefined" && "ethereum" in window && Boolean(window.ethereum));
+
+  const connectTo = (connector: Connector) => {
+    setOpen(false);
+    connect({ connector });
+  };
+
+  const pendingName = isPending ? (variables?.connector as Connector | undefined)?.name : undefined;
+
+  return (
+    <div className={className}>
       <Button
-        variant="ghost"
-        size="icon-sm"
-        onClick={() => disconnect()}
-        aria-label="Disconnect wallet"
-        title="Disconnect"
+        onClick={() => (choices.length > 1 ? setOpen(true) : choices[0] && connectTo(choices[0]))}
+        disabled={isPending || !hasProvider}
+        size="sm"
       >
-        <LogOutIcon />
+        {isPending ? <Loader2Icon className="animate-spin" /> : <WalletIcon />}
+        {isPending ? `Connecting${pendingName ? ` ${pendingName}` : ""}…` : "Connect wallet"}
       </Button>
+      {error ? <p className="mt-1 max-w-56 text-xs text-destructive">{describeError(error)}</p> : null}
+      {!hasProvider ? (
+        <p className="mt-1 max-w-56 text-xs text-muted-foreground">
+          No browser wallet detected. Install MetaMask or Rabby to continue.
+        </p>
+      ) : null}
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Connect a wallet</DialogTitle>
+            <DialogDescription>
+              Pick the wallet to use. It will then ask to switch to {creditcoinTestnet.name} — and
+              to add the network first if it has never seen it.
+            </DialogDescription>
+          </DialogHeader>
+          <ul className="flex flex-col gap-1.5">
+            {choices.map((connector) => (
+              <li key={connector.uid}>
+                <Button
+                  variant="outline"
+                  className="h-11 w-full justify-start gap-3 px-3"
+                  onClick={() => connectTo(connector)}
+                >
+                  {connector.icon ? (
+                    // EIP-6963 icons are data: URIs supplied by the wallet; next/image adds nothing here.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={connector.icon} alt="" className="size-6 rounded-md" />
+                  ) : (
+                    <WalletIcon className="size-6" />
+                  )}
+                  <span className="font-medium">
+                    {connector.id === "injected" ? "Browser wallet" : connector.name}
+                  </span>
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

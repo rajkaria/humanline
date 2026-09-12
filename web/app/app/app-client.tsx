@@ -11,6 +11,7 @@ import { EventHistory } from "@/components/event-history";
 import { GasCard } from "@/components/gas-card";
 import { HumanStatusCard } from "@/components/human-status-card";
 import { LenderPanel } from "@/components/lender-panel";
+import { useNetwork } from "@/components/network-guard";
 import { NotDeployedBanner } from "@/components/not-deployed-banner";
 import { ProfileSwitch } from "@/components/profile-switch";
 import { Card, CardContent } from "@/components/ui/card";
@@ -33,6 +34,7 @@ export function AppClient() {
   const { isConnected, chainId } = useAccount();
   const mounted = useMounted();
   const { profile } = useProfile();
+  const network = useNetwork();
 
   const human = useHuman();
   const credit = useCreditLine(human.nullifierHash);
@@ -76,12 +78,21 @@ export function AppClient() {
       ) : null}
 
       {connected && !onRightChain ? (
-        <Card>
+        <Card className="ring-warning/40">
           <CardContent className="flex flex-col items-start gap-3 py-2">
             <p className="text-sm text-muted-foreground">
-              This wallet is on another network. Humanline lives on Creditcoin CC3 testnet.
+              Your wallet is on{" "}
+              <span className="font-medium text-foreground">{network.currentNetwork}</span>.
+              Humanline runs on Creditcoin CC3 testnet (chainId {creditcoinTestnet.id}). Approve
+              the switch in your wallet — if it has never seen CC3, it asks to add the network
+              first.
             </p>
             <ConnectButton />
+            {network.error ? (
+              <p className="text-xs text-destructive" role="alert">
+                {network.error}
+              </p>
+            ) : null}
           </CardContent>
         </Card>
       ) : null}
