@@ -8,6 +8,7 @@ import { ConnectButton } from "@/components/connect-button";
 import { CreditPanel } from "@/components/credit-panel";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { EventHistory } from "@/components/event-history";
+import { GasCard } from "@/components/gas-card";
 import { HumanStatusCard } from "@/components/human-status-card";
 import { LenderPanel } from "@/components/lender-panel";
 import { NotDeployedBanner } from "@/components/not-deployed-banner";
@@ -50,6 +51,8 @@ export function AppClient() {
       <NotDeployedBanner need={["humanRegistry", "creditLine", "husd"]} />
 
       <ProfileSwitch />
+
+      <GasCard />
 
       {mounted && !isConnected ? (
         <Card>

@@ -33,6 +33,7 @@ import {
   TREE_CHANGED_TOPIC,
 } from "@/lib/chains";
 import { CONTRACT_LIST, WORLD_ACTION, WORLD_APP_ID, WORLD_RP_ID } from "@/lib/contracts";
+import { PROFILES, termLabel } from "@/lib/profiles";
 import { NEGATIVE_PATHS, NEGATIVE_PATH_FILTER } from "@/lib/negative-paths";
 
 export const metadata: Metadata = {
@@ -59,6 +60,7 @@ export default async function JudgePage() {
       />
 
       <Addresses />
+      <ProductionAddresses />
 
       <section className="flex flex-col gap-4">
         <SectionHeading
@@ -124,7 +126,7 @@ function Addresses() {
       <SectionHeading
         id="addresses"
         title="Addresses"
-        description={`Everything on Creditcoin CC3 testnet, chainId ${creditcoinTestnet.id}.`}
+        description={`Everything on Creditcoin CC3 testnet, chainId ${creditcoinTestnet.id}. The table below is the reproducible deployment — the one you can run end to end with World's simulator. The Orb-tree deployment for real verified humans follows it.`}
       />
 
       <div className="overflow-x-auto rounded-xl ring-1 ring-foreground/10">
@@ -248,6 +250,60 @@ function Addresses() {
         <KeyValue label="Explorer" value={creditcoinTestnet.blockExplorers.default.url} />
         <KeyValue label="TreeChanged topic0" value={TREE_CHANGED_TOPIC} />
       </dl>
+    </section>
+  );
+}
+
+/**
+ * The second deployment: same contracts, wired to the Ethereum mainnet Orb tree.
+ *
+ * A judge should be able to see that "real humans can use this" is a claim backed by
+ * deployed, verified bytecode rather than a roadmap line.
+ */
+function ProductionAddresses() {
+  const profile = PROFILES.production;
+  const rows = profile.deployment.list.filter((c) =>
+    ["humanRegistry", "creditLine", "humanGate"].includes(c.key),
+  );
+  if (!profile.available) return null;
+
+  return (
+    <section className="flex flex-col gap-4">
+      <SectionHeading
+        id="addresses-production"
+        title="The Orb-tree deployment"
+        description={`The same contracts verifying against the Ethereum mainnet identity tree instead of Sepolia staging — ${termLabel(profile)} terms, for people with an Orb-verified World ID. Open /app?profile=production to use it. hUSD and both AttestedWorldID instances are shared with the table above.`}
+      />
+      <div className="overflow-x-auto rounded-xl ring-1 ring-foreground/10">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Contract</TableHead>
+              <TableHead>Address</TableHead>
+              <TableHead className="hidden xl:table-cell">Verifies against</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rows.map((contract) => (
+              <TableRow key={contract.key}>
+                <TableCell className="font-medium whitespace-nowrap">{contract.name}</TableCell>
+                <TableCell>
+                  {contract.address ? (
+                    <HashLink value={contract.address} scope="creditcoin" kind="address" />
+                  ) : (
+                    <span className="text-xs text-muted-foreground">not deployed yet</span>
+                  )}
+                </TableCell>
+                <TableCell className="hidden max-w-md text-xs text-muted-foreground xl:table-cell">
+                  {contract.key === "humanRegistry"
+                    ? "AttestedWorldID (Ethereum mainnet) — World's Orb-verified tree, relayed by Attestcoin."
+                    : contract.blurb}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </section>
   );
 }
