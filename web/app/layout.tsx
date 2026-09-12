@@ -24,7 +24,15 @@ const title = "Humanline — one human, one credit line";
 const description =
   "World ID proof of personhood reaches Creditcoin through the Attestcoin Protocol. A zero-knowledge proof is verified on Creditcoin itself, and a verified human gets an uncollateralised credit line that follows the person, not the wallet.";
 
+/**
+ * Absolute base for `og:image` and canonical links. Set
+ * `NEXT_PUBLIC_SITE_URL` when a custom domain replaces the Vercel one; the
+ * fallback is the production deployment.
+ */
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://humanline-alpha.vercel.app";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: { default: title, template: "%s — Humanline" },
   description,
   applicationName: "Humanline",
@@ -37,7 +45,7 @@ export const metadata: Metadata = {
     "zero-knowledge",
     "Semaphore",
   ],
-  openGraph: { title, description, siteName: "Humanline", type: "website" },
+  openGraph: { title, description, siteName: "Humanline", type: "website", url: "/" },
   twitter: { card: "summary_large_image", title, description },
 };
 

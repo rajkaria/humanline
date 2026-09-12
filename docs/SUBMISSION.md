@@ -195,7 +195,7 @@ Confirm each before submitting. These are the organizers' stated conditions, and
 
 - [ ] Contracts deployed and verified on Blockscout; every address token above replaced.
 - [ ] Relay worker running and `/relay` showing a mainnet root relayed within the last few hours.
-- [ ] Web app live at `{{LIVE_URL}}` with no build errors and no "not deployed yet" banner.
+- [ ] Web app live at `https://humanline-alpha.vercel.app` with no build errors and no "not deployed yet" banner.
 - [ ] README present at repo root with the one-liner, addresses and known limitations.
 - [ ] `docs/ATTESTCOIN_INTEGRATION.md` present and linked from the README (this satisfies the technical documentation requirement).
 - [ ] `docs/deck.pdf` built and hosted; `docs/deck.pdf` replaced.

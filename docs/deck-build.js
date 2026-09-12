@@ -313,7 +313,7 @@ function chip(s, x, y, w, h, label, col){
     s.addText(d, {x:x+0.22, y:y+0.72, w:cw-0.44, h:1.15, fontSize:10.5, color:MUTED, fontFace:B,
       isTextBox:true, margin:0, lineSpacing:14.5, valign:"top"});
   });
-  s.addText("Live at {{LIVE_URL}}    ·    video at {{VIDEO_URL}}", {x:MX, y:6.52, w:W-2*MX, h:0.35,
+  s.addText("Live at https://humanline-alpha.vercel.app    ·    video at {{VIDEO_URL}}", {x:MX, y:6.52, w:W-2*MX, h:0.35,
     align:"center", fontSize:11, color:DIM, fontFace:M, isTextBox:true, margin:0});
 }
 
@@ -459,7 +459,7 @@ function chip(s, x, y, w, h, label, col){
   });
   s.addText("One human, one credit line.", {x:MX, y:6.18, w:6.5, h:0.5, fontSize:22, bold:true,
     color:TEXT, fontFace:H, isTextBox:true, margin:0});
-  s.addText("{{LIVE_URL}}    ·    {{REPO_URL}}", {x:6.5, y:6.24, w:6.2, h:0.4, align:"right",
+  s.addText("https://humanline-alpha.vercel.app    ·    {{REPO_URL}}", {x:6.5, y:6.24, w:6.2, h:0.4, align:"right",
     fontSize:11, color:AMBER, fontFace:M, isTextBox:true, margin:0, valign:"middle"});
 }
 

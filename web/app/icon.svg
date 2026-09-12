@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" width="28" height="28" role="img" aria-label="Humanline">
+  <title>Humanline</title>
+  <defs>
+    <linearGradient id="m" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#9f90ff"/>
+      <stop offset="1" stop-color="#28d7dc"/>
+    </linearGradient>
+  </defs>
+  <rect x="0.75" y="0.75" width="26.5" height="26.5" rx="8" fill="url(#m)" opacity="0.16"/>
+  <rect x="0.75" y="0.75" width="26.5" height="26.5" rx="8" fill="none" stroke="url(#m)" stroke-width="1.5" opacity="0.5"/>
+  <circle cx="9.5" cy="10" r="3" fill="url(#m)"/>
+  <path d="M5 20.5c0-2.7 2-4.5 4.5-4.5s4.5 1.8 4.5 4.5" fill="none" stroke="url(#m)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M16.5 14h6.5" fill="none" stroke="url(#m)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M16.5 19h4" fill="none" stroke="url(#m)" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+</svg>

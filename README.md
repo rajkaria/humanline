@@ -16,9 +16,9 @@ BUIDL CTC 2026 Fall submission, DeFi track. Live on Creditcoin CC3 testnet (chai
 
 | | |
 |---|---|
-| Live app | {{LIVE_URL}} |
-| Judge page (no wallet needed) | {{LIVE_URL}}/judge |
-| Live relay feed | {{LIVE_URL}}/relay |
+| Live app | https://humanline-alpha.vercel.app |
+| Judge page (no wallet needed) | https://humanline-alpha.vercel.app/judge |
+| Live relay feed | https://humanline-alpha.vercel.app/relay |
 | Attestcoin write-up (the required technical documentation) | [`docs/ATTESTCOIN_INTEGRATION.md`](docs/ATTESTCOIN_INTEGRATION.md) |
 | Relay evidence, one line per relayed root | [`evidence/relay-log.jsonl`](evidence/relay-log.jsonl) |
 | Deployment record | [`deployments/cc3-testnet.json`](deployments/cc3-testnet.json) |
