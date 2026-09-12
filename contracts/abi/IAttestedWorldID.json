@@ -1,0 +1,403 @@
+[
+  {
+    "type": "function",
+    "name": "FINALITY_DEPTH",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "IDENTITY_MANAGER",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "MAX_BATCH",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "MIN_ATTESTORS",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint32",
+        "internalType": "uint32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "SOURCE_CHAIN_KEY",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "executeBatch",
+    "inputs": [
+      {
+        "name": "chainKey",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "blockHeights",
+        "type": "uint64[]",
+        "internalType": "uint64[]"
+      },
+      {
+        "name": "encodedTransactions",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      },
+      {
+        "name": "merkleProofs",
+        "type": "tuple[]",
+        "internalType": "struct INativeQueryVerifier.MerkleProof[]",
+        "components": [
+          {
+            "name": "root",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "siblings",
+            "type": "tuple[]",
+            "internalType": "struct INativeQueryVerifier.MerkleProofEntry[]",
+            "components": [
+              {
+                "name": "hash",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              },
+              {
+                "name": "isLeft",
+                "type": "bool",
+                "internalType": "bool"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "sharedContinuityProof",
+        "type": "tuple",
+        "internalType": "struct INativeQueryVerifier.ContinuityProof",
+        "components": [
+          {
+            "name": "lowerEndpointDigest",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "roots",
+            "type": "bytes32[]",
+            "internalType": "bytes32[]"
+          }
+        ]
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "humansAddedTotal",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isValidRoot",
+    "inputs": [
+      {
+        "name": "root",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "latestRoot",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "rootCount",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "event",
+    "name": "RootRelayed",
+    "inputs": [
+      {
+        "name": "queryId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "sourceBlock",
+        "type": "uint64",
+        "indexed": true,
+        "internalType": "uint64"
+      },
+      {
+        "name": "postRoot",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "preRoot",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "kind",
+        "type": "uint8",
+        "indexed": false,
+        "internalType": "uint8"
+      },
+      {
+        "name": "humansAdded",
+        "type": "uint32",
+        "indexed": false,
+        "internalType": "uint32"
+      },
+      {
+        "name": "sourceTxIndex",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "relayer",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "AmbiguousTreeChange",
+    "inputs": [
+      {
+        "name": "count",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "BatchLengthMismatch",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "BatchOutOfOrder",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "BatchProofRejected",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "BatchTooLarge",
+    "inputs": [
+      {
+        "name": "size",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "CalldataLogMismatch",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "EmptyBatch",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NoTreeChange",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NotFinal",
+    "inputs": [
+      {
+        "name": "attestedTip",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "sourceBlock",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "NotIdentityManager",
+    "inputs": [
+      {
+        "name": "to",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "QueryAlreadyProcessed",
+    "inputs": [
+      {
+        "name": "queryId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "RootHistoryExpiryImmutable",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "SourceTxReverted",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ThinQuorum",
+    "inputs": [
+      {
+        "name": "have",
+        "type": "uint32",
+        "internalType": "uint32"
+      },
+      {
+        "name": "want",
+        "type": "uint32",
+        "internalType": "uint32"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "UnknownPreRoot",
+    "inputs": [
+      {
+        "name": "preRoot",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "UnsupportedEntrypoint",
+    "inputs": [
+      {
+        "name": "selector",
+        "type": "bytes4",
+        "internalType": "bytes4"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "WrongSourceChain",
+    "inputs": [
+      {
+        "name": "got",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "want",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ]
+  }
+]
