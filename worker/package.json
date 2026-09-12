@@ -4,8 +4,14 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "cli": "bun run src/cli.ts",
+    "check": "bun run src/cli.ts check",
     "relay": "bun run src/cli.ts relay",
-    "test": "bun test"
+    "prove": "bun run src/cli.ts prove",
+    "bootstrap": "bun run src/cli.ts bootstrap",
+    "status": "bun run src/cli.ts status",
+    "test": "bun test",
+    "typecheck": "bun x tsc --noEmit"
   },
   "dependencies": {
     "@gluwa/usc-sdk": "0.18.0",

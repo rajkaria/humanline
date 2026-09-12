@@ -25,5 +25,5 @@ const t1 = Date.now();
 const ok = await prover.verifySingle(d.chainKey, d.headerNumber, d.txBytes, d.merkleProof, d.continuityProof);
 console.log("verifySingle:", ok, "ms:", Date.now() - t1, "txIndex:", idx);
 const out = `../contracts/test/fixtures/${chainKey === 3 ? "mainnet" : "sepolia"}-${txHash.slice(0, 10)}.json`;
-await Bun.write(out, JSON.stringify({ txHash, ...d }, (_, v) => typeof v === "bigint" ? v.toString() : v, 2));
+await Bun.write(out, JSON.stringify({ ...d, txHash }, (_, v) => typeof v === "bigint" ? v.toString() : v, 2));
 console.log("fixture written", out);
