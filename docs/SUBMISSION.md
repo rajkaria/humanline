@@ -107,7 +107,7 @@ Three minutes, unlisted or public, per `docs/VIDEO_SCRIPT.md`. Do not gate it be
 Paste this paragraph wherever the form allows extra detail, and keep it in the README. It is the statement judges will check first.
 
 ```
-The World ID roots in this submission are real. They come from World's own sequencer updating the identity tree on Ethereum mainnet about once an hour, and each one arrives on Creditcoin as an Attestcoin proof verified by the 0x0FD2 precompile inside that same transaction. There is no mock verifier, no canned proof and no replayed fixture in the deployed path. The Semaphore Groth16 verification runs natively on Creditcoin CC3 on the bn128 precompiles at 0x06, 0x07 and 0x08. The Sepolia staging path and the World simulator are there so a judge can reproduce personhood verification end to end without an Orb, and it is the same code. What is testnet-only: hUSD is a test stablecoin we mint, lender deposits are testnet funds, and the demo deployment shortens loan terms to minutes so a full borrow and repay cycle fits in the video. What we do not claim: Attestcoin cannot prove that a payment did not happen, so a default is declared from a passed deadline plus the absence of a repayment on Creditcoin, which is native state, not a cross-chain absence claim.
+The World ID roots in this submission are real. They come from World's own sequencer updating the identity tree on Ethereum mainnet about once an hour, and each one arrives on Creditcoin as an Attestcoin proof verified by the 0x0FD2 precompile inside that same transaction. There is no mock verifier, no canned proof and no replayed fixture in the deployed path. The Semaphore Groth16 verification runs natively on Creditcoin CC3 on the bn128 precompiles at 0x06, 0x07 and 0x08. Humanline is deployed twice against those same roots: once verifying against World's Sepolia staging tree, so a judge can reproduce personhood verification end to end with the World simulator and no Orb, and once verifying against the Ethereum mainnet Orb tree with 30-day terms, which is what a real verified human uses. Same code, same relayed roots, one switch on the page. What is testnet-only: hUSD is a test stablecoin we mint, lender deposits are testnet funds, and the demo deployment shortens loan terms to minutes so a full borrow and repay cycle fits in the video. What we do not claim: Attestcoin cannot prove that a payment did not happen, so a default is declared from a passed deadline plus the absence of a repayment on Creditcoin, which is native state, not a cross-chain absence claim.
 ```
 
 ---
@@ -125,7 +125,19 @@ Paste into the form's description if space allows, and into the README regardles
 | `hUSD` | `0x4bd7f4c6648deb8f107932572ce7e85aca259640` |
 | `HumanGate` (example integration) | `0xa3e021de49cec8819ea1bd37a8b5a9df005b776c` |
 
-Explorer: `https://creditcoin-testnet.blockscout.com`. All six verified on Blockscout.
+The Orb-tree deployment — the same contracts verifying against World's Ethereum mainnet identity
+tree, 30-day terms, for people who actually hold an Orb-verified World ID. It shares the hUSD and
+both `AttestedWorldID` instances above:
+
+| Contract | Address (CC3 testnet, chainId 102031) |
+|---|---|
+| `HumanRegistry` (Orb tree) | `0x53fcba2cd9296b22635c67d5e73777b4e5db96af` |
+| `CreditLine` (30-day term, 7-day grace) | `0x86e38ce7173288372b638c0b1839fc9c6923ab82` |
+| `HumanGate` (Orb tree) | `0x544264e52a12fffa5c8640eb5a91b7f4628d5b93` |
+
+Open it at `https://humanline.credit/app?profile=production`; the switch is on the page.
+
+Explorer: `https://creditcoin-testnet.blockscout.com`. All nine verified on Blockscout.
 
 ---
 
@@ -193,13 +205,14 @@ Confirm each before submitting. These are the organizers' stated conditions, and
 
 ## Pre-submit checklist
 
-- [ ] Contracts deployed and verified on Blockscout; every address token above replaced.
-- [ ] Relay worker running and `/relay` showing a mainnet root relayed within the last few hours.
-- [ ] Web app live at `https://humanline.credit` with no build errors and no "not deployed yet" banner.
-- [ ] README present at repo root with the one-liner, addresses and known limitations.
-- [ ] `docs/ATTESTCOIN_INTEGRATION.md` present and linked from the README (this satisfies the technical documentation requirement).
+- [x] Contracts deployed and verified on Blockscout (nine, across both deployments); every address above is live.
+- [x] Relayer running as a GitHub Actions cron every 15 minutes, independent of any laptop; `/relay` shows the roots it lands.
+- [x] Web app live at `https://humanline.credit` with no build errors and no "not deployed yet" banner.
+- [x] README present at repo root with the one-liner, addresses and known limitations.
+- [x] `docs/ATTESTCOIN_INTEGRATION.md` present and linked from the README (this satisfies the technical documentation requirement).
+- [ ] Vercel → Settings → Deployment Protection → Vercel Authentication set to **Off** (the custom domain is already public; this opens the `*.vercel.app` URLs too).
 - [ ] `docs/deck.pdf` built and hosted; `docs/deck.pdf` replaced.
 - [ ] Video recorded, uploaded, ungated; `{{VIDEO_URL}}` replaced.
 - [ ] Description block under 300 words and integration summary under 400 words, both checked with `wc -w`.
-- [ ] Foundry suite green, worker tests green, negative-path suite runnable without a wallet.
+- [x] Foundry suite green (101), worker tests green (202), web tests green (215), all runnable from a fresh clone without a wallet.
 - [ ] Submitted before 2026-09-13 23:59 ET, not at 23:58.

@@ -658,8 +658,11 @@ Attestcoin proof verified by `0x0FD2` inside the Creditcoin transaction linked i
 source of truth is `evidence/relay-log.jsonl`, which the relay appends to and the GitHub Actions
 workflow commits. The relay is running, so the live file may be longer than this snapshot.
 
-Snapshot taken 2026-09-12T09:20Z. Rows 1 to 5 landed on the v1 deployment; rows 6 to 11 landed on
-the current contracts.
+Snapshot taken 2026-09-12T13:55Z. Rows 1 to 5 landed on the v1 deployment; rows 6 onward landed on
+the current contracts. **Rows 13 to 18 were relayed by the GitHub Actions cron**
+([`.github/workflows/relay.yml`](../.github/workflows/relay.yml), every 15 minutes), not from a
+laptop — the workflow derives its cursor from chain state, relays, and commits the new rows back to
+`main`, so this file's git history is also the relayer's uptime record.
 
 | # | Source | Ethereum tx | Block | Creditcoin tx | Call | Gas | Humans | Lag |
 |---|---|---|---|---|---|---|---|---|
@@ -674,6 +677,13 @@ the current contracts.
 | 9 | mainnet | [`0xbb4dff87…c1924`](https://etherscan.io/tx/0xbb4dff87690a536c822b9e5e456d0f5b05520aba4f96f794b9bd65c61e8c1924) | 25,960,305 | [`0xe764d3be…315dd`](https://creditcoin-testnet.blockscout.com/tx/0xe764d3be2bfa002d1f7db2e348daf5be410acc016ef6c4d7ebd797a5380315dd) | `executeBatch` (2) | 569,744 | +100 | 895 s |
 | 10 | sepolia | [`0x2db89d92…d8364`](https://sepolia.etherscan.io/tx/0x2db89d92bd775b1b718665b3f1f48be87c057dca46ca04a1516f0fefa16d8364) | 11,687,459 | [`0x2087b417…c7896`](https://creditcoin-testnet.blockscout.com/tx/0x2087b417224ca6b3831d8f16512a7773a0776915d8d854b62b79f888255c7896) | `executeBatch` (2) | 520,016 | +100 | 6,573 s |
 | 11 | sepolia | [`0x626e57ae…e4e54`](https://sepolia.etherscan.io/tx/0x626e57ae17a7d590a1968b638848326d980ce5fff5ddd0ff20651cd68cae4e54) | 11,687,747 | [`0x2087b417…c7896`](https://creditcoin-testnet.blockscout.com/tx/0x2087b417224ca6b3831d8f16512a7773a0776915d8d854b62b79f888255c7896) | `executeBatch` (2) | 520,016 | +100 | 2,973 s |
+| 12 | sepolia | [`0xf1d56e7d…b9304`](https://sepolia.etherscan.io/tx/0xf1d56e7d65d30c9fb53e59a7998bd38efa13fe4b5d562390f40cd39eafab9304) | 11,688,043 | [`0x42c23626…8e0cb`](https://creditcoin-testnet.blockscout.com/tx/0x42c2362661c27fd6f0e171c4654726d93b6674ca281627436c9c6ebbd4c8e0cb) | `execute` | 275,562 | +100 | 924 s |
+| 13 | mainnet | [`0x829c21ab…12d35`](https://etherscan.io/tx/0x829c21abce07a88969f76ab4570e586154ffa3d07e9874a6b1b5a4198fc12d35) | 25,960,630 | [`0x52514bce…86557`](https://creditcoin-testnet.blockscout.com/tx/0x52514bce2114bf51f87307efbde352cf242995bc677fba7bd16f4ff6e6086557) | `executeBatch` (3) | 791,161 | +100 | 10,015 s |
+| 14 | mainnet | [`0x2af1910e…3c117`](https://etherscan.io/tx/0x2af1910e21ba3b243cb2e2ae7390d63bbe25f582a3c1100a01a9ec11e4d3c117) | 25,960,932 | [`0x52514bce…86557`](https://creditcoin-testnet.blockscout.com/tx/0x52514bce2114bf51f87307efbde352cf242995bc677fba7bd16f4ff6e6086557) | `executeBatch` (3) | 791,161 | +100 | 6,391 s |
+| 15 | mainnet | [`0x40fe7c89…da6ff`](https://etherscan.io/tx/0x40fe7c89155bc0ee7db494c122cba4bb986fffaa1fdd87685a3e0353d27da6ff) | 25,961,231 | [`0x52514bce…86557`](https://creditcoin-testnet.blockscout.com/tx/0x52514bce2114bf51f87307efbde352cf242995bc677fba7bd16f4ff6e6086557) | `executeBatch` (3) | 791,161 | +100 | 2,791 s |
+| 16 | sepolia | [`0x76d12857…76aa3`](https://sepolia.etherscan.io/tx/0x76d12857cd4f1baa2ab0b63629654200e451b6b8efd584b34f69280dd3176aa3) | 11,688,338 | [`0x20ac99ef…99d1c`](https://creditcoin-testnet.blockscout.com/tx/0x20ac99ef1bff1a568bc3e9bd8e74e0b97b166ac5caf45b261f288119d1399d1c) | `executeBatch` (3) | 773,365 | +100 | 8,709 s |
+| 17 | sepolia | [`0x3858925c…39895`](https://sepolia.etherscan.io/tx/0x3858925cd1a4cfadd6b024f742be14bc1137453ecd95aaccb27bf51883639895) | 11,688,621 | [`0x20ac99ef…99d1c`](https://creditcoin-testnet.blockscout.com/tx/0x20ac99ef1bff1a568bc3e9bd8e74e0b97b166ac5caf45b261f288119d1399d1c) | `executeBatch` (3) | 773,365 | +100 | 5,181 s |
+| 18 | sepolia | [`0x83983295…f141b`](https://sepolia.etherscan.io/tx/0x839832958cd31fe54968b7f7f1efc80cf520cdd9ad42b8142452e9d4910f141b) | 11,688,909 | [`0x20ac99ef…99d1c`](https://creditcoin-testnet.blockscout.com/tx/0x20ac99ef1bff1a568bc3e9bd8e74e0b97b166ac5caf45b261f288119d1399d1c) | `executeBatch` (3) | 773,365 | +100 | 1,581 s |
 
 Notes on reading the table.
 
@@ -692,12 +702,15 @@ State of the current contracts at the time of the snapshot, read directly from C
 
 | | mainnet instance | sepolia instance |
 |---|---|---|
-| `rootCount()` | 4 | 4 |
-| `humansAddedTotal()` | 300 | 300 |
-| `latestRoot()` | `0x29cccc41f700fc485c60100f8ef09cd72e5a908d0142fb0f15180ee34da42118` | `0x0de7c26c4679912f801c48db0dc1907f6b0ecfacad4e6c1f2b4ad203e9d9fca9` |
+| `rootCount()` | 7 | 8 |
+| `humansAddedTotal()` | 600 | 700 |
+| `latestRoot()` | `0x15cd52107d7e573345bd04713336de26c81d89a7bd3a8759882a53ec6b417d14` | `0x0e4a67954ed0de7af23074c4cd9293d9ebe5aac3a2e0358a60835dfd266b4643` |
 
-`rootCount` is 4 after three relayed transactions because the bootstrap relay records both the
-`preRoot` and the `postRoot` of the transaction it starts from.
+Both counts keep rising while the cron runs; [humanline.credit/relay](https://humanline.credit/relay)
+reads them from the chain rather than from this file.
+
+`rootCount` exceeds the number of relayed transactions by one because the bootstrap relay records
+both the `preRoot` and the `postRoot` of the transaction it starts from.
 
 ---
 

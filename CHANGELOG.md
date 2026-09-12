@@ -5,6 +5,52 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-09-12
+
+The submission becomes something a stranger can use, not only something a judge can inspect.
+
+### Added
+
+- **A second deployment on World's Ethereum mainnet Orb tree** — `HumanRegistry`
+  `0x53fcba2c…`, `CreditLine` `0x86e38ce7…` (30-day term, 7-day grace), `HumanGate`
+  `0x544264e5…`, all Blockscout-verified. `/app` switches between it and the Sepolia-staging
+  deployment at runtime (`?profile=production`), moving the registry, the credit line and the
+  World ID environment together, because a proof against one tree can only revert against the
+  other's registry. Both share one hUSD and both read the same relayed `AttestedWorldID`
+  instances.
+- **A root-freshness check before the register transaction.** World mints a proof against the
+  identity tree's newest root, which the relayer may not have carried to Creditcoin yet; the
+  verify card now asks `isValidRoot` first and explains the wait instead of letting
+  `register` revert after the user has paid gas.
+- **`/api/gas`**, a CC3 gas drip for first-time humans. `register` binds the proof to
+  `msg.sender`, so a wallet with no tCTC cannot use Humanline however good its proof is. Guarded
+  by an on-chain balance check and a per-IP bucket; the card only appears when the connected
+  wallet cannot pay.
+- **`contracts/script/verify-blockscout.sh`**, which re-encodes constructor arguments from the
+  deployment file itself, and `REUSE`/`REUSE_FROM` in `deploy-cc3.sh` for deploying a second
+  profile against already-relayed contracts. **`scripts/seed-pool.sh`** seeds a lender pool
+  through the hUSD faucet's per-address daily limit; both pools now hold real liquidity.
+- **The relayer runs in CI**, every 15 minutes, committing its evidence rows back to `main` —
+  so relaying no longer depends on a laptop staying awake. Evidence rows now record the
+  `AttestedWorldID` instance that received the root, and `evidence/README.md` documents the
+  schema.
+
+### Fixed
+
+- **Every API route on the deployed site answered 500** (`Cannot find module
+  'next/dist/compiled/source-map'`): the build traced only `web/`, but bun hoists this
+  workspace's dependencies — the Next runtime included — into the repo root. That had taken
+  World ID verification down with it.
+- **A fresh clone could not build or test the contracts**: `forge-std` was committed as a bare
+  gitlink with no `.gitmodules`, the contracts' own `bun install` was undocumented, and the
+  README told judges to run a Foundry binary the repo does not ship. Verified end to end from a
+  clean clone.
+- **`bun.lock` was untracked**, so `bun install --frozen-lockfile` in the relay workflow would
+  have failed on every run.
+- **Relay state is now bound to its contract address.** A cursor from a previous deployment
+  claimed the new instance's roots were already handled; the store resets that source's state
+  when the address changes instead of relying on someone remembering to delete the database.
+
 ## [0.1.0] - 2026-09-12
 
 First public release: the BUIDL CTC 2026 Fall submission. Everything below is live on Creditcoin CC3
