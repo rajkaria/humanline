@@ -19,6 +19,12 @@
 #   WORLD_APP_ID      app_87b24915fcf733f10df1b0c46dd1f783
 #   WORLD_ACTION      humanline-register
 #   RPC_URL           https://rpc.cc3-testnet.creditcoin.network
+#   REUSE_FROM        path to an existing deployment JSON to take addresses from
+#   REUSE             space-separated labels to take from REUSE_FROM instead of deploying,
+#                     e.g. REUSE="AttestedWorldIDMainnet AttestedWorldIDSepolia HUSD".
+#                     Reusing the relayed AttestedWorldID instances is what lets a second
+#                     profile (production terms, Orb tree) share the roots the relayer has
+#                     already carried, and share one hUSD faucet across both credit lines.
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -31,7 +37,9 @@ OUT="${DEPLOYMENT_OUT:-$ROOT_DIR/deployments/cc3-testnet.json}"
 
 # shellcheck disable=SC1091
 [[ -f "$ROOT_DIR/.secrets.env" ]] && source "$ROOT_DIR/.secrets.env"
-: "${PRIVATE_KEY:?set PRIVATE_KEY (or put it in .secrets.env)}"
+# .secrets.env names the deployer key CREDITCOIN_WALLET_PRIVATE_KEY; accept either spelling.
+PRIVATE_KEY="${PRIVATE_KEY:-${CREDITCOIN_WALLET_PRIVATE_KEY:-}}"
+: "${PRIVATE_KEY:?set PRIVATE_KEY or CREDITCOIN_WALLET_PRIVATE_KEY (or put it in .secrets.env)}"
 
 PROFILE="${PROFILE:-prod}"
 WORLD_ID_SOURCE="${WORLD_ID_SOURCE:-sepolia}"
@@ -69,10 +77,40 @@ ADDRESSES_JSON=""
 TXHASHES_JSON=""
 addr_of() { printf '%s\n' "$ADDRESSES_JSON" | awk -F'\t' -v k="$1" '$1==k{print $2}'; }
 
+# Labels listed in $REUSE are copied out of $REUSE_FROM rather than deployed again.
+REUSE="${REUSE:-}"
+REUSE_FROM="${REUSE_FROM:-}"
+reused_field() { # reused_field <label> <contracts|txHashes>
+  [[ -n "$REUSE_FROM" ]] || return 1
+  LABEL="$1" FIELD="$2" REUSE_FROM="$REUSE_FROM" bun -e '
+    const doc = JSON.parse(await Bun.file(process.env.REUSE_FROM).text());
+    const value = doc?.[process.env.FIELD]?.[process.env.LABEL];
+    if (!value) process.exit(1);
+    console.log(value);
+  '
+}
+is_reused() {
+  case " $REUSE " in *" $1 "*) return 0 ;; *) return 1 ;; esac
+}
+
 deploy() {
   local label="$1" contract="$2" ctor_sig="${3:-}"
   shift 3 || true
   local code args receipt
+
+  if is_reused "$label"; then
+    local existing existing_tx
+    existing="$(reused_field "$label" contracts)" || {
+      echo "REUSE lists $label but $REUSE_FROM has no address for it" >&2; exit 1; }
+    existing_tx="$(reused_field "$label" txHashes || true)"
+    ADDRESSES_JSON="${ADDRESSES_JSON}${label}	${existing}
+"
+    [[ -n "$existing_tx" ]] && TXHASHES_JSON="${TXHASHES_JSON}${label}	${existing_tx}
+"
+    echo "  $label -> ${existing}  (reused from $(basename "$REUSE_FROM"))"
+    return 0
+  fi
+
   code="$("$FORGE" inspect "$contract" bytecode --json | tr -d '"')"
   if [[ -n "$ctor_sig" ]]; then
     args="$("$CAST" abi-encode "$ctor_sig" "$@")"
