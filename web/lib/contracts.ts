@@ -18,7 +18,7 @@
  *      "Not deployed yet" banner. The build never fails and no page crashes.
  */
 
-import { buildDeployment, CONTRACT_META, type ContractKey } from "@/lib/deployment";
+import { buildDeployment, type ContractKey } from "@/lib/deployment";
 import rawDeployments from "./generated/deployments.json";
 
 export {
@@ -60,9 +60,6 @@ export const deploymentBlockOf = DEFAULT_DEPLOYMENT.deploymentBlockOf;
 
 /** The deploy transaction hash, when the deployments file records one. */
 export const deploymentTxHashOf = DEFAULT_DEPLOYMENT.deploymentTxHashOf;
-
-// Keep the meta list re-exported above tree-shakeable without an unused import.
-void CONTRACT_META;
 
 // ---------------------------------------------------------------- World ID env
 

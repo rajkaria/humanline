@@ -186,3 +186,27 @@ sleeping 60000ms…
 mainnet: blocks 25960619..25960628 (head 25960697, attested tip 25960660, finality depth 32) — 0 TreeChanged tx(s)
 sepolia: blocks 11688219..11688228 (head 11688296, attested tip 11688260, finality depth 32) — 0 TreeChanged tx(s)
 sleeping 60000ms…
+env: loaded 1 file(s) (values not printed)
+mainnet: blocks 25961232..25961748 (head 25961822, attested tip 25961780, finality depth 32) — 1 TreeChanged tx(s)
+→ 1 tx(s), blocks 25961531..25961531 (span 0)
+  execute calldata 8388 bytes
+  precompile verifySingle: true
+  gas estimate 328446 (limit 426979)
+  submitted 0xd5bce978d991a59f98617b73d9179988264029cacecb6d929d512efed740ac73
+  relayed root 0x0f3b1c5af0a24ae7… (+100 humans, lag 3511s)
+  [mainnet] relayed single 1 tx 25961531..25961531 8388B https://creditcoin-testnet.blockscout.com/tx/0xd5bce978d991a59f98617b73d9179988264029cacecb6d929d512efed740ac73
+sepolia: blocks 11688910..11689308 (head 11689383, attested tip 11689340, finality depth 32) — 1 TreeChanged tx(s)
+→ 1 tx(s), blocks 11689195..11689195 (span 0)
+  execute calldata 6276 bytes
+  precompile verifySingle: true
+  gas estimate 297954 (limit 387340)
+  submitted 0xc62fa98d2f015e0ec30f834cae794d0b70927a13c910128adbf5b60fa927af4b
+  relayed root 0x2116dc22b3dfc8b9… (+100 humans, lag 2301s)
+  [sepolia] relayed single 1 tx 11689195..11689195 6276B https://creditcoin-testnet.blockscout.com/tx/0xc62fa98d2f015e0ec30f834cae794d0b70927a13c910128adbf5b60fa927af4b
+sleeping 60000ms…
+mainnet: blocks 25961532..25961758 (head 25961829, attested tip 25961790, finality depth 32) — 0 TreeChanged tx(s)
+sepolia: blocks 11689196..11689318 (head 11689390, attested tip 11689350, finality depth 32) — 0 TreeChanged tx(s)
+sleeping 60000ms…
+mainnet: blocks 25961759..25961758 (head 25961835, attested tip 25961790, finality depth 32) — 0 TreeChanged tx(s)
+sepolia: blocks 11689319..11689328 (head 11689395, attested tip 11689360, finality depth 32) — 0 TreeChanged tx(s)
+sleeping 60000ms…

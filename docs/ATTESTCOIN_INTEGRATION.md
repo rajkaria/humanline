@@ -813,16 +813,19 @@ up cleanly.
 
 ## 6. Setup and reproduction
 
-Prerequisites: [Bun](https://bun.sh). Foundry is vendored at `.tools/forge` and `.tools/cast`, so no
-separate install is needed. On macOS the shell is bash 3.2, which is why the scripts avoid
-associative arrays.
+Prerequisites: [Bun](https://bun.sh) and [Foundry](https://getfoundry.sh)
+(`curl -L https://foundry.paradigm.xyz | bash && foundryup`). Clone with
+`--recurse-submodules` — `forge-std` is a submodule. The shell scripts target bash 3.2, the macOS
+default, which is why they avoid associative arrays.
 
 ### Without a wallet
 
 Everything here is read-only. No key, no funds, no deployment of your own.
 
 ```bash
-bun install
+git clone --recurse-submodules https://github.com/rajkaria/humanline && cd humanline
+bun install                      # worker + web
+(cd contracts && bun install)    # Solidity dependencies
 
 # Probe all three Attestcoin precompiles, list supported chains with their attested tips and
 # bonded attestor counts, sanity-check bn128, and read both AttestedWorldID instances.
@@ -843,14 +846,15 @@ bun run worker/src/cli.ts prove \
 bun run worker/src/cli.ts relay --source sepolia --once --dry-run
 
 # Contracts: 101 tests. The 7 live CC3 tests skip cleanly without CC3_FORK.
-cd contracts && ../.tools/forge test
+cd contracts && forge test
 
 # The same suite with the 7 live tests enabled, talking to the real CC3 node.
-CC3_FORK=1 ../.tools/forge test
-CC3_FORK=1 ../.tools/forge test --match-contract Fork -vv
+CC3_FORK=1 forge test
+CC3_FORK=1 forge test --match-contract Fork -vv
 
-# Worker: 195 tests, no network.
+# Worker: 202 tests, no network. Web: 215.
 cd ../worker && bun test
+cd ../web && bun test
 ```
 
 `prove --dry-run` prints the local guard replay as a checklist, which is the artifact to read if you

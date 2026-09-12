@@ -84,7 +84,7 @@ export default async function JudgePage() {
         <SectionHeading
           id="commands"
           title="Verify without a wallet"
-          description="Copy, paste, run. `cast` is Foundry; the repo ships it at .tools/cast."
+          description="Copy, paste, run. `cast` is Foundry: curl -L https://foundry.paradigm.xyz | bash && foundryup."
         />
         <VerifyCommands />
       </section>
@@ -330,21 +330,21 @@ function VerifyCommands() {
         <CardContent className="flex flex-col gap-4">
           <CommandBlock
             title="How many real World ID roots have been relayed?"
-            command={`.tools/cast call ${A(mainnet, "AttestedWorldID")} \\\n  "rootCount()(uint256)" \\\n  --rpc-url ${RPC}\n\n.tools/cast call ${A(mainnet, "AttestedWorldID")} \\\n  "humansAddedTotal()(uint256)" \\\n  --rpc-url ${RPC}`}
+            command={`cast call ${A(mainnet, "AttestedWorldID")} \\\n  "rootCount()(uint256)" \\\n  --rpc-url ${RPC}\n\ncast call ${A(mainnet, "AttestedWorldID")} \\\n  "humansAddedTotal()(uint256)" \\\n  --rpc-url ${RPC}`}
           />
           <CommandBlock
             title="Is an address a unique human?"
             description="This is the entire lender integration."
-            command={`.tools/cast call ${A(registry, "HumanRegistry")} \\\n  "isHuman(address)(bool)" 0xYourWallet \\\n  --rpc-url ${RPC}`}
+            command={`cast call ${A(registry, "HumanRegistry")} \\\n  "isHuman(address)(bool)" 0xYourWallet \\\n  --rpc-url ${RPC}`}
           />
           <CommandBlock
             title="What is that human's credit line?"
-            command={`.tools/cast call ${A(creditLine, "CreditLine")} \\\n  "lineOf(uint256)((uint256,uint256,uint64,uint64,uint32,uint32,bool))" \\\n  $(.tools/cast call ${A(registry, "HumanRegistry")} "humanOf(address)(uint256)" 0xYourWallet --rpc-url ${RPC}) \\\n  --rpc-url ${RPC}`}
+            command={`cast call ${A(creditLine, "CreditLine")} \\\n  "lineOf(uint256)((uint256,uint256,uint64,uint64,uint32,uint32,bool))" \\\n  $(cast call ${A(registry, "HumanRegistry")} "humanOf(address)(uint256)" 0xYourWallet --rpc-url ${RPC}) \\\n  --rpc-url ${RPC}`}
           />
           <CommandBlock
             title="Ask the precompiles directly"
             description="Supported chains from 0x0FD3, attestor count from 0x0FD4."
-            command={`.tools/cast call ${PRECOMPILES.chainInfo} \\\n  "get_supported_chains()((uint64,uint64,bytes,uint8)[])" \\\n  --rpc-url ${RPC}\n\n.tools/cast call ${PRECOMPILES.attestorStash} \\\n  "getAttestorsCount(uint64)(uint32)" 3 \\\n  --rpc-url ${RPC}`}
+            command={`cast call ${PRECOMPILES.chainInfo} \\\n  "get_supported_chains()((uint64,uint64,bytes,uint8)[])" \\\n  --rpc-url ${RPC}\n\ncast call ${PRECOMPILES.attestorStash} \\\n  "getAttestorsCount(uint64)(uint32)" 3 \\\n  --rpc-url ${RPC}`}
           />
         </CardContent>
       </Card>
@@ -356,29 +356,31 @@ function VerifyCommands() {
             Run the suite
           </CardTitle>
           <CardDescription>
-            Foundry binaries ship in <code className="font-mono">.tools/</code>; they are not
-            on your PATH.
+            Clone with <code className="font-mono">--recurse-submodules</code>, then{" "}
+            <code className="font-mono">bun install &amp;&amp; (cd contracts &amp;&amp; bun install)</code>.
+            Foundry is not vendored — install it with{" "}
+            <code className="font-mono">curl -L https://foundry.paradigm.xyz | bash &amp;&amp; foundryup</code>.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <CommandBlock
             title="Every contract test, including the negative paths"
-            command={`cd contracts && ../.tools/forge test -vv`}
+            command={`cd contracts && forge test -vv`}
           />
           <CommandBlock
             title="Only the negative paths"
             description="52 tests. Each one should reject the attack listed below, most with a named custom error."
-            command={`cd contracts && ../.tools/forge test --match-test "${NEGATIVE_PATH_FILTER}" -vvv`}
+            command={`cd contracts && forge test --match-test "${NEGATIVE_PATH_FILTER}" -vvv`}
           />
           <CommandBlock
             title="One row from the table below"
             description="Every test name in that table is checked against contracts/test/*.t.sol by web's own test suite, so none of them can be invented."
-            command={`cd contracts && ../.tools/forge test --match-test "^test_RevertsOnThinAttestorQuorum$" -vvv`}
+            command={`cd contracts && forge test --match-test "^test_RevertsOnThinAttestorQuorum$" -vvv`}
           />
           <CommandBlock
             title="Fork tests against live CC3 state"
             description="Skipped unless CC3_FORK is set, so the default suite stays hermetic."
-            command={`cd contracts && CC3_FORK=${RPC} ../.tools/forge test --match-contract Fork -vv`}
+            command={`cd contracts && CC3_FORK=${RPC} forge test --match-contract Fork -vv`}
           />
           <CommandBlock
             title="Web unit tests — World ID hashing and formatting"
@@ -388,7 +390,7 @@ function VerifyCommands() {
           <CommandBlock
             title="Build a proof for any Ethereum transaction"
             description="The same endpoint the widget above uses."
-            command={`.tools/cast rpc --rpc-url ${RPC} eth_blockNumber\n\n# proof builder (chainKey 3 = Ethereum mainnet)\n${PROOF_BUILDER_URL}/api/v1/proof-by-tx/3/<txHash>`}
+            command={`cast rpc --rpc-url ${RPC} eth_blockNumber\n\n# proof builder (chainKey 3 = Ethereum mainnet)\n${PROOF_BUILDER_URL}/api/v1/proof-by-tx/3/<txHash>`}
           />
         </CardContent>
       </Card>

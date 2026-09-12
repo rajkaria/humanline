@@ -22,3 +22,6 @@ CLAUDE.md
 docs/PLAN.md
 docs/HACKATHON-RESEARCH.md
 docs/context/
+
+# Local relay daemon output; the canonical evidence log is written by CI.
+evidence/relay-local.jsonl

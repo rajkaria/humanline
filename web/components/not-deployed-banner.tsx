@@ -2,9 +2,9 @@ import { TriangleAlertIcon } from "lucide-react";
 
 import { CopyButton } from "@/components/copy-button";
 import {
-  deploymentStatus,
+  DEFAULT_DEPLOYMENT,
   type ContractKey,
-  CONTRACTS,
+  type Deployment,
 } from "@/lib/contracts";
 
 /**
@@ -14,18 +14,25 @@ import {
  * `NEXT_PUBLIC_*_ADDRESS` is set, every data view renders this instead of
  * silently showing zeros — a demo that shows "0 humans" because it is pointed at
  * nothing is worse than one that says so.
+ *
+ * `deployment` defaults to the one the static pages describe; `/app` passes the
+ * profile the visitor selected, so the banner reports the addresses that view is
+ * really reading rather than the other profile's.
  */
 export function NotDeployedBanner({
   need,
   className,
+  deployment = DEFAULT_DEPLOYMENT,
 }: {
   /** Only warn about the contracts this view actually reads. */
   need?: ContractKey[];
   className?: string;
+  /** The deployment this view reads from. Defaults to the documented one. */
+  deployment?: Deployment;
 }) {
-  const missing = (need ? need.map((k) => CONTRACTS[k]) : deploymentStatus.undeployed).filter(
-    (c) => !c.address,
-  );
+  const missing = (
+    need ? need.map((k) => deployment.contracts[k]) : deployment.status.undeployed
+  ).filter((c) => !c.address);
   if (missing.length === 0) return null;
 
   return (

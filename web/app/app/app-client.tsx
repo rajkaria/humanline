@@ -20,6 +20,7 @@ import { creditcoinTestnet } from "@/lib/chains";
 import { useCreditLine } from "@/lib/hooks/use-credit-line";
 import { useMounted } from "@/lib/hooks/use-mounted";
 import { useHuman } from "@/lib/hooks/use-human";
+import { useProfile } from "@/lib/profile-context";
 
 /**
  * The whole borrower + lender surface.
@@ -31,6 +32,7 @@ import { useHuman } from "@/lib/hooks/use-human";
 export function AppClient() {
   const { isConnected, chainId } = useAccount();
   const mounted = useMounted();
+  const { profile } = useProfile();
 
   const human = useHuman();
   const credit = useCreditLine(human.nullifierHash);
@@ -48,7 +50,10 @@ export function AppClient() {
 
   return (
     <div className="flex flex-col gap-6">
-      <NotDeployedBanner need={["humanRegistry", "creditLine", "husd"]} />
+      <NotDeployedBanner
+        need={["humanRegistry", "creditLine", "husd"]}
+        deployment={profile.deployment}
+      />
 
       <ProfileSwitch />
 

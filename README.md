@@ -209,14 +209,14 @@ web/              Next.js app: /, /app, /relay, /judge, /docs
 deployments/      cc3-testnet.json (current) and cc3-testnet.v1.json (superseded)
 evidence/         relay-log.jsonl, one line per relayed root
 docs/             SPEC, ARCHITECTURE, SECURITY, ATTESTCOIN_INTEGRATION, VISION, DECK, SUBMISSION
-.github/          relay.yml, the serverless relay fallback (30-minute cron)
-.tools/           vendored Foundry (forge, cast, anvil, chisel)
+.github/          relay.yml, the relayer that runs in CI every 15 minutes
 ```
 
 ## Getting started
 
-Prerequisites: [Bun](https://bun.sh). Foundry is vendored under `.tools/`, so there is nothing else
-to install. `bun install` at the repo root installs the `worker` and `web` workspaces.
+Prerequisites: [Bun](https://bun.sh) and [Foundry](https://getfoundry.sh). `bun install` at the repo
+root installs the `worker` and `web` workspaces; `cd contracts && bun install` installs the Solidity
+dependencies.
 
 Two environment notes that will otherwise cost you ten minutes:
 
