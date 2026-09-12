@@ -32,7 +32,7 @@ permissions:
 jobs:
   relay:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 25   # the relay loop stops itself at 19
     steps:
       - uses: actions/checkout@v4
 
@@ -50,6 +50,10 @@ jobs:
           ETH_SEPOLIA_RPC: ${{ secrets.ETH_SEPOLIA_RPC }}
         run: bun run worker/src/cli.ts check
 
+      # Scheduled runs on shared runners are queued, not guaranteed on the minute, so each
+      # run relays *continuously* for 19 minutes instead of taking a single pass and exiting.
+      # A late schedule then costs a delayed start, not a missed root. `timeout` exits 124 when
+      # it stops a healthy loop, which is the expected ending, not a failure.
       - name: Relay
         env:
           CREDITCOIN_WALLET_PRIVATE_KEY: ${{ secrets.CREDITCOIN_WALLET_PRIVATE_KEY }}
@@ -59,9 +63,16 @@ jobs:
           DRY_RUN: ${{ inputs.dry_run && '--dry-run' || '' }}
           FROM_BLOCK: ${{ inputs.from_block }}
         run: |
-          args="relay --source $SOURCE --once $DRY_RUN"
+          args="relay --source $SOURCE $DRY_RUN"
           if [ -n "$FROM_BLOCK" ]; then args="$args --from $FROM_BLOCK"; fi
-          bun run worker/src/cli.ts $args
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
+            timeout --preserve-status 1140 bun run worker/src/cli.ts $args --interval 120 || {
+              status=$?
+              [ "$status" -eq 124 ] || [ "$status" -eq 143 ] || exit "$status"
+            }
+          else
+            bun run worker/src/cli.ts $args --once
+          fi
 
       - name: Status
         if: always()
