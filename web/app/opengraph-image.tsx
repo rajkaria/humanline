@@ -11,18 +11,16 @@ export const contentType = "image/png";
  * properties, so the brand gradient is written out as literal sRGB here — the
  * same two stops `--brand` / `--brand-2` resolve to in the dark theme.
  */
-const MARK = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" width="112" height="112">
+const MARK = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="116" height="116">
   <defs>
-    <linearGradient id="m" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#9f90ff"/><stop offset="1" stop-color="#28d7dc"/>
+    <linearGradient id="m" x1="3" y1="8" x2="29" y2="24" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#9f90ff"/><stop offset="0.45" stop-color="#7fa6f4"/><stop offset="1" stop-color="#28d7dc"/>
     </linearGradient>
   </defs>
-  <rect x="0.75" y="0.75" width="26.5" height="26.5" rx="8" fill="url(#m)" opacity="0.16"/>
-  <rect x="0.75" y="0.75" width="26.5" height="26.5" rx="8" fill="none" stroke="url(#m)" stroke-width="1.5" opacity="0.5"/>
-  <circle cx="9.5" cy="10" r="3" fill="url(#m)"/>
-  <path d="M5 20.5c0-2.7 2-4.5 4.5-4.5s4.5 1.8 4.5 4.5" fill="none" stroke="url(#m)" stroke-width="2" stroke-linecap="round"/>
-  <path d="M16.5 14h6.5" fill="none" stroke="url(#m)" stroke-width="2" stroke-linecap="round"/>
-  <path d="M16.5 19h4" fill="none" stroke="url(#m)" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+  <path d="M19.91 10.21 A 9.4 9.4 0 1 0 19.91 21.79" fill="none" stroke="url(#m)" stroke-width="1.7" stroke-linecap="round" opacity="0.34"/>
+  <path d="M18.15 13 A 6.4 6.4 0 1 0 18.15 19" fill="none" stroke="url(#m)" stroke-width="2.1" stroke-linecap="round" opacity="0.66"/>
+  <circle cx="12.5" cy="16" r="3.5" fill="url(#m)"/>
+  <path d="M15.6 16 H 28.4" fill="none" stroke="url(#m)" stroke-width="3.1" stroke-linecap="round"/>
 </svg>`;
 
 const markSrc = `data:image/svg+xml;base64,${Buffer.from(MARK).toString("base64")}`;
@@ -37,7 +35,7 @@ export default function OpengraphImage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: "72px 80px",
+          padding: "60px 76px",
           background:
             "radial-gradient(900px 520px at 78% -10%, rgba(159,144,255,0.22), rgba(11,13,20,0) 60%), linear-gradient(160deg, #0b0d14 0%, #12141f 100%)",
           color: "#f4f5f8",
@@ -45,18 +43,18 @@ export default function OpengraphImage() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-          <img src={markSrc} width={112} height={112} alt="" />
+          <img src={markSrc} width={116} height={116} alt="" />
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ fontSize: 34, fontWeight: 600, letterSpacing: -0.5 }}>Humanline</div>
             <div style={{ fontSize: 22, color: "#a2a3b1" }}>Creditcoin CC3 · chainId 102031</div>
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          <div style={{ fontSize: 88, fontWeight: 700, letterSpacing: -2.5, lineHeight: 1.05 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+          <div style={{ fontSize: 74, fontWeight: 700, letterSpacing: -2.2, lineHeight: 1.06 }}>
             One human, one credit line.
           </div>
-          <div style={{ fontSize: 30, color: "#a2a3b1", maxWidth: 900, lineHeight: 1.35 }}>
+          <div style={{ fontSize: 27, color: "#a2a3b1", maxWidth: 880, lineHeight: 1.4 }}>
             World ID proof of personhood, carried to Creditcoin by the Attestcoin Protocol. No
             bridge, no oracle operator, no second wallet.
           </div>

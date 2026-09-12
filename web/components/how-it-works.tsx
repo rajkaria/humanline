@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 export function HowItWorksDiagram({ className }: { className?: string }) {
   return (
     <figure className={cn("w-full", className)}>
-      <div className="overflow-x-auto rounded-xl bg-card/40 p-3 ring-1 ring-foreground/10 sm:p-5">
+      <div className="panel overflow-x-auto p-3 sm:p-5">
         <svg
           viewBox="0 0 980 470"
           className="h-auto w-full min-w-[720px]"

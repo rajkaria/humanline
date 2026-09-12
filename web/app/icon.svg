@@ -1,15 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" width="28" height="28" role="img" aria-label="Humanline">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Humanline">
   <title>Humanline</title>
   <defs>
-    <linearGradient id="m" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+    <linearGradient id="m" x1="3" y1="8" x2="29" y2="24" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#9f90ff"/>
+      <stop offset="0.45" stop-color="#7fa6f4"/>
       <stop offset="1" stop-color="#28d7dc"/>
     </linearGradient>
   </defs>
-  <rect x="0.75" y="0.75" width="26.5" height="26.5" rx="8" fill="url(#m)" opacity="0.16"/>
-  <rect x="0.75" y="0.75" width="26.5" height="26.5" rx="8" fill="none" stroke="url(#m)" stroke-width="1.5" opacity="0.5"/>
-  <circle cx="9.5" cy="10" r="3" fill="url(#m)"/>
-  <path d="M5 20.5c0-2.7 2-4.5 4.5-4.5s4.5 1.8 4.5 4.5" fill="none" stroke="url(#m)" stroke-width="2" stroke-linecap="round"/>
-  <path d="M16.5 14h6.5" fill="none" stroke="url(#m)" stroke-width="2" stroke-linecap="round"/>
-  <path d="M16.5 19h4" fill="none" stroke="url(#m)" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+  <path d="M19.91 10.21 A 9.4 9.4 0 1 0 19.91 21.79" fill="none" stroke="url(#m)" stroke-width="1.7" stroke-linecap="round" opacity="0.34"/>
+  <path d="M18.15 13 A 6.4 6.4 0 1 0 18.15 19" fill="none" stroke="url(#m)" stroke-width="2.1" stroke-linecap="round" opacity="0.66"/>
+  <circle cx="12.5" cy="16" r="3.5" fill="url(#m)"/>
+  <path d="M15.6 16 H 28.4" fill="none" stroke="url(#m)" stroke-width="3.1" stroke-linecap="round"/>
 </svg>

@@ -10,11 +10,14 @@
 
   --font-sans: var(--font-inter);
   --font-mono: var(--font-jetbrains-mono);
-  --font-heading: var(--font-inter);
+  --font-heading: var(--font-space-grotesk);
 
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
   --color-brand-2: var(--brand-2);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-hairline: var(--hairline);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
@@ -52,7 +55,7 @@
  * the dark one and `<html class="dark">` is set in the root layout.
  */
 :root {
-  --radius: 0.75rem;
+  --radius: 0.875rem;
 
   --background: oklch(0.985 0.002 275);
   --foreground: oklch(0.18 0.012 275);
@@ -73,6 +76,10 @@
   --input: oklch(0.9 0.006 275);
   --ring: oklch(0.6 0.16 285);
 
+  --surface: oklch(1 0 0);
+  --surface-2: oklch(0.975 0.004 275);
+  --hairline: oklch(0.18 0.012 275 / 10%);
+
   --brand: oklch(0.62 0.19 287);
   --brand-foreground: oklch(0.99 0 0);
   --brand-2: oklch(0.72 0.14 200);
@@ -83,9 +90,9 @@
 }
 
 .dark {
-  --background: oklch(0.155 0.014 275);
-  --foreground: oklch(0.97 0.004 275);
-  --card: oklch(0.196 0.016 275);
+  --background: oklch(0.145 0.013 272);
+  --foreground: oklch(0.975 0.004 275);
+  --card: oklch(0.194 0.016 272);
   --card-foreground: oklch(0.97 0.004 275);
   --popover: oklch(0.2 0.016 275);
   --popover-foreground: oklch(0.97 0.004 275);
@@ -93,14 +100,19 @@
   --primary-foreground: oklch(0.16 0.02 287);
   --secondary: oklch(0.26 0.018 275);
   --secondary-foreground: oklch(0.97 0.004 275);
-  --muted: oklch(0.26 0.016 275);
-  --muted-foreground: oklch(0.71 0.014 275);
+  --muted: oklch(0.25 0.016 272);
+  --muted-foreground: oklch(0.735 0.014 272);
   --accent: oklch(0.3 0.03 287);
   --accent-foreground: oklch(0.97 0.004 275);
   --destructive: oklch(0.68 0.19 24);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 14%);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 13%);
   --ring: oklch(0.62 0.16 287);
+
+  /* Three steps of elevation, so a panel inside a panel still reads. */
+  --surface: oklch(0.178 0.015 272);
+  --surface-2: oklch(0.215 0.017 272);
+  --hairline: oklch(1 0 0 / 8%);
 
   --brand: oklch(0.72 0.17 287);
   --brand-foreground: oklch(0.15 0.02 287);
@@ -124,7 +136,17 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background font-sans text-foreground antialiased;
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-heading;
+    font-feature-settings: "ss01";
   }
 
   ::selection {
@@ -182,6 +204,92 @@
   box-shadow:
     0 0 0 1px color-mix(in oklab, var(--brand) 28%, transparent),
     0 18px 60px -24px color-mix(in oklab, var(--brand) 65%, transparent);
+}
+
+@utility surface-dots {
+  /* A finer ground than a 64px grid: it reads as texture, not as a table. */
+  background-image: radial-gradient(
+    color-mix(in oklab, var(--foreground) 13%, transparent) 1px,
+    transparent 0
+  );
+  background-size: 22px 22px;
+}
+
+@utility edge-fade {
+  /* Fades a decorative layer out before it reaches the section boundary. */
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 35%, transparent 78%);
+}
+
+@utility panel {
+  /* The one card treatment the site uses: a raised surface, a hairline, and a
+     1px top highlight so it catches light like a physical card. */
+  background-color: var(--surface);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 7%, transparent),
+    0 1px 2px oklch(0 0 0 / 30%),
+    0 12px 32px -20px oklch(0 0 0 / 60%);
+  outline: 1px solid var(--hairline);
+  outline-offset: -1px;
+}
+
+@utility panel-brand {
+  background-image: linear-gradient(
+    160deg,
+    color-mix(in oklab, var(--brand) 12%, var(--surface)),
+    var(--surface) 55%
+  );
+  border-radius: var(--radius-xl);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--brand) 22%, transparent),
+    0 16px 40px -24px color-mix(in oklab, var(--brand) 70%, transparent);
+  outline: 1px solid color-mix(in oklab, var(--brand) 26%, transparent);
+  outline-offset: -1px;
+}
+
+@utility display-xl {
+  font-family: var(--font-heading);
+  font-size: clamp(2.6rem, 6.4vw, 4.75rem);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+
+@utility display-md {
+  font-family: var(--font-heading);
+  font-size: clamp(1.75rem, 3.2vw, 2.6rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.028em;
+}
+
+@utility eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+@keyframes hl-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.72);
+  }
+}
+
+@utility live-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background-color: var(--brand-2);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--brand-2) 18%, transparent);
+  animation: hl-pulse 2.4s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 
 import { Providers } from "@/components/providers";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { BrandGradientDefs } from "@/components/wordmark";
 import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
@@ -16,6 +17,13 @@ const inter = Inter({
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+/** Display face. Carries the headlines, the wordmark and every card title. */
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
   subsets: ["latin"],
   display: "swap",
 });
@@ -55,12 +63,23 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+/**
+ * The font variables belong on `<html>`, not `<body>`. `html { font-family:
+ * var(--font-sans) }` resolves them in the `<html>` scope, and a custom
+ * property declared on `<body>` never reaches its parent — declared there,
+ * every page silently fell back to the UA serif.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
-      <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}>
+    <html
+      lang="en"
+      className={`dark ${inter.variable} ${jetbrainsMono.variable} ${spaceGrotesk.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="antialiased">
+        <BrandGradientDefs />
         <Providers>
           <div className="relative flex min-h-dvh flex-col">
             <SiteHeader />
