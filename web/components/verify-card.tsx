@@ -30,13 +30,13 @@ import {
 import { humanRegistryAbi } from "@/lib/abi";
 import { creditcoinTestnet } from "@/lib/chains";
 import {
-  CONTRACTS,
   WORLD_ACTION,
   WORLD_APP_ID,
-  WORLD_ENV,
   WORLD_SIMULATOR_URL,
 } from "@/lib/contracts";
+import { useRootStatus } from "@/lib/hooks/use-root-status";
 import { useRpContext } from "@/lib/hooks/use-rp-context";
+import { useProfile } from "@/lib/profile-context";
 import { useTx } from "@/lib/hooks/use-tx";
 import { hashSignalAddress, toRegistrationProof, type RegistrationProof } from "@/lib/worldid";
 
@@ -64,7 +64,12 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
   const [proof, setProof] = useState<RegistrationProof | null>(null);
   const [proofError, setProofError] = useState<string | null>(null);
 
-  const registry = CONTRACTS.humanRegistry.address;
+  const { profile } = useProfile();
+  const registry = profile.deployment.contracts.humanRegistry.address;
+  // The IDKit environment and the registry have to agree: a staging proof is not in
+  // the Orb tree and an Orb proof is not in the staging tree, so verifying one
+  // against the other's registry always reverts.
+  const worldEnv = profile.worldEnv;
   const onRightChain = chainId === creditcoinTestnet.id;
 
   const tx = useTx({
@@ -74,6 +79,10 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
       onRegistered?.();
     },
   });
+
+  // Whether the root this proof was minted against has reached Creditcoin yet.
+  const rootStatus = useRootStatus(proof?.root);
+  const rootNotRelayedYet = proof !== null && rootStatus.rootIsKnown === false;
 
   const signalHash = useMemo(
     () => (address ? hashSignalAddress(address) : undefined),
@@ -133,7 +142,7 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
             </CardDescription>
           </div>
           <Badge variant="outline" className="shrink-0 capitalize">
-            {WORLD_ENV}
+            {worldEnv}
           </Badge>
         </div>
       </CardHeader>
@@ -212,7 +221,42 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
                 <dd className="font-mono text-xs">8 × uint256</dd>
               </div>
             </dl>
-            <Button onClick={submit} disabled={!registry || tx.isBusy}>
+            {rootNotRelayedYet ? (
+              <Notice tone="warn" title="This root has not reached Creditcoin yet">
+                World issued your proof against Merkle root{" "}
+                <code className="font-mono text-[11px]">
+                  0x{proof.root.toString(16).slice(0, 12)}…
+                </code>
+                , and the Attestcoin relayer has not carried that one across yet — so the
+                registry would reject it. The relayer runs every 15 minutes; the newest root
+                on Creditcoin is{" "}
+                <code className="font-mono text-[11px]">
+                  {rootStatus.latestRoot === undefined
+                    ? "…"
+                    : `0x${rootStatus.latestRoot.toString(16).slice(0, 12)}…`}
+                </code>
+                .
+                <span className="block pt-1">
+                  Wait for the next relay and press check again, or watch them land on{" "}
+                  <a href="/relay" className="text-brand underline-offset-4 hover:underline">
+                    /relay
+                  </a>
+                  .
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-2"
+                  onClick={() => {
+                    void rootStatus.refetch();
+                  }}
+                >
+                  <RefreshCwIcon />
+                  Check again
+                </Button>
+              </Notice>
+            ) : null}
+            <Button onClick={submit} disabled={!registry || tx.isBusy || rootNotRelayedYet}>
               <ShieldCheckIcon />
               {tx.isBusy ? "Verifying on Creditcoin…" : "Verify on Creditcoin"}
             </Button>
@@ -231,7 +275,7 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
               <FingerprintIcon />
               {rpLoading ? "Preparing proof request…" : "Verify with World ID"}
             </Button>
-            {WORLD_ENV === "staging" ? (
+            {worldEnv === "staging" ? (
               <p className="text-xs text-muted-foreground">
                 On staging, scan the QR code with the{" "}
                 <a
@@ -246,7 +290,15 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
                 rather than World App. The proof it issues is a real Semaphore proof against
                 the staging tree, and it is verified on-chain exactly like a production one.
               </p>
-            ) : null}
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Scan the QR code with World App. Your credential has to be Orb-verified and
+                World ID 3.0 — 4.0 credentials only verify on World Chain today, and the card
+                will say so rather than failing on-chain. Roots reach Creditcoin through the
+                Attestcoin relayer every 15 minutes, so a brand-new credential may need one
+                cycle before it can register.
+              </p>
+            )}
           </div>
         )}
 
@@ -258,7 +310,7 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
             action={WORLD_ACTION}
             rp_context={rpContext}
             allow_legacy_proofs
-            environment={WORLD_ENV}
+            environment={worldEnv}
             preset={orbLegacy({ signal: address })}
             onSuccess={handleResult}
             onError={(errorCode) => {

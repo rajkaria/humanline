@@ -4,7 +4,7 @@ import { useAccount, useReadContracts } from "wagmi";
 
 import { creditLineAbi, husdAbi } from "@/lib/abi";
 import { creditcoinTestnet } from "@/lib/chains";
-import { CONTRACTS } from "@/lib/contracts";
+import { useProfile } from "@/lib/profile-context";
 
 export type Line = {
   limit: bigint;
@@ -49,8 +49,9 @@ const EMPTY_LINE: Line = {
  */
 export function useCreditLine(human: bigint) {
   const { address } = useAccount();
-  const creditLine = CONTRACTS.creditLine.address;
-  const husd = CONTRACTS.husd.address;
+  const { profile } = useProfile();
+  const creditLine = profile.deployment.contracts.creditLine.address;
+  const husd = profile.deployment.contracts.husd.address;
 
   const hasLineTarget = Boolean(creditLine) && human > 0n;
 

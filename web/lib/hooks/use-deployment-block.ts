@@ -2,7 +2,7 @@
 
 import type { PublicClient } from "viem";
 
-import { deploymentBlockOf, deploymentTxHashOf, type ContractKey } from "@/lib/contracts";
+import type { ResolvedContract } from "@/lib/contracts";
 
 /**
  * Resolve the block a contract was deployed in, for use as a `getLogs` floor.
@@ -23,29 +23,33 @@ export type DeploymentFloor = {
   exact: boolean;
 };
 
-const cache = new Map<ContractKey, DeploymentFloor>();
+// Keyed by address, not by contract key: the two deployment profiles have different
+// registries and credit lines, and caching by key would hand one profile the other's
+// deploy block and silently truncate its log scans.
+const cache = new Map<string, DeploymentFloor>();
 
 export async function resolveDeploymentBlock(
   client: PublicClient,
-  key: ContractKey,
+  contract: ResolvedContract,
 ): Promise<DeploymentFloor> {
-  const cached = cache.get(key);
+  const cacheKey = contract.address ?? contract.key;
+  const cached = cache.get(cacheKey);
   if (cached !== undefined) return cached;
 
-  const declared = deploymentBlockOf(key);
+  const declared = contract.deploymentBlock ?? 0n;
   if (declared > 0n) {
     const floor = { block: declared, exact: true };
-    cache.set(key, floor);
+    cache.set(cacheKey, floor);
     return floor;
   }
 
-  const hash = deploymentTxHashOf(key);
+  const hash = contract.deploymentTxHash;
   if (hash) {
     try {
       const receipt = await client.getTransactionReceipt({ hash });
       if (receipt.blockNumber !== null && receipt.blockNumber !== undefined) {
         const floor = { block: receipt.blockNumber, exact: true };
-        cache.set(key, floor);
+        cache.set(cacheKey, floor);
         return floor;
       }
     } catch {

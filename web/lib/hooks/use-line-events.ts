@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getAbiItem, type AbiEvent } from "viem";
 
 import { creditLineAbi } from "@/lib/abi";
-import { CONTRACTS } from "@/lib/contracts";
+import { useProfile } from "@/lib/profile-context";
 import { resolveDeploymentBlock } from "@/lib/hooks/use-deployment-block";
 import { scanLogs } from "@/lib/logs";
 import { getPublicClient } from "@/lib/public-client";
@@ -48,7 +48,9 @@ const EVENTS: LineEventKind[] = [
  */
 export function useLineEvents(human: bigint, options: { limit?: number } = {}) {
   const limit = options.limit ?? 25;
-  const creditLine = CONTRACTS.creditLine.address;
+  const { profile } = useProfile();
+  const creditLineContract = profile.deployment.contracts.creditLine;
+  const creditLine = creditLineContract.address;
 
   return useQuery({
     queryKey: ["line-events", creditLine, human.toString(), limit],
@@ -59,7 +61,7 @@ export function useLineEvents(human: bigint, options: { limit?: number } = {}) {
       const client = getPublicClient();
       const [tip, floor] = await Promise.all([
         client.getBlockNumber(),
-        resolveDeploymentBlock(client, "creditLine"),
+        resolveDeploymentBlock(client, creditLineContract),
       ]);
       // A bounded look-back when the deployment block is unknown: five event
       // types on a 20s timer must never turn into five full-chain rescans.

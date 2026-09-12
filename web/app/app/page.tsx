@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import { AppClient } from "@/app/app/app-client";
+import { ProfileProvider } from "@/lib/profile-context";
 import { PageHeader, PageShell } from "@/components/page-shell";
 
 export const metadata: Metadata = {
@@ -18,7 +20,13 @@ export default function AppPage() {
         description="One proof binds your World ID nullifier to this wallet. The line that follows belongs to the human, not the key — re-bind to a new wallet and the history comes with you."
       />
       <div className="pt-8">
-        <AppClient />
+        {/* ProfileProvider reads `?profile=`, which makes this subtree client-dynamic;
+            the Suspense boundary keeps the rest of the page statically rendered. */}
+        <Suspense fallback={null}>
+          <ProfileProvider>
+            <AppClient />
+          </ProfileProvider>
+        </Suspense>
       </div>
     </PageShell>
   );

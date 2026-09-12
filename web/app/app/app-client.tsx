@@ -11,6 +11,7 @@ import { EventHistory } from "@/components/event-history";
 import { HumanStatusCard } from "@/components/human-status-card";
 import { LenderPanel } from "@/components/lender-panel";
 import { NotDeployedBanner } from "@/components/not-deployed-banner";
+import { ProfileSwitch } from "@/components/profile-switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VerifyCard } from "@/components/verify-card";
@@ -46,9 +47,9 @@ export function AppClient() {
 
   return (
     <div className="flex flex-col gap-6">
-      <NotDeployedBanner
-        need={["humanRegistry", "creditLine", "husd", "attestedWorldIDSepolia"]}
-      />
+      <NotDeployedBanner need={["humanRegistry", "creditLine", "husd"]} />
+
+      <ProfileSwitch />
 
       {mounted && !isConnected ? (
         <Card>

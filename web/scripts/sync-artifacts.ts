@@ -59,6 +59,27 @@ if (existsSync(deploymentsPath)) {
   console.log("[sync-artifacts] deployments  — not found, using empty snapshot");
 }
 
+// The production-path deployment: the same contracts verifying against the Ethereum
+// mainnet (Orb) AttestedWorldID instance instead of the Sepolia staging one. `/app`
+// lets a real Orb-verified human switch to it; see `lib/profiles.ts`.
+const productionDeploymentsPath = join(repoRoot, "deployments", "cc3-testnet.production.json");
+if (existsSync(productionDeploymentsPath)) {
+  try {
+    const parsed: unknown = JSON.parse(readFileSync(productionDeploymentsPath, "utf8"));
+    write("deployments.production.json", parsed);
+    console.log(`[sync-artifacts] deployments(prod) ← ${productionDeploymentsPath}`);
+  } catch (error) {
+    console.warn(
+      `[sync-artifacts] production deployments file is not valid JSON, keeping previous snapshot: ${String(error)}`,
+    );
+  }
+} else {
+  if (!existsSync(join(outDir, "deployments.production.json"))) {
+    write("deployments.production.json", {});
+  }
+  console.log("[sync-artifacts] deployments(prod) — not found, using empty snapshot");
+}
+
 // ----------------------------------------------------------------------- ABIs
 // `lib/abi.ts` is hand-written so viem can infer argument and return types end to
 // end. The compiled artifacts are snapshotted alongside it purely so

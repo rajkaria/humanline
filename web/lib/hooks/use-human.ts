@@ -4,7 +4,7 @@ import { useAccount, useReadContracts } from "wagmi";
 
 import { humanRegistryAbi } from "@/lib/abi";
 import { creditcoinTestnet } from "@/lib/chains";
-import { CONTRACTS } from "@/lib/contracts";
+import { useProfile } from "@/lib/profile-context";
 
 export type HumanState = {
   /** The connected wallet is bound to a World ID nullifier. */
@@ -34,7 +34,8 @@ export type HumanState = {
  */
 export function useHuman() {
   const { address } = useAccount();
-  const registry = CONTRACTS.humanRegistry.address;
+  const { profile } = useProfile();
+  const registry = profile.deployment.contracts.humanRegistry.address;
   const enabled = Boolean(registry && address);
 
   const base = useReadContracts({

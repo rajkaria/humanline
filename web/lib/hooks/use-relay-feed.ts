@@ -57,7 +57,7 @@ export function useRelayFeed(options: { limit?: number; refetchInterval?: number
 
   const addresses = WORLD_ID_INSTANCES.map((instance) => ({
     chainKey: instance.chainKey,
-    contractKey: instance.key,
+    contract: CONTRACTS[instance.key],
     address: CONTRACTS[instance.key].address,
   })).filter((i) => Boolean(i.address));
 
@@ -76,8 +76,8 @@ export function useRelayFeed(options: { limit?: number; refetchInterval?: number
       let scannedFrom = tip;
 
       const batches = await Promise.all(
-        addresses.map(async ({ chainKey, contractKey, address }) => {
-          const floor = await resolveDeploymentBlock(client, contractKey);
+        addresses.map(async ({ chainKey, contract, address }) => {
+          const floor = await resolveDeploymentBlock(client, contract);
           // When the deployment block is unknown, scan a bounded look-back
           // rather than the whole chain — and say so in the footer.
           const fromBlock = floor.exact
