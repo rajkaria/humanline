@@ -21,7 +21,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { creditcoinTestnet } from "@/lib/chains";
 
 /** Matches ELIGIBILITY_CEILING in `app/api/gas/route.ts`. */
-const LOW_BALANCE = 5n * 10n ** 17n; // 0.5 tCTC
+const LOW_BALANCE = 25n * 10n ** 16n; // 0.25 tCTC
 
 export function GasCard() {
   const { address, isConnected, chainId } = useAccount();
@@ -87,7 +87,7 @@ export function GasCard() {
             <p className="text-xs text-muted-foreground">
               {state === "sent" ? (
                 <>
-                  2 tCTC is on its way — enough to register, borrow and repay several times
+                  1 tCTC is on its way — enough to register, borrow and repay many times
                   over. {hash ? <span className="font-mono text-[11px]">{hash.slice(0, 14)}…</span> : null}
                 </>
               ) : (
@@ -108,7 +108,7 @@ export function GasCard() {
           <div className="flex flex-wrap items-center gap-2">
             <Button size="sm" onClick={request} disabled={state === "sending"}>
               <FuelIcon />
-              {state === "sending" ? "Sending…" : "Send me 2 tCTC"}
+              {state === "sending" ? "Sending…" : "Send me 1 tCTC"}
             </Button>
           </div>
         ) : null}

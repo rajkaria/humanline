@@ -28,10 +28,14 @@ import { clientKey, rateLimit, tooManyRequests } from "@/lib/rate-limit";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Roughly 20× a register transaction, which costs ~340k gas. */
-const DRIP = parseEther("2");
-/** Above this the wallet can already pay for register + borrow + repay. */
-const ELIGIBILITY_CEILING = parseEther("0.5");
+/**
+ * A register transaction costs ~340k gas, and CC3 gas is cheap enough that a whole
+ * borrow-and-repay cycle lands well under 0.05 tCTC. 1 tCTC is therefore many times
+ * what anyone needs, and small enough that the drip is not worth farming.
+ */
+const DRIP = parseEther("1");
+/** Above this the wallet can already pay for register + borrow + repay many times over. */
+const ELIGIBILITY_CEILING = parseEther("0.25");
 /** Refuse rather than half-fund when the faucet is nearly empty. */
 const FAUCET_FLOOR = parseEther("10");
 
