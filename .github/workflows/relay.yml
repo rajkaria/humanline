@@ -1,11 +1,11 @@
 name: relay
 
-# Serverless fallback for the long-lived worker. Every 30 minutes the runner derives its
+# Serverless fallback for the long-lived worker. Every 15 minutes the runner derives its
 # cursor from chain state (RootRelayed events + processedQueries), relays whatever is
 # outstanding, and commits the evidence log back to the repo.
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "*/15 * * * *"
   workflow_dispatch:
     inputs:
       source:
