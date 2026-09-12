@@ -16,3 +16,9 @@ worker/.env
 # Agent/session scratch — never part of the submission.
 .claude/
 .superpowers/
+
+# Working notes for the build, not part of the submission.
+CLAUDE.md
+docs/PLAN.md
+docs/HACKATHON-RESEARCH.md
+docs/context/

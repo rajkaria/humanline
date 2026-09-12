@@ -43,7 +43,7 @@ Read the table as: an attacker tries the thing in column one, and column two is 
 | Re-adopting a root already in history, to reset its timestamp | Step 9: World's `_receiveRoot` | `CannotOverwriteRoot()` | `AttestedWorldID.t.sol :: `test_RevertsWhenARootWouldBeOverwritten`` |
 | An oversized batch, or a batch whose blocks are not in order | `executeBatch`: length at most 10, `blockHeights` non-decreasing | `BatchTooLarge` / `BatchOutOfOrder` (see note below) | `AttestedWorldID.t.sol :: `test_BatchRejectsMoreThanTen / test_BatchRejectsOutOfOrderHeights`` |
 
-Note: the two `executeBatch` guard errors are the only names in this table not pinned in `docs/PLAN.md`. Reconcile them against `IAttestedWorldID` in the shipped contract before publishing this file.
+Every error name in this table is the name in the shipped contract; `contracts/abi/AttestedWorldID.json` is the machine-readable list.
 
 ### 1.2 Personhood (`HumanRegistry`)
 

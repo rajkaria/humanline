@@ -105,7 +105,7 @@ or `{ Name: { address, block } }` entries, matched case- and
 separator-insensitively — the deploy script and this app are written by different
 tasks, and this is the cheap way to make them agree.
 
-ABIs are hand-written from the `Interfaces` section of `docs/PLAN.md` in
+ABIs are hand-written from the Solidity interfaces in `contracts/src/interfaces` in
 `lib/abi.ts` as viem `as const` tuples, so argument and return types are inferred
 end to end. When `contracts/abi/*.json` lands, those artifacts and this file must
 agree; a mismatch is a bug in one of them.
@@ -202,7 +202,7 @@ one.
 ### Notes for whoever wires the deployment together
 
 - `lib/negative-paths.ts` lists each attack from `docs/SPEC.md` §9 with the custom
-  error it reverts with (exact, from `docs/PLAN.md`) and the Foundry test name that
+  error it reverts with (exact, from the contract) and the Foundry test name that
   covers it (conventional `test_RevertWhen_*`). If the contract suite names them
   differently, update that one file.
 - `RootRelayed` carries the source block and Attestcoin's derived `txIndex`, not
