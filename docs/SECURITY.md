@@ -148,7 +148,7 @@ This is a liveness dependency, not a trust dependency, and the difference matter
 
 If you find a vulnerability in Humanline, please report it privately before disclosing it publicly.
 
-**How to report.** Open a private security advisory at `{{REPO_URL}}/security/advisories/new`. That channel is private to the maintainers until a fix ships. If you cannot use GitHub advisories, open a public issue containing only a request for a contact address and no details of the finding.
+**How to report.** Open a private security advisory at `https://github.com/rajkaria/humanline/security/advisories/new`. That channel is private to the maintainers until a fix ships. If you cannot use GitHub advisories, open a public issue containing only a request for a contact address and no details of the finding.
 
 **What to include.** The contract or file, the conditions required, and a proof of concept if you have one. A failing Foundry test is the most useful form, and this repository is set up to run one against the CC3 fork.
 

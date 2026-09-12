@@ -4,9 +4,9 @@ BUIDL CTC 2026 Fall · Track: DeFi · Creditcoin & Credit Labs
 
 Twelve slides. Each H2 is one slide. The `visual:` line describes the graphic for that slide. The PDF built from this file is `docs/deck.pdf`.
 
-Live: {{LIVE_URL}} · Repo: {{REPO_URL}} · Demo: {{VIDEO_URL}}
+Live: {{LIVE_URL}} · Repo: https://github.com/rajkaria/humanline · Demo: {{VIDEO_URL}}
 
-Before sending the PDF, replace these tokens in `docs/deck-build.js` and rebuild: `{{LIVE_URL}}`, `{{REPO_URL}}`, `{{VIDEO_URL}}` on slides 8 and 12, and `{{ROOTS}}`, `{{HUMANS}}`, `{{CREDIT}}` in the live counter block on slide 12. Read the counter values off the deployed landing page at record time and do not round up.
+Before sending the PDF, replace these tokens in `docs/deck-build.js` and rebuild: `{{LIVE_URL}}`, `https://github.com/rajkaria/humanline`, `{{VIDEO_URL}}` on slides 8 and 12, and `{{ROOTS}}`, `{{HUMANS}}`, `{{CREDIT}}` in the live counter block on slide 12. Read the counter values off the deployed landing page at record time and do not round up.
 
 Rebuild: `bun add pptxgenjs && bun run docs/deck-build.js docs/deck.pptx && soffice --headless --convert-to pdf --outdir docs docs/deck.pptx`. The editable source is `docs/deck.pptx`.
 

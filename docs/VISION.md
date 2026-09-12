@@ -2,7 +2,7 @@
 
 > One human, one credit line. World ID proof of personhood reaches Creditcoin through the Attestcoin Protocol, a zero-knowledge proof is verified on Creditcoin itself, and a verified human receives an uncollateralized credit line that follows the person, not the wallet.
 
-Live: {{LIVE_URL}} · Repo: {{REPO_URL}} · Demo: {{VIDEO_URL}}
+Live: {{LIVE_URL}} · Repo: https://github.com/rajkaria/humanline · Demo: {{VIDEO_URL}}
 
 ---
 

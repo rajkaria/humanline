@@ -79,7 +79,7 @@ Word count check: run `wc -w` on the block before pasting. The form's limit is 4
 ### GitHub Repository URL
 
 ```
-{{REPO_URL}}
+https://github.com/rajkaria/humanline
 ```
 
 The README must be present at the repo root, with the one-liner, a GIF, architecture, install steps, deployed addresses and known limitations. The required technical documentation for the Attestcoin integration requirement is `docs/ATTESTCOIN_INTEGRATION.md`, linked from the README.
