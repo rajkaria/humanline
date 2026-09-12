@@ -210,4 +210,5 @@ the live deployment exposed. Worker test count went from 162 to 195.
   consumes a great deal of gas before reverting with `ProofInvalid`, so clients should let
   `register` estimate rather than hard-coding a gas limit.
 
-[0.1.0]: {{REPO_URL}}/releases/tag/v0.1.0
+[0.2.0]: https://github.com/rajkaria/humanline
+[0.1.0]: https://github.com/rajkaria/humanline/releases/tag/v0.1.0
