@@ -10,7 +10,7 @@ Track: **DeFi** (secondary fit: RWA, AI-free by design). Hackathon: BUIDL CTC 20
 
 Creditcoin's founding mission is credit history for people the banking system cannot see. Every undercollateralized lending design on Creditcoin, including all thirty "credit passport" submissions in this hackathon, has the same hole: a wallet is not a person. A borrower can open ten wallets, repay themselves ten times, mint ten perfect scores, and default on the eleventh loan. Lenders like Aella (1M+ users on Creditcoin) cannot lend against on-chain history until the history belongs to a human who cannot walk away from it by generating a new key.
 
-Proof of personhood exists. World ID has 13M+ Orb-verified humans, concentrated in Kenya, Argentina, Indonesia, the Philippines, Brazil and Malaysia, which are Creditcoin's markets. But World ID's identity tree lives on Ethereum. Creditcoin cannot see it, and the only ways to bring it over today are a trusted bridge or a trusted oracle, which is exactly what Attestcoin exists to remove.
+Proof of personhood exists. World ID has 18M+ Orb-verified humans (July 2026), concentrated in Kenya, Argentina, Indonesia, the Philippines, Brazil and Malaysia, which are Creditcoin's markets. But World ID's identity tree lives on Ethereum. Creditcoin cannot see it, and the only ways to bring it over today are a trusted bridge or a trusted oracle, which is exactly what Attestcoin exists to remove.
 
 ## 2. The solution
 
@@ -87,7 +87,7 @@ No owner, no pause, no upgrade. Constants are immutables.
 ### 5.3 CreditLine
 
 - Lenders `deposit()` the pool asset (`hUSD`, a test ERC-20 we mint, 6 decimals, so amounts read like dollars) and receive pool shares.
-- A registered human `openLine()`: limit starts at `INITIAL_LIMIT` (25 hUSD). `borrow(amount)` ≤ available; `repay(amount)`; simple interest `APR_BPS` (1200 = 12%). Each loan has a due date (`TERM` = 30 days, testnet-configurable to minutes for demo).
+- A registered human `openLine()`: limit starts at `INITIAL_LIMIT` (25 hUSD). `borrow(amount)` ≤ available; `repay(amount)`; a flat `FEE_BPS` (100 = 1%) is added to principal on every draw. A due date (`TERM` = 30 days in production, 600 s on the demo deployment) is set when principal goes from zero to positive.
 - On-time full repayment: `limit = limit * 125 / 100` (cap 2,000 hUSD). Late repayment: limit halves. Past `GRACE` with balance > 0: anyone calls `markDefault(nullifier)`; the human is frozen permanently and the debt is written off against the pool.
 - All state keyed by nullifier. Wallet re-binding carries the line.
 - Events: `LineOpened`, `Borrowed`, `Repaid`, `LimitChanged`, `Defaulted`, mirroring Credal's loan lifecycle so lenders can index them.
