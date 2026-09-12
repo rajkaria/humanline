@@ -15,6 +15,21 @@ Deployed addresses, CC3 testnet (chainId 102031):
 | `hUSD` | `0x4bd7f4c6648deb8f107932572ce7e85aca259640` |
 | `HumanGate` | `0xa3e021de49cec8819ea1bd37a8b5a9df005b776c` |
 
+The registry and credit line above verify against the **Sepolia staging** `AttestedWorldID`, so
+anyone can reproduce the flow with World's simulator. A second set verifies against the **Ethereum
+mainnet Orb tree**, with 30-day terms, for people who hold a real Orb-verified World ID:
+
+| Contract | Address |
+|---|---|
+| `HumanRegistry` (Orb tree) | `0x53fcba2cd9296b22635c67d5e73777b4e5db96af` |
+| `CreditLine` (30-day term) | `0x86e38ce7173288372b638c0b1839fc9c6923ab82` |
+| `HumanGate` (Orb tree) | `0x544264e52a12fffa5c8640eb5a91b7f4628d5b93` |
+
+Nothing else differs: both read the same two `AttestedWorldID` instances, both draw on the same
+hUSD, and the web app switches between them at runtime. A registry is bound to exactly one identity
+tree because a proof is only a member of one tree — that binding is an immutable constructor
+argument, not a setting.
+
 ---
 
 ## 1. System diagram
@@ -249,7 +264,7 @@ Values 1 through 9 are the Attestcoin half of the system. Values 10 through 13 a
 
 **The worker** (`worker/`) is a Bun process with a SQLite cursor. It tails `TreeChanged` on both source chains, groups transactions into batches within the protocol's limits, waits for attestation, fetches proofs, and submits. It never skips and never reorders. Its cursor is derived from chain state, specifically `latestRoot` and past `RootRelayed` events, so a fresh worker or the GitHub Actions cron resumes correctly with no local state. It holds no privilege. The only thing it can do that a stranger cannot is pay for the gas.
 
-**The web app** (`web/`) is Next.js 15 on Vercel. It is entirely a read-and-submit client. It holds no keys, runs no indexer of its own, and reads every number it shows directly from CC3, including the precompile values on `/relay`. If the app is down, every contract still works.
+**The web app** (`web/`) is Next.js 15 on Vercel. It is entirely a read-and-submit client. It runs no indexer of its own and reads every number it shows directly from CC3, including the precompile values on `/relay`. If the app is down, every contract still works. Two server-side keys exist and neither can move a user's funds or sign on their behalf: the World ID relying-party key, which signs the `rp_context` nonce IDKit requires, and the gas faucet key, which sends native tCTC to a wallet that cannot yet pay for its own registration.
 
 **The evidence log** (`evidence/relay-log.jsonl`) is one JSON line per relayed transaction: source, Ethereum tx hash, source block and tx index, pre and post root, humans added, Creditcoin tx hash, gas used, attestation lag, timestamp. It is committed to the repository by the relay workflow. It proves nothing on its own, and no contract reads it. It exists so a judge can audit the relay's history without running the worker.
 
