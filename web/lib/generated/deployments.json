@@ -1,0 +1,32 @@
+{
+  "chainId": 102031,
+  "profile": "demo",
+  "contracts": {
+    "AttestedWorldIDMainnet": "0xaac41539949d6a8810a42944182a51ccafc421f1",
+    "AttestedWorldIDSepolia": "0x9a6c6f042f82142b43d66ab430015eca1e5a9d15",
+    "HUSD": "0x8f9016b4a7903c668d5fd4523a70947bed22b5f0",
+    "HumanRegistry": "0x968172a83fc126ae575e633121780db1bb4f9e61",
+    "CreditLine": "0xcbe0266178a4884e6f7c689b2894ecd3655ae460",
+    "HumanGate": "0xd0580f20b1ab5f424b91e0b882ec5f0435f8e092"
+  },
+  "txHashes": {
+    "AttestedWorldIDMainnet": "0xf80a324e273d30c9d1ccfad676379a298df90307cb4df786b4842f98a14d0310",
+    "AttestedWorldIDSepolia": "0x4df19ae8396e31c178ee0ca506758fe8c47c6bfe4e4ae97d76b67343e306c5ca",
+    "HUSD": "0xe41597983458686781fc8ee44df7ab891063b08cd209a9820594457092586025",
+    "HumanRegistry": "0x8bbe9dddcd316c89404e62eed8f4f239d67d239a173a165e55f1f9ba5b63091f",
+    "CreditLine": "0xbca710bfb68c19e4ea03005a0157612e769ab9298781effe3610d4eb530ae076",
+    "HumanGate": "0x8f939611622499e6df4cb7d1a234a5b242294b4cde30a96aa67d09e163352ad0"
+  },
+  "config": {
+    "worldIdSource": "sepolia",
+    "appId": "app_87b24915fcf733f10df1b0c46dd1f783",
+    "action": "humanline-register",
+    "termSeconds": 600,
+    "graceSeconds": 300,
+    "initialLimit": 25000000,
+    "maxLimit": 2000000000,
+    "feeBps": 100
+  },
+  "deployedAt": 1789202260,
+  "deployer": "0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3"
+}
