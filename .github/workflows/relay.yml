@@ -66,7 +66,7 @@ jobs:
           args="relay --source $SOURCE $DRY_RUN"
           if [ -n "$FROM_BLOCK" ]; then args="$args --from $FROM_BLOCK"; fi
           if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
-            timeout --preserve-status 1140 bun run worker/src/cli.ts $args --interval 120 || {
+            timeout --preserve-status 1140 bun run worker/src/cli.ts $args --interval 120000 || {
               status=$?
               [ "$status" -eq 124 ] || [ "$status" -eq 143 ] || exit "$status"
             }
