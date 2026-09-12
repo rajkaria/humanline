@@ -8,8 +8,9 @@ BUIDL CTC 2026 Fall submission, DeFi track. Live on Creditcoin CC3 testnet (chai
 
 ![Humanline](docs/screenshots/hero.png)
 
-<!-- Screenshots are captured from the live deployment: hero.png (landing), relay.png
-     (the root feed), judge.png (the reproducibility page). -->
+<!-- Screenshots are captured from the live deployment: hero.png (landing), app.png (verify
+     and borrow, with the deployment switch), relay.png (the root feed), judge.png (the
+     reproducibility page). -->
 
 ---
 

@@ -313,7 +313,7 @@ function chip(s, x, y, w, h, label, col){
     s.addText(d, {x:x+0.22, y:y+0.72, w:cw-0.44, h:1.15, fontSize:10.5, color:MUTED, fontFace:B,
       isTextBox:true, margin:0, lineSpacing:14.5, valign:"top"});
   });
-  s.addText("Live at https://humanline.credit    ·    video at {{VIDEO_URL}}", {x:MX, y:6.52, w:W-2*MX, h:0.35,
+  s.addText("Live at https://humanline.credit    ·    demo video linked from the submission", {x:MX, y:6.52, w:W-2*MX, h:0.35,
     align:"center", fontSize:11, color:DIM, fontFace:M, isTextBox:true, margin:0});
 }
 
@@ -450,7 +450,7 @@ function chip(s, x, y, w, h, label, col){
   });
 
   card(s, MX, 4.6, 12.09, 1.42, CARD2);
-  const counters=[["{{ROOTS}}","real World ID roots relayed"],["{{HUMANS}}","humans in the registry"],["{{CREDIT}}","hUSD credit extended"],["0","trusted parties"]];
+  const counters=[["15","real World ID roots relayed"],["600","World ID identities carried"],["1,000","hUSD in the lender pools"],["0","trusted parties"]];
   counters.forEach(([n,l],i)=>{
     const x = MX + 0.3 + i*3.0;
     s.addText(n, {x, y:4.75, w:2.8, h:0.55, fontSize:22, bold:true, color: i===3?AMBER:TEXT,
@@ -459,7 +459,7 @@ function chip(s, x, y, w, h, label, col){
   });
   s.addText("One human, one credit line.", {x:MX, y:6.18, w:6.5, h:0.5, fontSize:22, bold:true,
     color:TEXT, fontFace:H, isTextBox:true, margin:0});
-  s.addText("https://humanline.credit    ·    {{REPO_URL}}", {x:6.5, y:6.24, w:6.2, h:0.4, align:"right",
+  s.addText("https://humanline.credit    ·    https://github.com/rajkaria/humanline", {x:6.5, y:6.24, w:6.2, h:0.4, align:"right",
     fontSize:11, color:AMBER, fontFace:M, isTextBox:true, margin:0, valign:"middle"});
 }
 
