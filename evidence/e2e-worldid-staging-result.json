@@ -1,0 +1,18 @@
+{
+  "success": true,
+  "result": {
+    "action": "humanline-register",
+    "environment": "staging",
+    "nonce": "0x003b50680658014be569509a6a43f60c879041d8d9304d74d8e1bcaef01c1a95",
+    "protocol_version": "3.0",
+    "responses": [
+      {
+        "identifier": "orb",
+        "merkle_root": "0x0de7c26c4679912f801c48db0dc1907f6b0ecfacad4e6c1f2b4ad203e9d9fca9",
+        "nullifier": "0x06d6d24ba1cb97b3d3456e9a3bdfc4f707072ecd96e79998dfb7dce49529b6d4",
+        "proof": "0x2706a3dba9eb18fb41b470f9ebba9aba71f124a352f90f851287d1c9bea78ea30996b5f41c6238229f8d5d2c95bfb438982242a2e9ba9464dbb5e52c35654b3e168fa94ab825a927da6d4d8364f1f2175bc977e47f986232cacf1276bf3a55ef23d33e043d563b6dfad0c74761e18bbd1face8393642ae8e2a2db85d46b2377c21e5543fbce03560e593f5a4447b756783fe21eafbbe1a0a78b04e7631f3d7b818639e7a16f45b3c4d160aad3d68f61d6cee1ce2dcc09e98da847886c2141ce409bb6f31e054fc9703193c33a9a7ae9f61085eeb00d14dd700df380585f686091656a22821cf775292cb08027cc04f4f87660ff25886e6db20684e62fbb9451d",
+        "signal_hash": "0x0088cf232ba07d9b4a8749e13a5f3f08f22be325e603242c54b95efb9bc815fa"
+      }
+    ]
+  }
+}
