@@ -63,8 +63,10 @@ cd "$CONTRACTS_DIR"
 DEPLOYER="$("$CAST" wallet address --private-key "$PRIVATE_KEY")"
 echo "deployer: $DEPLOYER  profile: $PROFILE  world id source: $WORLD_ID_SOURCE"
 
-declare -A ADDRESS
-declare -A TXHASH
+# bash 3.2 compatible (macOS): tab-separated "label\taddress" rows instead of associative arrays
+ADDRESSES_JSON=""
+TXHASHES_JSON=""
+addr_of() { printf '%s\n' "$ADDRESSES_JSON" | awk -F'\t' -v k="$1" '$1==k{print $2}'; }
 
 deploy() {
   local label="$1" contract="$2" ctor_sig="${3:-}"
@@ -76,9 +78,14 @@ deploy() {
     code="${code}${args#0x}"
   fi
   receipt="$("$CAST" send --rpc-url "$RPC_URL" --private-key "$PRIVATE_KEY" --json --create "$code")"
-  ADDRESS[$label]="$(printf '%s' "$receipt" | bun -e 'const r = JSON.parse(await Bun.stdin.text()); console.log(r.contractAddress)')"
-  TXHASH[$label]="$(printf '%s' "$receipt" | bun -e 'const r = JSON.parse(await Bun.stdin.text()); console.log(r.transactionHash)')"
-  echo "  $label -> ${ADDRESS[$label]}  (${TXHASH[$label]})"
+  local addr txh
+  addr="$(printf '%s' "$receipt" | bun -e 'const r = JSON.parse(await Bun.stdin.text()); console.log(r.contractAddress)')"
+  txh="$(printf '%s' "$receipt" | bun -e 'const r = JSON.parse(await Bun.stdin.text()); console.log(r.transactionHash)')"
+  ADDRESSES_JSON="${ADDRESSES_JSON}${label}	${addr}
+"
+  TXHASHES_JSON="${TXHASHES_JSON}${label}	${txh}
+"
+  echo "  $label -> ${addr}  (${txh})"
 }
 
 deploy AttestedWorldIDMainnet AttestedWorldID "constructor(uint64,address,uint64,uint32)" \
@@ -88,23 +95,21 @@ deploy AttestedWorldIDSepolia AttestedWorldID "constructor(uint64,address,uint64
 deploy HUSD HUSD ""
 
 if [[ "$WORLD_ID_SOURCE" == "mainnet" ]]; then
-  WORLD_ID_ADDRESS="${ADDRESS[AttestedWorldIDMainnet]}"
+  WORLD_ID_ADDRESS="$(addr_of AttestedWorldIDMainnet)"
 else
-  WORLD_ID_ADDRESS="${ADDRESS[AttestedWorldIDSepolia]}"
+  WORLD_ID_ADDRESS="$(addr_of AttestedWorldIDSepolia)"
 fi
 
 deploy HumanRegistry HumanRegistry "constructor(address,string,string)" \
   "$WORLD_ID_ADDRESS" "$WORLD_APP_ID" "$WORLD_ACTION"
 deploy CreditLine CreditLine "constructor(address,address,uint256,uint256,uint256,uint64,uint64)" \
-  "${ADDRESS[HUSD]}" "${ADDRESS[HumanRegistry]}" "$INITIAL_LIMIT" "$MAX_LIMIT" "$FEE_BPS" \
+  "$(addr_of HUSD)" "$(addr_of HumanRegistry)" "$INITIAL_LIMIT" "$MAX_LIMIT" "$FEE_BPS" \
   "$TERM_SECONDS" "$GRACE_SECONDS"
-deploy HumanGate HumanGate "constructor(address)" "${ADDRESS[HumanRegistry]}"
+deploy HumanGate HumanGate "constructor(address)" "$(addr_of HumanRegistry)"
 
 CHAIN_ID="$("$CAST" chain-id --rpc-url "$RPC_URL")"
 
 mkdir -p "$(dirname "$OUT")"
-ADDRESSES_JSON="$(for k in "${!ADDRESS[@]}"; do printf '%s\t%s\n' "$k" "${ADDRESS[$k]}"; done)"
-TXHASHES_JSON="$(for k in "${!TXHASH[@]}"; do printf '%s\t%s\n' "$k" "${TXHASH[$k]}"; done)"
 
 ADDRESSES="$ADDRESSES_JSON" TXHASHES="$TXHASHES_JSON" CHAIN_ID="$CHAIN_ID" DEPLOYER="$DEPLOYER" \
 PROFILE="$PROFILE" WORLD_ID_SOURCE="$WORLD_ID_SOURCE" WORLD_APP_ID="$WORLD_APP_ID" \
