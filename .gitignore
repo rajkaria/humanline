@@ -1,0 +1,9 @@
+.secrets.env
+.env
+.env.*
+node_modules/
+.tools/
+contracts/out/
+contracts/cache/
+web/.next/
+*.db

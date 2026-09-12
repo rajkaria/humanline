@@ -1,0 +1,13 @@
+{
+  "name": "humanline",
+  "private": true,
+  "version": "0.1.0",
+  "description": "One human, one credit line. World ID proof of personhood on Creditcoin via the Attestcoin Protocol.",
+  "workspaces": ["worker", "web"],
+  "scripts": {
+    "build:contracts": "cd contracts && ../.tools/forge build",
+    "test:contracts": "cd contracts && ../.tools/forge test -vv",
+    "worker": "bun run worker/src/cli.ts",
+    "web": "cd web && bun run dev"
+  }
+}

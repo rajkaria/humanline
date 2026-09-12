@@ -1,0 +1,20 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["node_modules", "vendor"]
+test = "test"
+solc_version = "0.8.28"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+via_ir = false
+remappings = [
+  "@gluwa/asc-contracts/=node_modules/@gluwa/asc-contracts/",
+  "@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",
+  "forge-std/=lib/forge-std/src/",
+  "worldid/=vendor/worldid/"
+]
+fs_permissions = [{ access = "read-write", path = "./" }]
+
+[rpc_endpoints]
+cc3 = "https://rpc.cc3-testnet.creditcoin.network"
