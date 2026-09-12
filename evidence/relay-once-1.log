@@ -1,0 +1,19 @@
+env: loaded 1 file(s) (values not printed)
+  rpc https://ethereum-rpc.publicnode.com failed (server response 403 Forbidden (request={  }, response={  }, error=null, info={ "requestUrl); trying the next endpoint
+mainnet: blocks 25959566..25960168 (head 25960243, attested tip 25960200, finality depth 32) — 1 TreeChanged tx(s)
+→ 1 tx(s), blocks 25959864..25959864 (span 0)
+  execute calldata 7332 bytes
+  precompile verifySingle: true
+  gas estimate 310139 (limit 403180)
+  submitted 0xfb33a81affddeb20dff94fe684506b901729e2b91e60b51bfc553de46a013b56
+  relayed root 0x18ebe77d857f85ee… (+100 humans, lag 4594s)
+  [mainnet] relayed single 1 tx 25959864..25959864 7332B https://creditcoin-testnet.blockscout.com/tx/0xfb33a81affddeb20dff94fe684506b901729e2b91e60b51bfc553de46a013b56
+sepolia: blocks 11687164..11687788 (head 11687856, attested tip 11687820, finality depth 32) — 2 TreeChanged tx(s)
+→ 2 tx(s), blocks 11687459..11687747 (span 288)
+  executeBatch calldata 21540 bytes
+  precompile verifyBatch: true
+  gas estimate 523887 (limit 681053)
+  submitted 0x9b317c8f9e08a44a661a5ec6df14640536668b58e891abda68f1f2924493d479
+  relayed root 0x0bff68f766f2566b… (+100 humans, lag 4968s)
+  relayed root 0x0de7c26c4679912f… (+100 humans, lag 1368s)
+  [sepolia] relayed batch 2 tx 11687459..11687747 21540B https://creditcoin-testnet.blockscout.com/tx/0x9b317c8f9e08a44a661a5ec6df14640536668b58e891abda68f1f2924493d479
