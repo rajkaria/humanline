@@ -62,6 +62,32 @@ interface IChainInfo {
 
     /// @notice Whether `targetHeight` can be proven via the continuity chain.
     function is_height_attested(uint64 chainKey, uint64 targetHeight) external view returns (bool isAttested);
+
+    /// @notice The attested (or checkpointed) heights on either side of `targetHeight`.
+    function get_attestation_bounds(uint64 chainKey, uint64 targetHeight)
+        external
+        view
+        returns (BoundsCheckResult memory result);
+
+    /// @notice Lowest attested height strictly above `targetHeight`.
+    function find_lowest_attested_after(uint64 chainKey, uint64 targetHeight)
+        external
+        view
+        returns (HeightHashResult memory result);
+
+    /// @notice First source height the attestation set covers for this chain.
+    function get_attestation_genesis_height(uint64 chainKey) external view returns (uint64 genesisHeight);
+}
+
+/// @notice Parent and child attested heights around a target height.
+struct BoundsCheckResult {
+    uint64 parentHeight;
+    bytes32 parentHash;
+    bool parentIsAttestation;
+    uint64 childHeight;
+    bytes32 childHash;
+    bool childIsAttestation;
+    bool isAttested;
 }
 
 /// @notice Canonical address of the ChainInfo precompile on Creditcoin 3.

@@ -1,0 +1,459 @@
+profile demo  CreditLine v2 0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9  wallet 0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3
+human 0x6d6d24ba1cb97b3d…
+security budget (live 0x0FD4): 7 attestors × 100 CTC = cap 7000 hUSD; outstanding 0 hUSD
+openLine: 0xad0be0f9cd66c5eb95fa302ced4fdb8e4c6fefb26d741c5ac844b6caa5c6af48 status=success gas=123508
+faucet on cooldown; repaying from borrowed funds plus pool shares
+borrow 20 hUSD (re-reads the cap on-chain): 0xff9683e53cad24513642a9da8e779d898d8872819c5d323b9c1c10a95f1a5cbf status=success gas=173544
+after borrow: principal 20.2 hUSD of limit 25 hUSD; pool outstanding 20 hUSD of cap 7000 hUSD
+approve: 0x1b60d4e5b00d9950c8b9b06d8fdc86c991ed6ffbe596332b8038c8cf3b30a1f1 status=success gas=45933
+29 |                 cause: err,
+30 |             });
+31 |         }
+32 |         return err;
+33 |     })();
+34 |     return new ContractFunctionExecutionError(cause, {
+                ^
+ContractFunctionExecutionError: The contract function "repay" reverted with the following signature:
+0xe450d38c
+
+Unable to decode signature "0xe450d38c" as it was not found on the provided ABI.
+Make sure you are using the correct ABI and that the error exists on it.
+You can look up the decoded signature here: https://4byte.sourcify.dev/?q=0xe450d38c.
+ 
+Contract Call:
+  address:   0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9
+  function:  repay(uint256)
+  args:           (20200000)
+  sender:    0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3
+
+Docs: https://viem.sh/docs/contract/decodeErrorResult
+Details: VM Exception while processing transaction: revert
+Version: viem@2.56.3
+    details: "VM Exception while processing transaction: revert",
+   docsPath: "/docs/contract/decodeErrorResult",
+ metaMessages: [
+  "Unable to decode signature \"0xe450d38c\" as it was not found on the provided ABI.",
+  "Make sure you are using the correct ABI and that the error exists on it.", "You can look up the decoded signature here: https://4byte.sourcify.dev/?q=0xe450d38c.",
+  " ", "Contract Call:", "  address:   0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9\n  function:  repay(uint256)\n  args:           (20200000)\n  sender:    0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3"
+],
+ shortMessage: "The contract function \"repay\" reverted with the following signature:\n0xe450d38c",
+    version: "2.56.3",
+        abi: [
+  [Object ...], [Object ...], [Object ...], [Object ...], [Object ...], [Object ...], [Object ...], [Object ...]
+],
+       args: [ 20200000n ],
+ contractAddress: "0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9",
+ formattedArgs: undefined,
+ functionName: "repay",
+     sender: "0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3",
+
+      at getContractError (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/errors/getContractError.js:34:12)
+      at internal (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/actions/wallet/writeContract.js:82:19)
+
+17 |         if (([EXECUTION_REVERTED_ERROR_CODE, InternalRpcError.code].includes(code) &&
+18 |             (data || details || message || shortMessage)) ||
+19 |             (code === InvalidInputRpcError.code &&
+20 |                 details === 'execution reverted' &&
+21 |                 data)) {
+22 |             return new ContractFunctionRevertedError({
+                        ^
+ContractFunctionRevertedError: The contract function "repay" reverted with the following signature:
+0xe450d38c
+
+Unable to decode signature "0xe450d38c" as it was not found on the provided ABI.
+Make sure you are using the correct ABI and that the error exists on it.
+You can look up the decoded signature here: https://4byte.sourcify.dev/?q=0xe450d38c.
+
+Docs: https://viem.sh/docs/contract/decodeErrorResult
+Details: VM Exception while processing transaction: revert
+Version: viem@2.56.3
+    details: "VM Exception while processing transaction: revert",
+   docsPath: "/docs/contract/decodeErrorResult",
+ metaMessages: [
+  "Unable to decode signature \"0xe450d38c\" as it was not found on the provided ABI.",
+  "Make sure you are using the correct ABI and that the error exists on it.", "You can look up the decoded signature here: https://4byte.sourcify.dev/?q=0xe450d38c."
+],
+ shortMessage: "The contract function \"repay\" reverted with the following signature:\n0xe450d38c",
+    version: "2.56.3",
+       data: undefined,
+        raw: "0xe450d38c00000000000000000000000045b9c98bc6dbe96a8ee470743637e6a0e36dcca30000000000000000000000000000000000000000000000000000000001312d000000000000000000000000000000000000000000000000000000000001343a40",
+     reason: undefined,
+  signature: "0xe450d38c",
+
+      at <anonymous> (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/errors/getContractError.js:22:20)
+      at getContractError (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/errors/getContractError.js:32:16)
+      at internal (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/actions/wallet/writeContract.js:82:19)
+
+10 |     if (signature === '0x')
+11 |         throw new AbiDecodingZeroDataError({ cause });
+12 |     const abi_ = [...(abi || []), solidityError, solidityPanic];
+13 |     const abiItem = abi_.find((x) => x.type === 'error' && signature === toFunctionSelector(formatAbiItem(x)));
+14 |     if (!abiItem)
+15 |         throw new AbiErrorSignatureNotFoundError(signature, {
+                   ^
+AbiErrorSignatureNotFoundError: Encoded error signature "0xe450d38c" not found on ABI.
+Make sure you are using the correct ABI and that the error exists on it.
+You can look up the decoded signature here: https://4byte.sourcify.dev/?q=0xe450d38c.
+
+Docs: https://viem.sh/docs/contract/decodeErrorResult
+Details: VM Exception while processing transaction: revert
+Version: viem@2.56.3
+    details: "VM Exception while processing transaction: revert",
+   docsPath: "/docs/contract/decodeErrorResult",
+ metaMessages: undefined,
+ shortMessage: "Encoded error signature \"0xe450d38c\" not found on ABI.\nMake sure you are using the correct ABI and that the error exists on it.\nYou can look up the decoded signature here: https://4byte.sourcify.dev/?q=0xe450d38c.",
+    version: "2.56.3",
+  signature: "0xe450d38c",
+
+      at decodeErrorResult (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/abi/decodeErrorResult.js:15:15)
+      at new ContractFunctionRevertedError (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/errors/contract.js:146:31)
+      at <anonymous> (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/errors/getContractError.js:22:20)
+      at getContractError (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/errors/getContractError.js:32:16)
+      at internal (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/actions/wallet/writeContract.js:82:19)
+
+ 6 |         const cause = getNodeError(err, args);
+ 7 |         if (cause instanceof UnknownNodeError)
+ 8 |             return err;
+ 9 |         return cause;
+10 |     })();
+11 |     return new TransactionExecutionError(cause, {
+                ^
+TransactionExecutionError: An internal error was received.
+
+URL: https://rpc.cc3-testnet.creditcoin.network
+Request body: {"method":"eth_estimateGas","params":[{"data":"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40","from":"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3","maxFeePerGas":"0x23c34600","maxPriorityFeePerGas":"0x0","nonce":"0x3e","to":"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9"}]}
+ 
+Estimate Gas Arguments:
+  from:                  0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3
+  to:                    0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9
+  data:                  0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40
+  maxFeePerGas:          0.6 gwei
+  maxPriorityFeePerGas:  0 gwei
+  nonce:                 62
+ 
+Request Arguments:
+  chain:  Creditcoin CC3 Testnet (id: 102031)
+  from:   0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3
+  to:     0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9
+  data:   0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40
+
+Details: VM Exception while processing transaction: revert
+Version: viem@2.56.3
+      cause:  6 |         const cause = getNodeError(err, args);
+ 7 |         if (cause instanceof UnknownNodeError)
+ 8 |             return err;
+ 9 |         return cause;
+10 |     })();
+11 |     return new EstimateGasExecutionError(cause, {
+                ^
+EstimateGasExecutionError: An internal error was received.
+
+URL: https://rpc.cc3-testnet.creditcoin.network
+Request body: {"method":"eth_estimateGas","params":[{"data":"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40","from":"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3","maxFeePerGas":"0x23c34600","maxPriorityFeePerGas":"0x0","nonce":"0x3e","to":"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9"}]}
+ 
+Estimate Gas Arguments:
+  from:                  0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3
+  to:                    0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9
+  data:                  0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40
+  maxFeePerGas:          0.6 gwei
+  maxPriorityFeePerGas:  0 gwei
+  nonce:                 62
+
+Details: VM Exception while processing transaction: revert
+Version: viem@2.56.3
+      cause: 48 |                     // -32602
+49 |                     case InvalidParamsRpcError.code:
+50 |                         throw new InvalidParamsRpcError(err);
+51 |                     // -32603
+52 |                     case InternalRpcError.code:
+53 |                         throw new InternalRpcError(err);
+                                   ^
+InternalRpcError: An internal error was received.
+
+URL: https://rpc.cc3-testnet.creditcoin.network
+Request body: {"method":"eth_estimateGas","params":[{"data":"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40","from":"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3","maxFeePerGas":"0x23c34600","maxPriorityFeePerGas":"0x0","nonce":"0x3e","to":"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9"}]}
+
+Details: VM Exception while processing transaction: revert
+Version: viem@2.56.3
+    details: "VM Exception while processing transaction: revert",
+   docsPath: undefined,
+ metaMessages: [
+  "URL: https://rpc.cc3-testnet.creditcoin.network", "Request body: {\"method\":\"eth_estimateGas\",\"params\":[{\"data\":\"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40\",\"from\":\"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3\",\"maxFeePerGas\":\"0x23c34600\",\"maxPriorityFeePerGas\":\"0x0\",\"nonce\":\"0x3e\",\"to\":\"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9\"}]}"
+],
+ shortMessage: "An internal error was received.",
+    version: "2.56.3",
+       code: -32603,
+
+      at <anonymous> (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/buildRequest.js:53:31)
+      at async <anonymous> (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/promise/withRetry.js:24:36)
+
+68 |                     ];
+69 |                 const [{ error, result }] = await fn(body);
+70 |                 if (raw)
+71 |                     return { error, result };
+72 |                 if (error)
+73 |                     throw new RpcRequestError({
+                               ^
+RpcRequestError: RPC Request failed.
+
+URL: https://rpc.cc3-testnet.creditcoin.network
+Request body: {"method":"eth_estimateGas","params":[{"data":"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40","from":"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3","maxFeePerGas":"0x23c34600","maxPriorityFeePerGas":"0x0","nonce":"0x3e","to":"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9"}]}
+
+Details: VM Exception while processing transaction: revert
+Version: viem@2.56.3
+    details: "VM Exception while processing transaction: revert",
+   docsPath: undefined,
+ metaMessages: [
+  "URL: https://rpc.cc3-testnet.creditcoin.network", "Request body: {\"method\":\"eth_estimateGas\",\"params\":[{\"data\":\"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40\",\"from\":\"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3\",\"maxFeePerGas\":\"0x23c34600\",\"maxPriorityFeePerGas\":\"0x0\",\"nonce\":\"0x3e\",\"to\":\"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9\"}]}"
+],
+ shortMessage: "RPC Request failed.",
+    version: "2.56.3",
+       code: -32603,
+       data: "0xe450d38c00000000000000000000000045b9c98bc6dbe96a8ee470743637e6a0e36dcca30000000000000000000000000000000000000000000000000000000001312d000000000000000000000000000000000000000000000000000000000001343a40",
+        url: "https://rpc.cc3-testnet.creditcoin.network",
+
+      at request (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/clients/transports/http.js:73:27)
+      at async <anonymous> (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/buildRequest.js:30:30)
+      at async <anonymous> (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/promise/withRetry.js:24:36)
+,
+    details: "VM Exception while processing transaction: revert",
+   docsPath: undefined,
+ metaMessages: [
+  "URL: https://rpc.cc3-testnet.creditcoin.network", "Request body: {\"method\":\"eth_estimateGas\",\"params\":[{\"data\":\"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40\",\"from\":\"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3\",\"maxFeePerGas\":\"0x23c34600\",\"maxPriorityFeePerGas\":\"0x0\",\"nonce\":\"0x3e\",\"to\":\"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9\"}]}",
+  " ", "Estimate Gas Arguments:", "  from:                  0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3\n  to:                    0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9\n  data:                  0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40\n  maxFeePerGas:          0.6 gwei\n  maxPriorityFeePerGas:  0 gwei\n  nonce:                 62"
+],
+ shortMessage: "An internal error was received.",
+    version: "2.56.3",
+
+      at getEstimateGasError (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/errors/getEstimateGasError.js:11:12)
+      at estimateGas (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/actions/public/estimateGas.js:114:15)
+      at async prepareTransactionRequest (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/actions/wallet/prepareTransactionRequest.js:363:73)
+      at async sendTransaction (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/actions/wallet/sendTransaction.js:190:107)
+      at async internal (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/actions/wallet/writeContract.js:74:58)
+
+48 |                     // -32602
+49 |                     case InvalidParamsRpcError.code:
+50 |                         throw new InvalidParamsRpcError(err);
+51 |                     // -32603
+52 |                     case InternalRpcError.code:
+53 |                         throw new InternalRpcError(err);
+                                   ^
+InternalRpcError: An internal error was received.
+
+URL: https://rpc.cc3-testnet.creditcoin.network
+Request body: {"method":"eth_estimateGas","params":[{"data":"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40","from":"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3","maxFeePerGas":"0x23c34600","maxPriorityFeePerGas":"0x0","nonce":"0x3e","to":"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9"}]}
+
+Details: VM Exception while processing transaction: revert
+Version: viem@2.56.3
+    details: "VM Exception while processing transaction: revert",
+   docsPath: undefined,
+ metaMessages: [
+  "URL: https://rpc.cc3-testnet.creditcoin.network", "Request body: {\"method\":\"eth_estimateGas\",\"params\":[{\"data\":\"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40\",\"from\":\"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3\",\"maxFeePerGas\":\"0x23c34600\",\"maxPriorityFeePerGas\":\"0x0\",\"nonce\":\"0x3e\",\"to\":\"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9\"}]}"
+],
+ shortMessage: "An internal error was received.",
+    version: "2.56.3",
+       code: -32603,
+
+      at <anonymous> (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/buildRequest.js:53:31)
+      at async <anonymous> (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/promise/withRetry.js:24:36)
+
+68 |                     ];
+69 |                 const [{ error, result }] = await fn(body);
+70 |                 if (raw)
+71 |                     return { error, result };
+72 |                 if (error)
+73 |                     throw new RpcRequestError({
+                               ^
+RpcRequestError: RPC Request failed.
+
+URL: https://rpc.cc3-testnet.creditcoin.network
+Request body: {"method":"eth_estimateGas","params":[{"data":"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40","from":"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3","maxFeePerGas":"0x23c34600","maxPriorityFeePerGas":"0x0","nonce":"0x3e","to":"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9"}]}
+
+Details: VM Exception while processing transaction: revert
+Version: viem@2.56.3
+    details: "VM Exception while processing transaction: revert",
+   docsPath: undefined,
+ metaMessages: [
+  "URL: https://rpc.cc3-testnet.creditcoin.network", "Request body: {\"method\":\"eth_estimateGas\",\"params\":[{\"data\":\"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40\",\"from\":\"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3\",\"maxFeePerGas\":\"0x23c34600\",\"maxPriorityFeePerGas\":\"0x0\",\"nonce\":\"0x3e\",\"to\":\"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9\"}]}"
+],
+ shortMessage: "RPC Request failed.",
+    version: "2.56.3",
+       code: -32603,
+       data: "0xe450d38c00000000000000000000000045b9c98bc6dbe96a8ee470743637e6a0e36dcca30000000000000000000000000000000000000000000000000000000001312d000000000000000000000000000000000000000000000000000000000001343a40",
+        url: "https://rpc.cc3-testnet.creditcoin.network",
+
+      at request (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/clients/transports/http.js:73:27)
+      at async <anonymous> (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/buildRequest.js:30:30)
+      at async <anonymous> (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/promise/withRetry.js:24:36)
+,
+    details: "VM Exception while processing transaction: revert",
+   docsPath: undefined,
+ metaMessages: [
+  "URL: https://rpc.cc3-testnet.creditcoin.network", "Request body: {\"method\":\"eth_estimateGas\",\"params\":[{\"data\":\"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40\",\"from\":\"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3\",\"maxFeePerGas\":\"0x23c34600\",\"maxPriorityFeePerGas\":\"0x0\",\"nonce\":\"0x3e\",\"to\":\"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9\"}]}",
+  " ", "Estimate Gas Arguments:", "  from:                  0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3\n  to:                    0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9\n  data:                  0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40\n  maxFeePerGas:          0.6 gwei\n  maxPriorityFeePerGas:  0 gwei\n  nonce:                 62",
+  " ", "Request Arguments:", "  chain:  Creditcoin CC3 Testnet (id: 102031)\n  from:   0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3\n  to:     0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9\n  data:   0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40"
+],
+ shortMessage: "An internal error was received.",
+    version: "2.56.3",
+
+      at getTransactionError (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/errors/getTransactionError.js:11:12)
+      at sendTransaction (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/actions/wallet/sendTransaction.js:244:15)
+      at async internal (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/actions/wallet/writeContract.js:74:58)
+
+ 6 |         const cause = getNodeError(err, args);
+ 7 |         if (cause instanceof UnknownNodeError)
+ 8 |             return err;
+ 9 |         return cause;
+10 |     })();
+11 |     return new EstimateGasExecutionError(cause, {
+                ^
+EstimateGasExecutionError: An internal error was received.
+
+URL: https://rpc.cc3-testnet.creditcoin.network
+Request body: {"method":"eth_estimateGas","params":[{"data":"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40","from":"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3","maxFeePerGas":"0x23c34600","maxPriorityFeePerGas":"0x0","nonce":"0x3e","to":"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9"}]}
+ 
+Estimate Gas Arguments:
+  from:                  0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3
+  to:                    0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9
+  data:                  0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40
+  maxFeePerGas:          0.6 gwei
+  maxPriorityFeePerGas:  0 gwei
+  nonce:                 62
+
+Details: VM Exception while processing transaction: revert
+Version: viem@2.56.3
+      cause: 48 |                     // -32602
+49 |                     case InvalidParamsRpcError.code:
+50 |                         throw new InvalidParamsRpcError(err);
+51 |                     // -32603
+52 |                     case InternalRpcError.code:
+53 |                         throw new InternalRpcError(err);
+                                   ^
+InternalRpcError: An internal error was received.
+
+URL: https://rpc.cc3-testnet.creditcoin.network
+Request body: {"method":"eth_estimateGas","params":[{"data":"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40","from":"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3","maxFeePerGas":"0x23c34600","maxPriorityFeePerGas":"0x0","nonce":"0x3e","to":"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9"}]}
+
+Details: VM Exception while processing transaction: revert
+Version: viem@2.56.3
+    details: "VM Exception while processing transaction: revert",
+   docsPath: undefined,
+ metaMessages: [
+  "URL: https://rpc.cc3-testnet.creditcoin.network", "Request body: {\"method\":\"eth_estimateGas\",\"params\":[{\"data\":\"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40\",\"from\":\"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3\",\"maxFeePerGas\":\"0x23c34600\",\"maxPriorityFeePerGas\":\"0x0\",\"nonce\":\"0x3e\",\"to\":\"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9\"}]}"
+],
+ shortMessage: "An internal error was received.",
+    version: "2.56.3",
+       code: -32603,
+
+      at <anonymous> (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/buildRequest.js:53:31)
+      at async <anonymous> (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/promise/withRetry.js:24:36)
+
+68 |                     ];
+69 |                 const [{ error, result }] = await fn(body);
+70 |                 if (raw)
+71 |                     return { error, result };
+72 |                 if (error)
+73 |                     throw new RpcRequestError({
+                               ^
+RpcRequestError: RPC Request failed.
+
+URL: https://rpc.cc3-testnet.creditcoin.network
+Request body: {"method":"eth_estimateGas","params":[{"data":"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40","from":"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3","maxFeePerGas":"0x23c34600","maxPriorityFeePerGas":"0x0","nonce":"0x3e","to":"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9"}]}
+
+Details: VM Exception while processing transaction: revert
+Version: viem@2.56.3
+    details: "VM Exception while processing transaction: revert",
+   docsPath: undefined,
+ metaMessages: [
+  "URL: https://rpc.cc3-testnet.creditcoin.network", "Request body: {\"method\":\"eth_estimateGas\",\"params\":[{\"data\":\"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40\",\"from\":\"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3\",\"maxFeePerGas\":\"0x23c34600\",\"maxPriorityFeePerGas\":\"0x0\",\"nonce\":\"0x3e\",\"to\":\"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9\"}]}"
+],
+ shortMessage: "RPC Request failed.",
+    version: "2.56.3",
+       code: -32603,
+       data: "0xe450d38c00000000000000000000000045b9c98bc6dbe96a8ee470743637e6a0e36dcca30000000000000000000000000000000000000000000000000000000001312d000000000000000000000000000000000000000000000000000000000001343a40",
+        url: "https://rpc.cc3-testnet.creditcoin.network",
+
+      at request (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/clients/transports/http.js:73:27)
+      at async <anonymous> (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/buildRequest.js:30:30)
+      at async <anonymous> (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/promise/withRetry.js:24:36)
+,
+    details: "VM Exception while processing transaction: revert",
+   docsPath: undefined,
+ metaMessages: [
+  "URL: https://rpc.cc3-testnet.creditcoin.network", "Request body: {\"method\":\"eth_estimateGas\",\"params\":[{\"data\":\"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40\",\"from\":\"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3\",\"maxFeePerGas\":\"0x23c34600\",\"maxPriorityFeePerGas\":\"0x0\",\"nonce\":\"0x3e\",\"to\":\"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9\"}]}",
+  " ", "Estimate Gas Arguments:", "  from:                  0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3\n  to:                    0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9\n  data:                  0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40\n  maxFeePerGas:          0.6 gwei\n  maxPriorityFeePerGas:  0 gwei\n  nonce:                 62"
+],
+ shortMessage: "An internal error was received.",
+    version: "2.56.3",
+
+      at getEstimateGasError (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/errors/getEstimateGasError.js:11:12)
+      at estimateGas (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/actions/public/estimateGas.js:114:15)
+      at async prepareTransactionRequest (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/actions/wallet/prepareTransactionRequest.js:363:73)
+      at async sendTransaction (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/actions/wallet/sendTransaction.js:190:107)
+      at async internal (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/actions/wallet/writeContract.js:74:58)
+
+48 |                     // -32602
+49 |                     case InvalidParamsRpcError.code:
+50 |                         throw new InvalidParamsRpcError(err);
+51 |                     // -32603
+52 |                     case InternalRpcError.code:
+53 |                         throw new InternalRpcError(err);
+                                   ^
+InternalRpcError: An internal error was received.
+
+URL: https://rpc.cc3-testnet.creditcoin.network
+Request body: {"method":"eth_estimateGas","params":[{"data":"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40","from":"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3","maxFeePerGas":"0x23c34600","maxPriorityFeePerGas":"0x0","nonce":"0x3e","to":"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9"}]}
+
+Details: VM Exception while processing transaction: revert
+Version: viem@2.56.3
+    details: "VM Exception while processing transaction: revert",
+   docsPath: undefined,
+ metaMessages: [
+  "URL: https://rpc.cc3-testnet.creditcoin.network", "Request body: {\"method\":\"eth_estimateGas\",\"params\":[{\"data\":\"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40\",\"from\":\"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3\",\"maxFeePerGas\":\"0x23c34600\",\"maxPriorityFeePerGas\":\"0x0\",\"nonce\":\"0x3e\",\"to\":\"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9\"}]}"
+],
+ shortMessage: "An internal error was received.",
+    version: "2.56.3",
+       code: -32603,
+
+      at <anonymous> (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/buildRequest.js:53:31)
+      at async <anonymous> (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/promise/withRetry.js:24:36)
+
+68 |                     ];
+69 |                 const [{ error, result }] = await fn(body);
+70 |                 if (raw)
+71 |                     return { error, result };
+72 |                 if (error)
+73 |                     throw new RpcRequestError({
+                               ^
+RpcRequestError: RPC Request failed.
+
+URL: https://rpc.cc3-testnet.creditcoin.network
+Request body: {"method":"eth_estimateGas","params":[{"data":"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40","from":"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3","maxFeePerGas":"0x23c34600","maxPriorityFeePerGas":"0x0","nonce":"0x3e","to":"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9"}]}
+
+Details: VM Exception while processing transaction: revert
+Version: viem@2.56.3
+    details: "VM Exception while processing transaction: revert",
+   docsPath: undefined,
+ metaMessages: [
+  "URL: https://rpc.cc3-testnet.creditcoin.network", "Request body: {\"method\":\"eth_estimateGas\",\"params\":[{\"data\":\"0x371fd8e60000000000000000000000000000000000000000000000000000000001343a40\",\"from\":\"0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3\",\"maxFeePerGas\":\"0x23c34600\",\"maxPriorityFeePerGas\":\"0x0\",\"nonce\":\"0x3e\",\"to\":\"0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9\"}]}"
+],
+ shortMessage: "RPC Request failed.",
+    version: "2.56.3",
+       code: -32603,
+       data: "0xe450d38c00000000000000000000000045b9c98bc6dbe96a8ee470743637e6a0e36dcca30000000000000000000000000000000000000000000000000000000001312d000000000000000000000000000000000000000000000000000000000001343a40",
+        url: "https://rpc.cc3-testnet.creditcoin.network",
+
+      at request (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/clients/transports/http.js:73:27)
+      at async <anonymous> (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/buildRequest.js:30:30)
+      at async <anonymous> (/Users/rajkaria/Projects/humanline/.claude/worktrees/protocol-relay-sprint-s1-21a18f/node_modules/.bun/viem@2.56.3+55e206e5e266c2ef/node_modules/viem/_esm/utils/promise/withRetry.js:24:36)
+
+Bun v1.3.11 (macOS arm64)
+
+--- run 1 stopped at the repay estimate: ERC20InsufficientBalance (wallet held 20.00 hUSD, owed 20.20) ---
+The operator wallet had just moved all of its hUSD into the new pool and the hUSD faucet was on its
+24 h cooldown, so it held only the borrowed 20 hUSD against a 20.2 hUSD balance (principal + 1% fee).
+Recovered by hand inside the 10-minute demo term, then fixed in scripts/e2e-credit-v2.ts (it now
+withdraws the fee shortfall from the wallet's own pool shares before repaying):
+withdraw ~2 hUSD of pool shares: 0xb91e63c81d423de39616eb99e3d8035119ecf9f99fe2db39268d83d7f6a9e228 status=success
+repay 20.2 hUSD: 0xfbece7d72acfe048dffae1e5230912882202625b85732b2c723edc05325768ea status=success
+line after: limit 31.25 hUSD, principal 0, loansRepaid 1, frozen false (repaid on time: limit × 1.25)

@@ -3,8 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { hexToString } from "viem";
 
-import { attestorStashAbi, chainInfoAbi, chainInfoHeightAbi } from "@/lib/abi";
-import { PRECOMPILES, SOURCE_CHAIN_LIST } from "@/lib/chains";
+import { attestorStashAbi, chainInfoAbi, chainInfoAttestationAbi, chainInfoLookupAbi } from "@/lib/abi";
+import { PRECOMPILES, SOURCE_CHAINS, SOURCE_CHAIN_LIST, type SourceChainKey } from "@/lib/chains";
 import { getPublicClient } from "@/lib/public-client";
 
 export type PrecompileChainRow = {
@@ -12,29 +12,34 @@ export type PrecompileChainRow = {
   chainId: number;
   chainName: string;
   chainEncoding: number;
-  /** Latest height attested for that chain. */
+  /** Highest attested height (ChainInfo `get_latest_attestation_height_and_hash`). */
   attestedTip?: bigint;
-  /** Whether the tip came from the 0x0FD3 precompile or the proof builder. */
-  attestedTipSource?: "precompile" | "proof-builder";
-  /** How many attestors currently back the chain. */
+  /** Highest checkpointed height (`get_latest_checkpoint_height_and_hash`, every 100 blocks). */
+  checkpointTip?: bigint;
+  /** Bonded attestors for the chain (AttestorStash `getAttestorsCount`). */
   attestors?: number;
+  /** Minimum bond per attestor, wei of CTC (AttestorStash `getMinBondRequirement`). */
+  minBond?: bigint;
+  /** `attestors × minBond`: the capital a colluding quorum would put at stake. */
+  bondedCapital?: bigint;
+  /** `get_chain_by_key(chainKey).chainId` matches the EVM chain Humanline expects for this key. */
+  chainIdMatches?: boolean;
 };
 
 export type PrecompileSnapshot = {
   chains: PrecompileChainRow[];
   /** `false` when `get_supported_chains` itself failed — not a CC3 node, say. */
   available: boolean;
-  /** Set when the attested-height getter could not be resolved. */
-  heightGetterUnavailable: boolean;
 };
 
 /**
- * Read the Attestcoin precompiles directly, with no wallet.
+ * Read the Attestcoin precompiles directly, with no wallet: which source chains `0x0FD3`
+ * tracks, how far each is attested and checkpointed, whether its chain key really is the
+ * EVM chain Humanline assumes, and what `0x0FD4` says its attestors have bonded.
  *
- * `0x0FD3` lists the chains this node attests; `0x0FD4` reports how many
- * attestors back each one. The "latest attested height" getter's exact name is
- * still being confirmed against `chain_info.sol` upstream, so it is probed and
- * quietly dropped when the call reverts rather than failing the whole header.
+ * These are the same getters `AttestedWorldID` (finality, quorum) and `CreditLine`
+ * (security budget, chain assertion) call on-chain, so the page shows the guard inputs,
+ * not an approximation of them.
  */
 export function usePrecompiles(options: { refetchInterval?: number } = {}) {
   return useQuery({
@@ -49,7 +54,6 @@ export function usePrecompiles(options: { refetchInterval?: number } = {}) {
         chainName: `0x${string}`;
         chainEncoding: number;
       }[];
-
       try {
         supported = (await client.readContract({
           address: PRECOMPILES.chainInfo,
@@ -57,10 +61,9 @@ export function usePrecompiles(options: { refetchInterval?: number } = {}) {
           functionName: "get_supported_chains",
         })) as typeof supported;
       } catch {
-        return { chains: [], available: false, heightGetterUnavailable: true };
+        return { chains: [], available: false };
       }
 
-      // Only the source chains Humanline actually relays from are interesting.
       const wanted = new Set(SOURCE_CHAIN_LIST.map((c) => c.chainKey as number));
       const rows = supported
         .filter((entry) => wanted.has(Number(entry.chainKey)))
@@ -71,73 +74,35 @@ export function usePrecompiles(options: { refetchInterval?: number } = {}) {
           chainEncoding: Number(entry.chainEncoding),
         }));
 
-      let heightGetterUnavailable = false;
-
-      const enriched = await Promise.all(
+      const chains = await Promise.all(
         rows.map(async (row): Promise<PrecompileChainRow> => {
-          const [tip, attestors] = await Promise.all([
-            client
-              .readContract({
-                address: PRECOMPILES.chainInfo,
-                abi: chainInfoHeightAbi,
-                functionName: "get_latest_attested_height",
-                args: [BigInt(row.chainKey)],
-              })
-              .then((result) => {
-                const value = result as { height: bigint; exists: boolean };
-                return value.exists ? value.height : undefined;
-              })
-              .catch(() => {
-                heightGetterUnavailable = true;
-                return undefined;
-              }),
-            client
-              .readContract({
-                address: PRECOMPILES.attestorStash,
-                abi: attestorStashAbi,
-                functionName: "getAttestorsCount",
-                args: [BigInt(row.chainKey)],
-              })
-              .then((count) => Number(count))
-              .catch(() => undefined),
+          const key = BigInt(row.chainKey);
+          const soft = <T,>(p: Promise<T>) => p.catch(() => undefined);
+          const [attestation, checkpoint, byKey, attestors, minBond] = await Promise.all([
+            soft(client.readContract({ address: PRECOMPILES.chainInfo, abi: chainInfoAttestationAbi, functionName: "get_latest_attestation_height_and_hash", args: [key] })),
+            soft(client.readContract({ address: PRECOMPILES.chainInfo, abi: chainInfoAttestationAbi, functionName: "get_latest_checkpoint_height_and_hash", args: [key] })),
+            soft(client.readContract({ address: PRECOMPILES.chainInfo, abi: chainInfoLookupAbi, functionName: "get_chain_by_key", args: [key] })),
+            soft(client.readContract({ address: PRECOMPILES.attestorStash, abi: attestorStashAbi, functionName: "getAttestorsCount", args: [key] })),
+            soft(client.readContract({ address: PRECOMPILES.attestorStash, abi: attestorStashAbi, functionName: "getMinBondRequirement", args: [key] })),
           ]);
-
-          if (tip !== undefined) {
-            return { ...row, attestedTip: tip, attestedTipSource: "precompile", attestors };
-          }
-
-          // Second opinion: the CC3 proof builder exposes the same number over
-          // HTTP. It is not a substitute for the on-chain guard — the contract
-          // still reads 0x0FD3 — but it lets this page show the value while the
-          // precompile getter's exact name is being confirmed upstream.
-          const fallback = await fetchAttestedHeight(row.chainKey);
+          const expected = SOURCE_CHAINS[row.chainKey as SourceChainKey]?.chainId;
+          const count = attestors === undefined ? undefined : Number(attestors);
           return {
             ...row,
-            attestedTip: fallback,
-            attestedTipSource: fallback === undefined ? undefined : "proof-builder",
-            attestors,
+            attestedTip: attestation?.exists ? attestation.height : undefined,
+            checkpointTip: checkpoint?.exists ? checkpoint.height : undefined,
+            attestors: count,
+            minBond,
+            bondedCapital: count !== undefined && minBond !== undefined ? BigInt(count) * minBond : undefined,
+            chainIdMatches:
+              byKey && expected !== undefined ? byKey.exists && Number(byKey.info.chainId) === expected : undefined,
           };
         }),
       );
 
-      return { chains: enriched, available: true, heightGetterUnavailable };
+      return { chains, available: true };
     },
   });
-}
-
-/** Ask our own proxy for the proof builder's attested height. */
-async function fetchAttestedHeight(chainKey: number): Promise<bigint | undefined> {
-  try {
-    const response = await fetch(`/api/attestcoin/attested-height?chainKey=${chainKey}`, {
-      cache: "no-store",
-    });
-    if (!response.ok) return undefined;
-    const data = (await response.json()) as { attestedHeight?: number | string | null };
-    if (data.attestedHeight === null || data.attestedHeight === undefined) return undefined;
-    return BigInt(data.attestedHeight);
-  } catch {
-    return undefined;
-  }
 }
 
 /** `chainName` comes back as raw bytes; render it as UTF-8 when it looks like it. */

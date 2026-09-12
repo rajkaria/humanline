@@ -6,6 +6,8 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 
 import {ICreditLine} from "./interfaces/ICreditLine.sol";
 import {IHumanRegistry} from "./interfaces/IHumanRegistry.sol";
+import {AttestorStashLib} from "./interfaces/IAttestorStash.sol";
+import {ChainInfoLib, ChainInfoResult} from "./interfaces/IChainInfo.sol";
 
 /// @title CreditLine
 /// @notice Unsecured revolving credit, one line per human, funded by an open lender pool.
@@ -32,11 +34,24 @@ import {IHumanRegistry} from "./interfaces/IHumanRegistry.sol";
 ///      opens with one unit and then donates has to give up most of the donation to the virtual
 ///      tranche, and the next depositor's rounding loss is capped at roughly `1 / VIRTUAL_SHARES`.
 ///
+///      Security budget. Every root this pool lends against arrived through Attestcoin, so the
+///      deepest assumption under every loan is the attestor quorum for the World ID source chain.
+///      A quorum that attested a fake Ethereum block could mint a fake human and borrow. The pool
+///      therefore never lets total outstanding principal exceed what that quorum has bonded:
+///      `cap = getAttestorsCount(chainKey) × getMinBondRequirement(chainKey) × EXPOSURE_PER_BONDED_CTC`,
+///      read live from AttestorStash `0x0FD4` on every draw. More attestors or a higher bond raise
+///      the ceiling; a thinning set lowers it, and a set that reports zero stops new draws
+///      entirely. Repayments, withdrawals and defaults are never blocked. The constructor also
+///      checks through ChainInfo `0x0FD3` that the chain key really is the source chain the
+///      deployer claims (chainKey 3 → Ethereum chainId 1, chainKey 1 → Sepolia 11155111), so the
+///      budget can never be read from the wrong chain by a copy-paste mistake.
+///
 ///      No owner, no pause, no upgrade. Every parameter is an immutable constructor argument.
 contract CreditLine is ICreditLine {
     using SafeERC20 for IERC20;
 
     uint256 private constant BPS = 10_000;
+    uint256 private constant ONE_CTC = 1e18;
 
     /// @dev Virtual share tranche backed by one virtual asset. See the contract-level note.
     uint256 private constant VIRTUAL_SHARES = 1e3;
@@ -55,6 +70,12 @@ contract CreditLine is ICreditLine {
     uint64 public immutable override TERM;
     /// @inheritdoc ICreditLine
     uint64 public immutable override GRACE;
+    /// @inheritdoc ICreditLine
+    uint64 public immutable override SECURITY_CHAIN_KEY;
+    /// @inheritdoc ICreditLine
+    uint64 public immutable override SOURCE_CHAIN_ID;
+    /// @inheritdoc ICreditLine
+    uint256 public immutable override EXPOSURE_PER_BONDED_CTC;
 
     /// @notice Ex-fee principal still out on loan across every line. This, not the borrowers'
     ///         fee-inclusive balances, is what the pool counts as an asset.
@@ -75,8 +96,15 @@ contract CreditLine is ICreditLine {
         uint256 maxLimit,
         uint256 feeBps,
         uint64 term,
-        uint64 grace
+        uint64 grace,
+        uint64 securityChainKey,
+        uint64 sourceChainId,
+        uint256 exposurePerBondedCtc
     ) {
+        if (exposurePerBondedCtc == 0) revert ZeroAmount();
+        (bool exists, uint64 chainId) = _chainIdOf(securityChainKey);
+        if (!exists || chainId != sourceChainId) revert WrongSecurityChain(securityChainKey, chainId, sourceChainId);
+
         ASSET = asset;
         REGISTRY = registry;
         INITIAL_LIMIT = initialLimit;
@@ -84,6 +112,9 @@ contract CreditLine is ICreditLine {
         FEE_BPS = feeBps;
         TERM = term;
         GRACE = grace;
+        SECURITY_CHAIN_KEY = securityChainKey;
+        SOURCE_CHAIN_ID = sourceChainId;
+        EXPOSURE_PER_BONDED_CTC = exposurePerBondedCtc;
     }
 
     // ---------------------------------------------------------------------------------------
@@ -161,6 +192,9 @@ contract CreditLine is ICreditLine {
 
         uint256 idle = IERC20(ASSET).balanceOf(address(this));
         if (amount > idle) revert InsufficientLiquidity(amount, idle);
+
+        uint256 cap = exposureCap();
+        if (totalPrincipal + amount > cap) revert ExposureCapExceeded(totalPrincipal + amount, cap);
 
         if (line.principal == 0) line.dueAt = uint64(block.timestamp) + TERM;
         line.principal += owed;
@@ -267,6 +301,17 @@ contract CreditLine is ICreditLine {
         return line.principal != 0 && block.timestamp > line.dueAt + GRACE;
     }
 
+    /// @inheritdoc ICreditLine
+    function securityBudget() public view override returns (uint32 attestors, uint128 minBond, uint256 cap) {
+        (attestors, minBond) = _bond();
+        cap = (uint256(attestors) * uint256(minBond) * EXPOSURE_PER_BONDED_CTC) / ONE_CTC;
+    }
+
+    /// @inheritdoc ICreditLine
+    function exposureCap() public view override returns (uint256 cap) {
+        (,, cap) = securityBudget();
+    }
+
     /// @notice The line belonging to a wallet, resolved through the registry. Convenience for the
     ///         web app, which knows wallets rather than nullifiers.
     function lineOfWallet(address wallet) external view returns (Line memory) {
@@ -298,6 +343,21 @@ contract CreditLine is ICreditLine {
 
         line.limit = newLimit;
         emit LimitChanged(human, oldLimit, newLimit, onTime);
+    }
+
+    /// @dev Bonded attestors and the minimum bond for the security chain, from AttestorStash `0x0FD4`.
+    ///      `internal virtual` only so unit tests can run without the native precompile; the fork
+    ///      tests read the real one.
+    function _bond() internal view virtual returns (uint32 attestors, uint128 minBond) {
+        attestors = AttestorStashLib.get().getAttestorsCount(SECURITY_CHAIN_KEY);
+        minBond = AttestorStashLib.get().getMinBondRequirement(SECURITY_CHAIN_KEY);
+    }
+
+    /// @dev EVM chain id Creditcoin's ChainInfo `0x0FD3` records for a chain key. Virtual for the same
+    ///      reason as `_bond`.
+    function _chainIdOf(uint64 chainKey) internal view virtual returns (bool exists, uint64 chainId) {
+        ChainInfoResult memory result = ChainInfoLib.get().get_chain_by_key(chainKey);
+        return (result.exists, result.info.chainId);
     }
 
     function _humanOf(address wallet) private view returns (uint256 human) {

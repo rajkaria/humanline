@@ -5,6 +5,7 @@ import {Test} from "forge-std/Test.sol";
 
 import {MockWorldID} from "./mocks/MockWorldID.sol";
 import {CreditLine} from "../src/CreditLine.sol";
+import {CreditLineHarness} from "./harness/CreditLineHarness.sol";
 import {HUSD} from "../src/HUSD.sol";
 import {HumanRegistry} from "../src/HumanRegistry.sol";
 import {ICreditLine} from "../src/interfaces/ICreditLine.sol";
@@ -42,11 +43,11 @@ contract CreditLineTest is Test {
         husd = new HUSD();
         worldId = new MockWorldID();
         registry = new HumanRegistry(address(worldId), APP_ID, ACTION);
-        pool = new CreditLine(
-            address(husd), address(registry), INITIAL_LIMIT, MAX_LIMIT, FEE_BPS, TERM, GRACE
+        pool = new CreditLineHarness(
+            address(husd), address(registry), INITIAL_LIMIT, MAX_LIMIT, FEE_BPS, TERM, GRACE, 1, 11_155_111, 10e6
         );
-        bigPool = new CreditLine(
-            address(husd), address(registry), 1_000e6, 5_000e6, FEE_BPS, TERM, GRACE
+        bigPool = new CreditLineHarness(
+            address(husd), address(registry), 1_000e6, 5_000e6, FEE_BPS, TERM, GRACE, 1, 11_155_111, 10e6
         );
 
         deal(address(husd), lender, 10_000e6);
@@ -152,7 +153,7 @@ contract CreditLineTest is Test {
 
     function test_LimitIsCappedAtMaxLimit() public {
         CreditLine nearMax =
-            new CreditLine(address(husd), address(registry), 1_800e6, MAX_LIMIT, FEE_BPS, TERM, GRACE);
+            new CreditLineHarness(address(husd), address(registry), 1_800e6, MAX_LIMIT, FEE_BPS, TERM, GRACE, 1, 11_155_111, 10e6);
         deal(address(husd), lender, 10_000e6);
         vm.startPrank(lender);
         husd.approve(address(nearMax), type(uint256).max);

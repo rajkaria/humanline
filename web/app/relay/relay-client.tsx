@@ -35,7 +35,7 @@ import {
   type SourceChainKey,
 } from "@/lib/chains";
 import { CONTRACTS, WORLD_ID_INSTANCES } from "@/lib/contracts";
-import { describeError, formatCount, formatRelativeTime, truncateUint256 } from "@/lib/format";
+import { describeError, formatCount, formatCtc, formatRelativeTime, truncateUint256 } from "@/lib/format";
 import { usePrecompiles } from "@/lib/hooks/use-precompiles";
 import { useRelayFeed, type RelayRow } from "@/lib/hooks/use-relay-feed";
 import { getPublicClient } from "@/lib/public-client";
@@ -273,38 +273,52 @@ function PrecompileCards() {
                   {known?.name ?? chain.chainName} · chainKey {chain.chainKey}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex flex-col gap-3">
                 <dl className="grid grid-cols-2 gap-3">
                   <Stat
                     label="Attested tip"
                     value={chain.attestedTip === undefined ? "—" : formatCount(chain.attestedTip)}
-                    hint={
-                      chain.attestedTipSource === "proof-builder"
-                        ? "CC3 proof builder"
-                        : "0x0FD3 ChainInfo"
-                    }
+                    hint="0x0FD3 · every 10 blocks"
                   />
                   <Stat
-                    label="Attestors"
-                    value={chain.attestors === undefined ? "—" : formatCount(chain.attestors)}
-                    hint="0x0FD4 AttestorStash"
+                    label="Checkpoint"
+                    value={chain.checkpointTip === undefined ? "—" : formatCount(chain.checkpointTip)}
+                    hint="0x0FD3 · every 100 blocks"
+                  />
+                  <Stat
+                    label="Attestors × min bond"
+                    value={
+                      chain.attestors === undefined || chain.minBond === undefined
+                        ? "—"
+                        : `${formatCount(chain.attestors)} × ${formatCtc(chain.minBond)}`
+                    }
+                    hint="0x0FD4 AttestorStash · CTC"
+                  />
+                  <Stat
+                    label="Bonded capital"
+                    value={chain.bondedCapital === undefined ? "—" : `${formatCtc(chain.bondedCapital)} CTC`}
+                    hint="caps credit exposure"
                   />
                 </dl>
+                <p className="text-xs text-muted-foreground">
+                  {chain.chainIdMatches === undefined
+                    ? "Chain id check unavailable."
+                    : chain.chainIdMatches
+                      ? `get_chain_by_key(${chain.chainKey}) → EVM chain ${chain.chainId}, as Humanline assumes.`
+                      : `get_chain_by_key(${chain.chainKey}) does not match the expected EVM chain.`}
+                </p>
               </CardContent>
             </Card>
           );
         })}
       </div>
 
-      {data.heightGetterUnavailable ? (
-        <p className="text-xs text-muted-foreground">
-          The attested-height getter on 0x0FD3 did not resolve by name on this node, so the tip
-          above comes from the CC3 proof builder instead (or is blank if that is unreachable
-          too). It is shown for context only: the finality guard is enforced on-chain by{" "}
-          <code className="font-mono">AttestedWorldID</code> reading the precompile directly,
-          and this page only mirrors it.
-        </p>
-      ) : null}
+      <p className="text-xs text-muted-foreground">
+        The same getters the contracts call: <code className="font-mono">AttestedWorldID</code>{" "}
+        takes the higher of the attested and checkpointed tips for its finality guard and the
+        attestor count for its quorum floor; <code className="font-mono">CreditLine</code> checks
+        the chain id at deployment and caps total credit at the bonded capital on every draw.
+      </p>
     </div>
   );
 }
@@ -428,7 +442,17 @@ function RelayTableRow({ row }: { row: RelayRow }) {
       </TableCell>
 
       <TableCell>
-        <HashLink value={row.creditcoinTxHash} scope="creditcoin" kind="tx" copy={false} />
+        <span className="flex items-center gap-1.5 whitespace-nowrap">
+          <HashLink value={row.creditcoinTxHash} scope="creditcoin" kind="tx" copy={false} />
+          {row.verifiedByPrecompile ? (
+            <span
+              className="rounded bg-success/10 px-1 font-mono text-[10px] text-success"
+              title={`${row.verifiedByPrecompile} TransactionVerified event(s) emitted by the 0x0FD2 BlockProver precompile in this transaction`}
+            >
+              0x0FD2 ✓
+            </span>
+          ) : null}
+        </span>
       </TableCell>
 
       <TableCell className="hidden lg:table-cell">

@@ -315,6 +315,7 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
                 onRelay={() => void selfRelay.run()}
                 rewardPerRoot={selfRelay.rewardPerRoot}
                 vaultAvailable={selfRelay.vaultAvailable}
+                targetAttested={selfRelay.targetAttested}
               />
             </RelayWaitPanel>
             <Button size="lg" disabled>

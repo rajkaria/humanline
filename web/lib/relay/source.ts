@@ -17,7 +17,7 @@ import {
 } from "viem";
 import { mainnet, sepolia } from "viem/chains";
 
-import { attestedWorldIdAbi, chainInfoAttestationAbi } from "@/lib/abi";
+import { attestedWorldIdAbi, chainInfoAttestationAbi, chainInfoLookupAbi } from "@/lib/abi";
 import { PRECOMPILES, SOURCE_CHAINS, type SourceChainKey } from "@/lib/chains";
 import type { TreeChange } from "@/lib/relay/plan";
 
@@ -196,6 +196,25 @@ export async function attestedTip(client: PublicClient, chainKey: SourceChainKey
     read("get_latest_checkpoint_height_and_hash"),
   ]);
   return Math.max(attestation, checkpoint);
+}
+
+/**
+ * ChainInfo `is_height_attested`: whether a continuity proof can already reach this source
+ * height. `undefined` when the precompile could not be read — never guessed.
+ */
+export async function isHeightAttested(
+  client: PublicClient,
+  chainKey: SourceChainKey,
+  height: number,
+): Promise<boolean | undefined> {
+  return client
+    .readContract({
+      address: PRECOMPILES.chainInfo,
+      abi: chainInfoLookupAbi,
+      functionName: "is_height_attested",
+      args: [BigInt(chainKey), BigInt(height)],
+    })
+    .catch(() => undefined);
 }
 
 export async function readRootState(

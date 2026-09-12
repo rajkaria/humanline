@@ -18,6 +18,7 @@ as generated output, not something to hand-edit.
     "CreditLine": "0x…",
     "HumanGate": "0x…",
     "RelayReward": "0x…"                // shared relayer vault, added by deploy-relay-reward.sh
+    // "previous": { "CreditLineV1": { … } } keeps superseded addresses attributable
   },
   "txHashes": { "…": "0x…" },           // deployment transaction per contract
   "config": {

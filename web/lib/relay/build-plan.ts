@@ -12,6 +12,7 @@ import { CONTRACTS } from "@/lib/contracts";
 import { planRelay, type RelayPlan, type TreeChange } from "@/lib/relay/plan";
 import {
   findChangeByPostRoot,
+  isHeightAttested,
   readRootState,
   scanChanges,
   sourceHead,
@@ -27,6 +28,8 @@ export type BuiltPlan = {
   state: CreditcoinRootState;
   contract: Hex;
   sourceHead: number | null;
+  /** ChainInfo `is_height_attested` for the target update's block; `undefined` when not asked. */
+  targetAttested?: boolean;
 };
 
 export async function buildRelayPlan(options: {
@@ -52,10 +55,12 @@ export async function buildRelayPlan(options: {
   ]);
 
   // Inclusive of the tip's own block: a later update can share it.
-  const changes =
+  const [changes, targetAttested] = await Promise.all([
     targetChange && latestChange && targetChange.blockNumber >= latestChange.blockNumber
-      ? await scanChanges(chainKey, latestChange.blockNumber, targetChange.blockNumber)
-      : [];
+      ? scanChanges(chainKey, latestChange.blockNumber, targetChange.blockNumber)
+      : Promise.resolve([]),
+    targetChange ? isHeightAttested(client, chainKey, targetChange.blockNumber) : Promise.resolve(undefined),
+  ]);
 
   const plan = planRelay({
     target: root,
@@ -68,7 +73,7 @@ export async function buildRelayPlan(options: {
     finalityDepth: state.finalityDepth,
     sourceBlockTime: state.sourceBlockTime,
   });
-  return { plan, state, contract, sourceHead: head };
+  return { plan, state, contract, sourceHead: head, targetAttested };
 }
 
 /**

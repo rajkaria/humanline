@@ -11,16 +11,17 @@ inside the same Creditcoin transaction that adopts the root. There is no bridge 
 signer, no owner, no pause and no upgrade path. Remove Attestcoin and there is no root, therefore no
 verified human, therefore no credit line.
 
-Deployed on Creditcoin CC3 testnet (chainId 102031). All six contracts are verified on Blockscout.
+Deployed on Creditcoin CC3 testnet (chainId 102031). All seven contracts are verified on Blockscout.
 
 | Contract | Address |
 |---|---|
 | `AttestedWorldID` (Ethereum mainnet, chainKey 3) | [`0x1122ef3fa4ab0693809e42a00b2476efcf4468ad`](https://creditcoin-testnet.blockscout.com/address/0x1122ef3fa4ab0693809e42a00b2476efcf4468ad) |
 | `AttestedWorldID` (Ethereum Sepolia, chainKey 1) | [`0x3a7c3cc67034197208923587b8dc5c4674cbcef7`](https://creditcoin-testnet.blockscout.com/address/0x3a7c3cc67034197208923587b8dc5c4674cbcef7) |
 | `HumanRegistry` | [`0x62c2fd99ea587e4b466175ad248468782bd5298d`](https://creditcoin-testnet.blockscout.com/address/0x62c2fd99ea587e4b466175ad248468782bd5298d) |
-| `CreditLine` | [`0x1bd40163e41e44d2f139d95de88b640f6ea461f7`](https://creditcoin-testnet.blockscout.com/address/0x1bd40163e41e44d2f139d95de88b640f6ea461f7) |
+| `CreditLine` v2 (exposure capped by `0x0FD4` bonds) | [`0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9`](https://creditcoin-testnet.blockscout.com/address/0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9) |
 | `hUSD` | [`0x4bd7f4c6648deb8f107932572ce7e85aca259640`](https://creditcoin-testnet.blockscout.com/address/0x4bd7f4c6648deb8f107932572ce7e85aca259640) |
 | `HumanGate` (example integration) | [`0xa3e021de49cec8819ea1bd37a8b5a9df005b776c`](https://creditcoin-testnet.blockscout.com/address/0xa3e021de49cec8819ea1bd37a8b5a9df005b776c) |
+| `RelayReward` (permissionless relayer vault) | [`0x9766480a872ad7df2a5cf86f9e307804a3f7afe0`](https://creditcoin-testnet.blockscout.com/address/0x9766480a872ad7df2a5cf86f9e307804a3f7afe0) |
 
 An earlier deployment of the same six contracts is recorded in `deployments/cc3-testnet.v1.json`.
 It was replaced after a code review round (source-block root dating and the pool share math changed,
@@ -68,8 +69,48 @@ repayment in Creditcoin's own state, which is native and directly readable. See 
 
 ## 2. Every Attestcoin surface Humanline uses
 
-Ten distinct surfaces, each one load-bearing. This section is the depth checklist from
+Section 2.0 is the one-table answer: every surface, its file and line, and its test. Sections 2.1
+onward walk through the on-chain relay surfaces in depth, as the depth checklist from
 `docs/SPEC.md` section 8, with the code.
+
+### 2.0 Coverage at a glance
+
+Every Attestcoin surface Humanline calls, where, and the test that proves it. **17 load-bearing
+surfaces** (a wrong answer from any of them changes what the chain accepts, what a user is asked to
+sign, or what a lender is exposed to) and **1 informational** one. Counted strictly: an interface we
+declared, or a getter we only read in a test, is listed separately below and is not counted.
+
+| # | Surface | Where (file:line) | What it decides | Proven by |
+|---|---|---|---|---|
+| 1 | BlockProver `0x0FD2` `verifyAndEmit` (single), via `ASCBase.execute` | `@gluwa/asc-contracts ASCBase.sol:35` → `contracts/src/AttestedWorldID.sol:122` | a root enters only with a proof of its source tx | `AttestedWorldID.t.sol::test_RelaysTheRealMainnetRoot`, `AttestedWorldID.fork.t.sol::testFork_RelaysTheMainnetFixtureEndToEnd` |
+| 2 | `0x0FD2` `verifyAndEmit` (batch, shared continuity proof) | `contracts/src/AttestedWorldID.sol:96` | up to 10 roots under one continuity proof | `test_BatchRelaysInArrayOrder`, `test_BatchRevertsWhenTheProverRejectsTheProof` |
+| 3 | `0x0FD2` `calculateTxIndex` | `contracts/src/AttestedWorldID.sol:102` | the replay key (`queryId`) and ordering evidence | `test_RevertsOnReplayOfTheSameQuery`, `FixtureSanity.t.sol` (mainnet 173, Sepolia 58) |
+| 4 | `0x0FD2` `verify` (view, batch) as a free preflight | `web/lib/hooks/use-self-relay.ts:175`, `web/lib/relay/relay-pass.ts:111`, `worker/src/relay.ts:536` | a stale or tampered proof stops before a wallet signs | live: real proof → `true`, one tx byte flipped → `Merkle proof validation failed` (section 3) |
+| 5 | `0x0FD2` `TransactionVerified` event | `web/lib/hooks/use-relay-feed.ts:39`, `:57` | the on-chain audit trail shown on every `/relay` row | live receipts, e.g. self-relay `0xd1df2b92…` log 0 |
+| 6 | ChainInfo `0x0FD3` `get_latest_attestation_height_and_hash` | `contracts/src/AttestedWorldID.sol:364`, `web/lib/relay/source.ts:184` | the finality guard (`NotFinal`) and the self-relay ETA | `test_RevertsWhenTheSourceBlockIsNotFinalYet`, `test_AcceptsExactlyAtTheFinalityDepth`, `testFork_ChainInfoReportsTheSourceChains` |
+| 7 | `0x0FD3` `get_latest_checkpoint_height_and_hash` | `contracts/src/AttestedWorldID.sol:366` | the tip is the higher of attestation and checkpoint | `testFork_ChainInfoReportsTheSourceChains` |
+| 8 | `0x0FD3` `get_chain_by_key` | `contracts/src/CreditLine.sol:359`, guard at `:106` | a pool cannot be bound to the wrong source chain | `CreditLineExposure.t.sol::test_TheConstructorRefusesAChainKeyThatIsNotTheClaimedChain`, `AttestcoinSurfaces.fork.t.sol::testFork_CreditLineAcceptsTheRealChainAndRefusesAWrongOne` |
+| 9 | `0x0FD3` `is_height_attested` | `web/lib/relay/source.ts:214` | tells a waiting user whether their block is attested yet | `AttestcoinSurfaces.fork.t.sol::testFork_AttestationBoundsBracketARecentHeight` |
+| 10 | AttestorStash `0x0FD4` `getAttestorsCount` | `contracts/src/AttestedWorldID.sol:373`, `contracts/src/CreditLine.sol:352` | the quorum floor (`ThinQuorum`) and half of the security budget | `test_RevertsOnThinAttestorQuorum`, `test_AThinningAttestorSetLowersTheCeilingLive`, `testFork_AttestorStashReportsBondedAttestors` |
+| 11 | `0x0FD4` `getMinBondRequirement` | `contracts/src/CreditLine.sol:353`, cap at `:197` | total credit ≤ attestors × bond × rate (`ExposureCapExceeded`) | `test_ADrawThatWouldCrossTheCapReverts`, `testFuzz_OutstandingNeverExceedsTheCapAfterADraw`, `testFork_SecurityBudgetIsReadable` |
+| 12 | `EvmV1Decoder.decodeReceiptFields` | `contracts/src/AttestedWorldID.sol:187` | the source tx succeeded (`SourceTxReverted`) | `test_RevertsWhenTheSourceTxReverted` |
+| 13 | `EvmV1Decoder.decodeCommonTxFields` | `contracts/src/AttestedWorldID.sol:206` | callee and calldata (`NotIdentityManager`, `CalldataLogMismatch`) | `test_RevertsWhenTheCalleeIsNotTheIdentityManager`, `test_RevertsWhenCalldataRootsDisagreeWithTheLog` |
+| 14 | `EvmV1Decoder.getLogsByEventSignature` | `contracts/src/AttestedWorldID.sol:292` | exactly one genuine `TreeChanged`, decoys skipped | `test_IgnoresDecoyTreeChangedFromAnotherEmitter`, `test_RevertsOnTwoGenuineTreeChangedLogs` |
+| 15 | Proof builder `GET /api/v1/proof-by-tx/{ck}/{hash}` | `web/lib/relay/prover.ts:53`, `worker/src/proofs.ts` | the single proof a relay sends | `web/test/relay-proof.test.ts` (real fixtures), live self-relay |
+| 16 | Proof builder `POST /api/v1/proof-batch-by-tx/{ck}` | `web/lib/relay/prover.ts:62`, `worker/src/proofs.ts:216` | one continuity proof for a catch-up batch | `relay-proof.test.ts::normalizeBatch`, worker `proofs.test.ts` |
+| 17 | Proof builder `GET /api/v1/attested-height/{ck}` | `worker/src/relay.ts:453` (`waitUntilHeightAttested`) | the worker waits instead of fetching a proof that cannot exist | worker `relay.test.ts` |
+| i | `0x0FD3` `get_supported_chains` (informational) | `web/lib/hooks/use-precompiles.ts` | lists tracked chains on `/relay` | `testFork_ChainInfoReportsTheSourceChains` |
+
+**Declared and live-tested, but not counted as uses.** `get_attestation_bounds`,
+`find_lowest_attested_after` and `get_attestation_genesis_height` are in
+`contracts/src/interfaces/IChainInfo.sol` and read against the live node in
+`AttestcoinSurfaces.fork.t.sol`, but nothing in the product depends on their answer yet.
+`getAttestor` and `isActiveAttestor` are declared in `IAttestorStash.sol` and unused: the attestor set
+cannot be enumerated from the precompile, so there are no ids to ask about.
+
+**Not used because they do not exist.** Absence proofs, storage or MPT proofs, block header and
+timestamp proofs, and slashing data. Write-ability (outbound messages) is not on testnet. A default is
+therefore declared from Creditcoin's own state, never from a claim about Ethereum.
 
 ### 2.1 `verifyAndEmit` through `ASCBase.execute`: the only door
 
@@ -1038,11 +1079,14 @@ removes the operator between World's tree and Creditcoin. It does not remove Wor
 can attest to an Ethereum block that does not exist and a fabricated root would pass `verifyAndEmit`.
 Humanline inherits Attestcoin's security here and cannot do better than it. What it can do, and does,
 is refuse roots when the bonded set is under three and when the source block is under 32 attested
-blocks deep.
+blocks deep, and bound the damage: `CreditLine` v2 never lets total outstanding credit exceed
+`attestors × minimum bond × 10 hUSD per CTC`, read live from `0x0FD4` on every draw. AttestorStash
+publishes no slashing data, so this is a ceiling tied to capital at stake, not a proven loss.
 
-**The relay is single-operator today.** That is a liveness dependency, not a trust dependency: the
-worker is public, the contract does not care who calls it, and nothing is lost while nobody relays.
-We say "single operator" rather than describing one worker as decentralized.
+**The scheduled relay has one operator; relaying does not.** A Vercel Cron pass every five minutes
+and a GitHub Actions backup are ours. Beside them, any user can relay their own pending root from the
+verify card, and `RelayReward` pays anyone who carries a fresh root, so a stranger has a reason to run
+the public worker. We do not describe that as decentralized until someone other than us does it.
 
 **Batch limits are the protocol's.** At most 10 proofs share one continuity proof, inside a
 1,000-block window. A burst of tree activity takes several transactions to relay. The prover's batch

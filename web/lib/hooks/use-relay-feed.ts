@@ -28,7 +28,41 @@ export type RelayRow = {
   timestamp?: bigint;
   /** Recovered from `evidence/relay-log.jsonl` when the worker recorded it. */
   sourceTxHash?: `0x${string}`;
+  /**
+   * `TransactionVerified` events the 0x0FD2 BlockProver precompile emitted in the same
+   * Creditcoin transaction: the on-chain audit trail that the proof was checked.
+   */
+  verifiedByPrecompile?: number;
 };
+
+/** keccak256("TransactionVerified(uint64,uint64,uint64)"), emitted by 0x0FD2 on verifyAndEmit. */
+export const TRANSACTION_VERIFIED_TOPIC =
+  "0x8a8df984523447f746ce8bccdb04c87025c708eb62a2d070bdffb8945c8f391e";
+
+/** A receipt never changes, so each relay transaction's count is fetched once per tab. */
+const verifiedCounts = new Map<string, number>();
+
+async function precompileVerifications(
+  client: ReturnType<typeof getPublicClient>,
+  hashes: readonly `0x${string}`[],
+): Promise<void> {
+  const todo = hashes.filter((h) => !verifiedCounts.has(h));
+  await Promise.all(
+    todo.map(async (hash) => {
+      try {
+        const receipt = await client.getTransactionReceipt({ hash });
+        const count = receipt.logs.filter(
+          (l) =>
+            l.address.toLowerCase() === "0x0000000000000000000000000000000000000fd2" &&
+            l.topics[0] === TRANSACTION_VERIFIED_TOPIC,
+        ).length;
+        verifiedCounts.set(hash, count);
+      } catch {
+        // unknown for now; the next refresh tries again
+      }
+    }),
+  );
+}
 
 export type RelayFeed = {
   rows: RelayRow[];
@@ -124,10 +158,13 @@ export function useRelayFeed(options: { limit?: number; refetchInterval?: number
         }),
       );
 
+      await precompileVerifications(client, [...new Set(merged.map((r) => r.creditcoinTxHash))]);
+
       return {
         rows: merged.map((row) => ({
           ...row,
           timestamp: timestamps.get(row.creditcoinBlock),
+          verifiedByPrecompile: verifiedCounts.get(row.creditcoinTxHash),
         })),
         bounded,
         scannedFrom,

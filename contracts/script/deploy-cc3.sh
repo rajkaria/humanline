@@ -57,6 +57,8 @@ SOURCE_BLOCK_TIME=12        # seconds per block on both Ethereum chains; dates r
 INITIAL_LIMIT=25000000     # 25 hUSD
 MAX_LIMIT=2000000000       # 2,000 hUSD
 FEE_BPS=100                # 1% per term
+# Outstanding hUSD base units allowed per 1 CTC bonded by the source chain's attestors (10 hUSD).
+EXPOSURE_PER_BONDED_CTC="${EXPOSURE_PER_BONDED_CTC:-10000000}"
 
 if [[ "$PROFILE" == "demo" ]]; then
   TERM_SECONDS="${TERM_SECONDS:-600}"
@@ -141,9 +143,14 @@ fi
 
 deploy HumanRegistry HumanRegistry "constructor(address,string,string)" \
   "$WORLD_ID_ADDRESS" "$WORLD_APP_ID" "$WORLD_ACTION"
-deploy CreditLine CreditLine "constructor(address,address,uint256,uint256,uint256,uint64,uint64)" \
+if [[ "$WORLD_ID_SOURCE" == "mainnet" ]]; then
+  SECURITY_CHAIN_KEY=$MAINNET_CHAIN_KEY; SOURCE_CHAIN_ID=1
+else
+  SECURITY_CHAIN_KEY=$SEPOLIA_CHAIN_KEY; SOURCE_CHAIN_ID=11155111
+fi
+deploy CreditLine CreditLine "constructor(address,address,uint256,uint256,uint256,uint64,uint64,uint64,uint64,uint256)" \
   "$(addr_of HUSD)" "$(addr_of HumanRegistry)" "$INITIAL_LIMIT" "$MAX_LIMIT" "$FEE_BPS" \
-  "$TERM_SECONDS" "$GRACE_SECONDS"
+  "$TERM_SECONDS" "$GRACE_SECONDS" "$SECURITY_CHAIN_KEY" "$SOURCE_CHAIN_ID" "$EXPOSURE_PER_BONDED_CTC"
 deploy HumanGate HumanGate "constructor(address)" "$(addr_of HumanRegistry)"
 
 CHAIN_ID="$("$CAST" chain-id --rpc-url "$RPC_URL")"
@@ -154,7 +161,8 @@ ADDRESSES="$ADDRESSES_JSON" TXHASHES="$TXHASHES_JSON" CHAIN_ID="$CHAIN_ID" DEPLO
 PROFILE="$PROFILE" WORLD_ID_SOURCE="$WORLD_ID_SOURCE" WORLD_APP_ID="$WORLD_APP_ID" \
 WORLD_ACTION="$WORLD_ACTION" TERM_SECONDS="$TERM_SECONDS" GRACE_SECONDS="$GRACE_SECONDS" \
 INITIAL_LIMIT="$INITIAL_LIMIT" MAX_LIMIT="$MAX_LIMIT" FEE_BPS="$FEE_BPS" OUT="$OUT" \
-SOURCE_BLOCK_TIME="$SOURCE_BLOCK_TIME" \
+SOURCE_BLOCK_TIME="$SOURCE_BLOCK_TIME" SECURITY_CHAIN_KEY="$SECURITY_CHAIN_KEY" \
+SOURCE_CHAIN_ID="$SOURCE_CHAIN_ID" EXPOSURE_PER_BONDED_CTC="$EXPOSURE_PER_BONDED_CTC" \
 bun -e '
 const rows = (s) => Object.fromEntries((s ?? "").split("\n").filter(Boolean).map((l) => l.split("\t")));
 const out = {
@@ -172,6 +180,9 @@ const out = {
     maxLimit: Number(process.env.MAX_LIMIT),
     feeBps: Number(process.env.FEE_BPS),
     sourceBlockTime: Number(process.env.SOURCE_BLOCK_TIME),
+    securityChainKey: Number(process.env.SECURITY_CHAIN_KEY),
+    sourceChainId: Number(process.env.SOURCE_CHAIN_ID),
+    exposurePerBondedCtc: Number(process.env.EXPOSURE_PER_BONDED_CTC),
   },
   deployedAt: Math.floor(Date.now() / 1000),
   deployer: process.env.DEPLOYER,

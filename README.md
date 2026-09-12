@@ -37,14 +37,14 @@ Both share one hUSD and both read the same two `AttestedWorldID` instances, so e
 `/relay` backs both. The switch is on the page — you are not asked to trust that the other one
 exists.
 
-Six contracts on the reproducible deployment, all verified on Blockscout:
+Seven contracts on the reproducible deployment, all verified on Blockscout:
 
 | Contract | Address |
 |---|---|
 | `AttestedWorldID` (Ethereum mainnet, chainKey 3) | [`0x1122ef3fa4ab0693809e42a00b2476efcf4468ad`](https://creditcoin-testnet.blockscout.com/address/0x1122ef3fa4ab0693809e42a00b2476efcf4468ad) |
 | `AttestedWorldID` (Ethereum Sepolia, chainKey 1) | [`0x3a7c3cc67034197208923587b8dc5c4674cbcef7`](https://creditcoin-testnet.blockscout.com/address/0x3a7c3cc67034197208923587b8dc5c4674cbcef7) |
 | `HumanRegistry` | [`0x62c2fd99ea587e4b466175ad248468782bd5298d`](https://creditcoin-testnet.blockscout.com/address/0x62c2fd99ea587e4b466175ad248468782bd5298d) |
-| `CreditLine` | [`0x1bd40163e41e44d2f139d95de88b640f6ea461f7`](https://creditcoin-testnet.blockscout.com/address/0x1bd40163e41e44d2f139d95de88b640f6ea461f7) |
+| `CreditLine` v2 (attestor-bond exposure cap) | [`0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9`](https://creditcoin-testnet.blockscout.com/address/0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9) |
 | `hUSD` (test stablecoin, 6 decimals) | [`0x4bd7f4c6648deb8f107932572ce7e85aca259640`](https://creditcoin-testnet.blockscout.com/address/0x4bd7f4c6648deb8f107932572ce7e85aca259640) |
 | `HumanGate` (example integration) | [`0xa3e021de49cec8819ea1bd37a8b5a9df005b776c`](https://creditcoin-testnet.blockscout.com/address/0xa3e021de49cec8819ea1bd37a8b5a9df005b776c) |
 | `RelayReward` (relayer vault, shared by both deployments) | [`0x9766480a872ad7df2a5cf86f9e307804a3f7afe0`](https://creditcoin-testnet.blockscout.com/address/0x9766480a872ad7df2a5cf86f9e307804a3f7afe0) |
@@ -55,7 +55,7 @@ Three more for the Orb-tree deployment, also Blockscout-verified (hUSD and both
 | Contract | Address |
 |---|---|
 | `HumanRegistry` (Orb tree) | [`0x53fcba2cd9296b22635c67d5e73777b4e5db96af`](https://creditcoin-testnet.blockscout.com/address/0x53fcba2cd9296b22635c67d5e73777b4e5db96af) |
-| `CreditLine` (30-day terms) | [`0x86e38ce7173288372b638c0b1839fc9c6923ab82`](https://creditcoin-testnet.blockscout.com/address/0x86e38ce7173288372b638c0b1839fc9c6923ab82) |
+| `CreditLine` v2 (30-day terms, exposure cap) | [`0x8063982df3250c2f21f2f18f1cf340ec75c1c1cb`](https://creditcoin-testnet.blockscout.com/address/0x8063982df3250c2f21f2f18f1cf340ec75c1c1cb) |
 | `HumanGate` (Orb tree) | [`0x544264e52a12fffa5c8640eb5a91b7f4628d5b93`](https://creditcoin-testnet.blockscout.com/address/0x544264e52a12fffa5c8640eb5a91b7f4628d5b93) |
 
 Three commands, no wallet, no funds:

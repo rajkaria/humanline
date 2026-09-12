@@ -6,9 +6,9 @@ import { toast } from "sonner";
 import type { Hex } from "viem";
 import { useAccount, useReadContracts, useWriteContract } from "wagmi";
 
-import { attestedWorldIdAbi, relayRewardAbi } from "@/lib/abi";
+import { attestedWorldIdAbi, nativeQueryVerifierAbi, relayRewardAbi } from "@/lib/abi";
 import { CONTRACTS } from "@/lib/contracts";
-import { creditcoinTestnet, explorerUrl, type SourceChainKey } from "@/lib/chains";
+import { creditcoinTestnet, explorerUrl, PRECOMPILES, type SourceChainKey } from "@/lib/chains";
 import { describeError } from "@/lib/format";
 import { getPublicClient } from "@/lib/public-client";
 import { planFromJson, type RelayPlan, type RelayPlanJson } from "@/lib/relay/plan";
@@ -31,6 +31,7 @@ type PlanResponse = {
   latestRoot: string | null;
   attestedTip: number;
   finalityDepth: number;
+  targetAttested: boolean | null;
   plan: RelayPlanJson;
 };
 
@@ -164,6 +165,20 @@ export function useSelfRelay(options: {
         }
         const args = argsFromJson(body.args);
 
+        // Free preflight: ask the 0x0FD2 precompile itself, with a view call, whether this proof
+        // is valid before anything else happens. A stale or tampered proof stops here with a
+        // plain answer instead of an opaque revert later.
+        setPhase("simulating");
+        const valid = await client.readContract({
+          address: PRECOMPILES.blockProver,
+          abi: nativeQueryVerifierAbi,
+          functionName: "verify",
+          args,
+        });
+        if (!valid) {
+          throw new Error("The 0x0FD2 precompile says this proof does not verify (it may have gone stale). Try again for a fresh proof.");
+        }
+
         // Through the RelayReward vault when one is deployed (the user is paid for fresh roots),
         // straight to AttestedWorldID otherwise. Dry-run first either way: a revert here costs
         // nothing, and it names the reason.
@@ -251,6 +266,8 @@ export function useSelfRelay(options: {
     planError: query.error ? describeError(query.error) : null,
     planLoading: query.isLoading,
     attestedTip: query.data?.attestedTip,
+    /** Whether 0x0FD3 already has a continuity proof reaching the target update's block. */
+    targetAttested: query.data?.targetAttested ?? undefined,
     phase,
     progress,
     txs,

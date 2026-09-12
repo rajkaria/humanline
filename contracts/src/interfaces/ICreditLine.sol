@@ -45,6 +45,10 @@ interface ICreditLine {
     /// @notice The lender does not hold that many shares. (Not in the plan sketch; a named error
     ///         beats an arithmetic panic.)
     error InsufficientShares(uint256 have, uint256 want);
+    /// @notice The draw would take total outstanding principal past what the attestor quorum has bonded.
+    error ExposureCapExceeded(uint256 wouldOwe, uint256 cap);
+    /// @notice ChainInfo does not record `chainKey` as the claimed source chain.
+    error WrongSecurityChain(uint64 chainKey, uint64 recordedChainId, uint64 claimedChainId);
 
     function ASSET() external view returns (address);
     function REGISTRY() external view returns (address);
@@ -53,6 +57,12 @@ interface ICreditLine {
     function FEE_BPS() external view returns (uint256);
     function TERM() external view returns (uint64);
     function GRACE() external view returns (uint64);
+    /// @notice Attestcoin chain key whose attestor bonds back this pool (the World ID source chain).
+    function SECURITY_CHAIN_KEY() external view returns (uint64);
+    /// @notice EVM chain id ChainInfo confirmed for `SECURITY_CHAIN_KEY` at deployment.
+    function SOURCE_CHAIN_ID() external view returns (uint64);
+    /// @notice Asset base units of outstanding principal allowed per 1 CTC of bonded attestor capital.
+    function EXPOSURE_PER_BONDED_CTC() external view returns (uint256);
 
     function deposit(uint256 assets) external returns (uint256 shares);
     function withdraw(uint256 shares) external returns (uint256 assets);
@@ -68,4 +78,8 @@ interface ICreditLine {
     function totalShares() external view returns (uint256);
     function sharesOf(address lender) external view returns (uint256);
     function isInDefault(uint256 human) external view returns (bool);
+    /// @notice Live security budget: bonded attestors, minimum bond (wei) and the resulting cap.
+    function securityBudget() external view returns (uint32 attestors, uint128 minBond, uint256 cap);
+    /// @notice Maximum total outstanding principal right now.
+    function exposureCap() external view returns (uint256);
 }

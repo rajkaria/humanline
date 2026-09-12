@@ -462,6 +462,31 @@ export const creditLineAbi = [
   { type: "function", name: "FEE_BPS", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
   { type: "function", name: "TERM", stateMutability: "view", inputs: [], outputs: [{ type: "uint64" }] },
   { type: "function", name: "GRACE", stateMutability: "view", inputs: [], outputs: [{ type: "uint64" }] },
+  { type: "function", name: "SECURITY_CHAIN_KEY", stateMutability: "view", inputs: [], outputs: [{ type: "uint64" }] },
+  { type: "function", name: "SOURCE_CHAIN_ID", stateMutability: "view", inputs: [], outputs: [{ type: "uint64" }] },
+  { type: "function", name: "EXPOSURE_PER_BONDED_CTC", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  {
+    type: "function",
+    name: "securityBudget",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [
+      { name: "attestors", type: "uint32" },
+      { name: "minBond", type: "uint128" },
+      { name: "cap", type: "uint256" },
+    ],
+  },
+  { type: "function", name: "exposureCap", stateMutability: "view", inputs: [], outputs: [{ name: "cap", type: "uint256" }] },
+  { type: "error", name: "ExposureCapExceeded", inputs: [{ name: "wouldOwe", type: "uint256" }, { name: "cap", type: "uint256" }] },
+  {
+    type: "error",
+    name: "WrongSecurityChain",
+    inputs: [
+      { name: "chainKey", type: "uint64" },
+      { name: "recordedChainId", type: "uint64" },
+      { name: "claimedChainId", type: "uint64" },
+    ],
+  },
 
   {
     type: "function",
@@ -784,7 +809,7 @@ export const chainInfoAttestationAbi = [
   },
 ] as const;
 
-/** `IAttestorStash` at 0x0FD4. */
+/** `IAttestorStash` at 0x0FD4: bonded attestor count and minimum bond (wei of CTC) per chain key. */
 export const attestorStashAbi = [
   {
     type: "function",
@@ -792,6 +817,52 @@ export const attestorStashAbi = [
     stateMutability: "view",
     inputs: [{ name: "chainKey", type: "uint64" }],
     outputs: [{ type: "uint32" }],
+  },
+  {
+    type: "function",
+    name: "getMinBondRequirement",
+    stateMutability: "view",
+    inputs: [{ name: "chainKey", type: "uint64" }],
+    outputs: [{ name: "minBond", type: "uint128" }],
+  },
+] as const;
+
+/** ChainInfo lookups by chain key: which EVM chain a key is, and whether a height is provable. */
+export const chainInfoLookupAbi = [
+  {
+    type: "function",
+    name: "get_chain_by_key",
+    stateMutability: "view",
+    inputs: [{ name: "chainKey", type: "uint64" }],
+    outputs: [
+      {
+        name: "result",
+        type: "tuple",
+        components: [
+          {
+            name: "info",
+            type: "tuple",
+            components: [
+              { name: "chainKey", type: "uint64" },
+              { name: "chainId", type: "uint64" },
+              { name: "chainName", type: "bytes" },
+              { name: "chainEncoding", type: "uint8" },
+            ],
+          },
+          { name: "exists", type: "bool" },
+        ],
+      },
+    ],
+  },
+  {
+    type: "function",
+    name: "is_height_attested",
+    stateMutability: "view",
+    inputs: [
+      { name: "chainKey", type: "uint64" },
+      { name: "targetHeight", type: "uint64" },
+    ],
+    outputs: [{ name: "isAttested", type: "bool" }],
   },
 ] as const;
 
@@ -817,6 +888,40 @@ export const nativeQueryVerifierAbi = [
       {
         name: "merkleProof",
         type: "tuple",
+        components: [
+          { name: "root", type: "bytes32" },
+          {
+            name: "siblings",
+            type: "tuple[]",
+            components: [
+              { name: "hash", type: "bytes32" },
+              { name: "isLeft", type: "bool" },
+            ],
+          },
+        ],
+      },
+      {
+        name: "continuityProof",
+        type: "tuple",
+        components: [
+          { name: "lowerEndpointDigest", type: "bytes32" },
+          { name: "roots", type: "bytes32[]" },
+        ],
+      },
+    ],
+    outputs: [{ type: "bool" }],
+  },
+  {
+    type: "function",
+    name: "verify",
+    stateMutability: "view",
+    inputs: [
+      { name: "chainKey", type: "uint64" },
+      { name: "heights", type: "uint64[]" },
+      { name: "encodedTransactions", type: "bytes[]" },
+      {
+        name: "merkleProofs",
+        type: "tuple[]",
         components: [
           { name: "root", type: "bytes32" },
           {

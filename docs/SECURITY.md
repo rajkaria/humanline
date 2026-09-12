@@ -11,9 +11,11 @@ Deployed contracts, CC3 testnet (chainId 102031):
 | `AttestedWorldID` (mainnet, chainKey 3) | `0x1122ef3fa4ab0693809e42a00b2476efcf4468ad` |
 | `AttestedWorldID` (Sepolia, chainKey 1) | `0x3a7c3cc67034197208923587b8dc5c4674cbcef7` |
 | `HumanRegistry` | `0x62c2fd99ea587e4b466175ad248468782bd5298d` |
-| `CreditLine` | `0x1bd40163e41e44d2f139d95de88b640f6ea461f7` |
+| `CreditLine` v2 (staging pool) | `0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9` |
+| `CreditLine` v2 (Orb pool) | `0x8063982df3250c2f21f2f18f1cf340ec75c1c1cb` |
 | `hUSD` | `0x4bd7f4c6648deb8f107932572ce7e85aca259640` |
 | `HumanGate` | `0xa3e021de49cec8819ea1bd37a8b5a9df005b776c` |
+| `RelayReward` | `0x9766480a872ad7df2a5cf86f9e307804a3f7afe0` |
 
 There are no admin keys, no pause switch and no upgrade path in any of them. Every configured constant is an immutable set at construction. Anyone can run the relay.
 
@@ -99,6 +101,8 @@ Attestcoin's attestors observe source chains and attest to block headers. CC3 te
 If a quorum of attestors colludes, they can attest to an Ethereum block that does not exist, and a fabricated World ID root would pass `verifyAndEmit`. Humanline inherits Attestcoin's security here and cannot do better than it. What we can do, and do, is refuse to accept roots when the set is thin and when the source block is shallow. The finality depth of 32 blocks means a colluding set would also have to survive Ethereum finality, not just a momentary fork.
 
 This is the assumption every Attestcoin application makes. It is the reason the protocol's decentralization roadmap matters to us.
+
+Humanline also sizes its exposure to it. `CreditLine` v2 caps total outstanding principal at `getAttestorsCount(chainKey) × getMinBondRequirement(chainKey) × EXPOSURE_PER_BONDED_CTC`, read from `0x0FD4` on every draw: on testnet that is 7 × 100 CTC × 10 hUSD = 7,000 hUSD for the staging pool and 4 × 100 CTC × 10 hUSD = 4,000 hUSD for the Orb pool. A thinning attestor set lowers the ceiling immediately, and a set reporting zero stops new draws while repayments, withdrawals and defaults keep working. The constructor also refuses a chain key that ChainInfo `0x0FD3` does not record as the claimed EVM chain. The precompile publishes no slashing data, so the cap ties credit to capital at stake rather than to a proven loss (tests: `CreditLineExposure.t.sol`, live: `AttestcoinSurfaces.fork.t.sol`).
 
 ### 2.2 World's identity operator
 

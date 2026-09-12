@@ -18,8 +18,8 @@ import {
   type PublicClient,
 } from "viem";
 
-import { attestedWorldIdAbi } from "@/lib/abi";
-import { creditcoinTestnet, type SourceChainKey } from "@/lib/chains";
+import { attestedWorldIdAbi, nativeQueryVerifierAbi } from "@/lib/abi";
+import { creditcoinTestnet, PRECOMPILES, type SourceChainKey } from "@/lib/chains";
 import { attestedWorldIdFor, buildRelayPlan, newestFinalRoot } from "@/lib/relay/build-plan";
 import { toExecuteBatchArgs } from "@/lib/relay/proof";
 import { fetchRelayProof } from "@/lib/relay/prover";
@@ -103,6 +103,15 @@ export async function relayPass(options: {
           }
           const proof = await fetchRelayProof(chainKey, batch.changes.map((c) => c.txHash));
           const args = toExecuteBatchArgs(proof);
+
+          // Free preflight through the precompile's view `verify`, before any gas estimate.
+          const valid = await client.readContract({
+            address: PRECOMPILES.blockProver,
+            abi: nativeQueryVerifierAbi,
+            functionName: "verify",
+            args,
+          });
+          if (!valid) throw new Error("0x0FD2 verify() returned false for a freshly built proof");
 
           let gas: bigint;
           try {

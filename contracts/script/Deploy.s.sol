@@ -44,6 +44,8 @@ contract Deploy is Script {
     uint256 internal constant INITIAL_LIMIT = 25e6;
     uint256 internal constant MAX_LIMIT = 2000e6;
     uint256 internal constant FEE_BPS = 100;
+    /// @notice Outstanding hUSD allowed per 1 CTC of bonded attestor capital (10 hUSD, 6 decimals).
+    uint256 internal constant EXPOSURE_PER_BONDED_CTC = 10e6;
 
     uint64 internal constant PROD_TERM = 30 days;
     uint64 internal constant PROD_GRACE = 7 days;
@@ -98,7 +100,16 @@ contract Deploy is Script {
         HumanRegistry registry =
             new HumanRegistry(address(useMainnet ? mainnetRelay : sepoliaRelay), appId, action);
         CreditLine creditLine = new CreditLine(
-            address(husd), address(registry), INITIAL_LIMIT, MAX_LIMIT, FEE_BPS, term, grace
+            address(husd),
+            address(registry),
+            INITIAL_LIMIT,
+            MAX_LIMIT,
+            FEE_BPS,
+            term,
+            grace,
+            useMainnet ? MAINNET_CHAIN_KEY : SEPOLIA_CHAIN_KEY,
+            useMainnet ? uint64(1) : uint64(11_155_111),
+            EXPOSURE_PER_BONDED_CTC
         );
         HumanGate gate = new HumanGate(address(registry));
 

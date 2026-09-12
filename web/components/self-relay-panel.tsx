@@ -47,7 +47,10 @@ export function SelfRelayPanel({
   onRelay,
   rewardPerRoot,
   vaultAvailable,
+  targetAttested,
 }: {
+  /** ChainInfo `is_height_attested` for the update's block, when known. */
+  targetAttested?: boolean;
   /** RelayReward vault terms; omitted when no vault is deployed. */
   rewardPerRoot?: bigint;
   vaultAvailable?: bigint;
@@ -99,7 +102,7 @@ export function SelfRelayPanel({
           {plan.reason}
         </p>
       ) : waiting ? (
-        <AttestationWait plan={plan} sourceLabel={sourceLabel} />
+        <AttestationWait plan={plan} sourceLabel={sourceLabel} targetAttested={targetAttested} />
       ) : ready ? (
         <p className="text-xs text-muted-foreground" data-testid="self-relay-summary">
           {updates === 1 ? "1 World ID update" : `${updates} World ID updates`} to carry ·{" "}
@@ -186,9 +189,11 @@ export function SelfRelayPanel({
 function AttestationWait({
   plan,
   sourceLabel,
+  targetAttested,
 }: {
   plan: Extract<RelayPlan, { status: "waiting" }>;
   sourceLabel: string;
+  targetAttested?: boolean;
 }) {
   // The update's own block is where the wait starts; `needHeight` is where it ends.
   const lastBlock = plan.chain[plan.chain.length - 1]!.blockNumber;
@@ -202,6 +207,13 @@ function AttestationWait({
         the contract requires (attested {plan.attestedTip.toLocaleString()} of{" "}
         {plan.needHeight.toLocaleString()}). Roughly {formatDuration(plan.etaSeconds)} to go.
       </p>
+      {targetAttested !== undefined ? (
+        <p className="text-[11px] text-muted-foreground" data-testid="self-relay-attested">
+          {targetAttested
+            ? "✓ ChainInfo 0x0FD3: your update's block is already attested — it only needs burying deeper."
+            : "ChainInfo 0x0FD3: your update's block is not attested yet — attestors are still catching up to it."}
+        </p>
+      ) : null}
       <div className="h-1 overflow-hidden rounded-full bg-muted" aria-hidden>
         <div className="h-full rounded-full bg-brand/60 transition-all" style={{ width: `${covered * 100}%` }} />
       </div>

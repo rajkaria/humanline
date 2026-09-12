@@ -31,6 +31,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and 7 d, pending relayable roots, and which relays came from non-operator wallets. All
   recomputed from `RootRelayed`, CC3 and source block timestamps, and `TreeChanged`.
 - **`/api/relay/health`**, a watchdog for uptime monitors: `200` ok, `503` late or stalled.
+- **CreditLine v2: the attestor quorum's bonded capital is now a lending parameter.** Total
+  outstanding principal is capped at `getAttestorsCount × getMinBondRequirement × 10 hUSD per CTC`,
+  read live from AttestorStash `0x0FD4` on every draw (testnet: 7,000 hUSD staging pool, 4,000 hUSD
+  Orb pool). The constructor asserts through ChainInfo `get_chain_by_key` that the chain key is the
+  claimed EVM chain. Deployed for both profiles (`0x49d5f2ea…`, `0x8063982d…`, Blockscout-verified),
+  v1 liquidity migrated, and a live loop recorded in `evidence/e2e-credit-loop-v2*.log`. 10 unit
+  tests (incl. a 512-run fuzz) and 4 live `CC3_FORK` tests for every new precompile read.
+- **Deeper precompile use in the app.** `/relay` reads the real ChainInfo getters (attested and
+  checkpoint tips, `get_chain_by_key` check) and AttestorStash's minimum bond and bonded capital;
+  the relay feed marks each relay transaction with the `TransactionVerified` events 0x0FD2 emitted;
+  self-relay and the cron pass preflight every proof with the precompile's view `verify` before
+  estimating gas; the self-relay wait shows ChainInfo `is_height_attested` for the user's block.
 - **`RelayReward`**, a permissionless relayer vault on CC3 testnet
   (`0x9766480a872ad7df2a5cf86f9e307804a3f7afe0`, Blockscout-verified, funded 25 tCTC). It forwards
   to `AttestedWorldID.executeBatch` and pays 0.002 tCTC per root the call recorded, only when the

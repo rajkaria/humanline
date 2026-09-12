@@ -1,0 +1,9 @@
+profile demo  CreditLine v2 0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9  wallet 0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3
+human 0x6d6d24ba1cb97b3d…
+security budget (live 0x0FD4): 7 attestors × 100 CTC = cap 7000 hUSD; outstanding 0 hUSD
+faucet on cooldown; repaying from borrowed funds plus pool shares
+borrow 20 hUSD (re-reads the cap on-chain): 0xe10a2f318ced9fc29adfb56255429c3b95a05869e46f841265524bf045a4ab23 status=success gas=173544
+after borrow: principal 20.2 hUSD of limit 31.25 hUSD; pool outstanding 20 hUSD of cap 7000 hUSD
+approve: 0x860f53a1e792bedae5e56a2cceaca8bb062574d9a0a3c416b2f27d0ac9eb0bcf status=success gas=45933
+repay 20.2 hUSD: 0x4119bfed8818b8ed08ac35455e5025e3a5f3594bde58dd9c848cb32cbdd5f605 status=success gas=168616
+after repay: principal 0 hUSD, limit 39.0625 hUSD, loans repaid 2

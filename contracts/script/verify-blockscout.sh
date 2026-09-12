@@ -75,8 +75,14 @@ verify AttestedWorldIDSepolia src/AttestedWorldID.sol:AttestedWorldID "construct
 verify HUSD src/HUSD.sol:HUSD ""
 verify HumanRegistry src/HumanRegistry.sol:HumanRegistry "constructor(address,string,string)" \
   "$WORLD_ID_ADDRESS" "$APP_ID" "$ACTION"
-verify CreditLine src/CreditLine.sol:CreditLine "constructor(address,address,uint256,uint256,uint256,uint64,uint64)" \
-  "$HUSD_ADDR" "$REGISTRY_ADDR" "$INITIAL_LIMIT" "$MAX_LIMIT" "$FEE_BPS" "$TERM_SECONDS" "$GRACE_SECONDS"
+if EXPOSURE="$(field config.exposurePerBondedCtc 2>/dev/null)"; then
+  # CreditLine v2: security budget bound to the World ID source chain's attestor bonds.
+  verify CreditLine src/CreditLine.sol:CreditLine "constructor(address,address,uint256,uint256,uint256,uint64,uint64,uint64,uint64,uint256)" \
+    "$HUSD_ADDR" "$REGISTRY_ADDR" "$INITIAL_LIMIT" "$MAX_LIMIT" "$FEE_BPS" "$TERM_SECONDS" "$GRACE_SECONDS" \
+    "$(field config.securityChainKey)" "$(field config.sourceChainId)" "$EXPOSURE"
+else
+  echo "  CreditLine — v1 deployment (no exposure cap); its source is in git history, skipping"
+fi
 verify HumanGate src/examples/HumanGate.sol:HumanGate "constructor(address)" "$REGISTRY_ADDR"
 
 # RelayReward is shared by both profiles and recorded by script/deploy-relay-reward.sh; its

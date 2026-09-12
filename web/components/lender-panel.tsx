@@ -4,6 +4,7 @@ import { LandmarkIcon, MinusIcon, PlusIcon } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
+import { SecurityBudget } from "@/components/security-budget";
 import { Stat, StatRow } from "@/components/stat";
 import { Button } from "@/components/ui/button";
 import {
@@ -161,6 +162,8 @@ export function LenderPanel({
             aria-label="Pool utilisation"
           />
         </div>
+
+        {creditLine ? <SecurityBudget creditLine={creditLine} symbol={symbol} /> : null}
 
         <div className="grid gap-4 border-t border-foreground/10 pt-4 sm:grid-cols-2 sm:gap-6">
           <form

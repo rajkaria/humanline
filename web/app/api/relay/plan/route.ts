@@ -79,6 +79,8 @@ export async function GET(request: Request) {
       attestedTip: built.state.attestedTip,
       finalityDepth: built.state.finalityDepth,
       sourceHead: built.sourceHead,
+      /** ChainInfo `is_height_attested` for the target update's block (null when not asked). */
+      targetAttested: built.targetAttested ?? null,
       plan: planToJson(built.plan),
     };
     cache.set(key, { at: Date.now(), body });
