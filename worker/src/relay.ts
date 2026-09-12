@@ -14,6 +14,7 @@ import {
   blockProverClient,
   chainInfoProvider,
   computeQueryId,
+  isNoRootsSeen,
   proofBuilder,
   revertReason,
 } from "./cc3";
@@ -132,7 +133,10 @@ const PERMANENT_ERRORS = [
 
 export function classifyRevert(reason: string): RevertClass {
   const r = reason ?? "";
-  if (r.includes("Query already processed")) return "already-processed";
+  // Two spellings reach us: `ASCBase.execute`'s require string ("Query already processed")
+  // and AttestedWorldID's own custom error on the batch path, which ethers renders as
+  // "QueryAlreadyProcessed(0x…)". Both mean the query is already recorded, i.e. success.
+  if (/Query ?[Aa]lready ?[Pp]rocessed/.test(r)) return "already-processed";
   if (r.includes("NotFinal") || r.includes("ThinQuorum")) return "transient";
   if (r.includes("UnknownPreRoot")) return "transient"; // an earlier root must land first
   if (r.includes("Proof of inclusion verification failed")) return "stale-proof";
@@ -208,52 +212,118 @@ export async function executeWithRetry<B, R>(
   }
 }
 
+function isSettledOutcome(status: BatchOutcome["status"]): boolean {
+  return status === "relayed" || status === "already";
+}
+
 /**
- * Highest block covered by the *leading run* of settled batches. Stopping at the first
- * unsettled batch is what makes "never skip" true: a failure keeps every later block in
- * scope for the next pass instead of the cursor scanning past it.
+ * Highest block the cursor may move past, or undefined when it may not move at all.
+ *
+ * Two rules, both needed for "never skip":
+ *  1. Only the *leading run* of settled batches counts — a failure stops the advance, so
+ *     later blocks stay in scope even if a subsequent batch succeeded.
+ *  2. The result is clamped below the first block any unsettled batch touches. Batches can
+ *     share a block, because `groupIntoBatches` splits on member count rather than on block
+ *     boundaries: a block holding two TreeChanged txs can straddle the 10-member limit.
+ *     Without this clamp a settled batch ending at block B would push the cursor to B+1
+ *     while B still held an unsettled tx — that root would never be rescanned, and every
+ *     later root would then revert UnknownPreRoot forever.
  */
 export function settledThrough(
   outcomes: ReadonlyArray<{ status: BatchOutcome["status"]; blockRange: [number, number] }>,
 ): number | undefined {
-  let advanceTo: number | undefined;
+  let settledMax: number | undefined;
+  let leading = true;
+  let firstUnsettledBlock: number | undefined;
   for (const o of outcomes) {
-    if (o.status !== "relayed" && o.status !== "already") break;
-    advanceTo = o.blockRange[1];
+    if (isSettledOutcome(o.status)) {
+      if (leading) settledMax = o.blockRange[1];
+      continue;
+    }
+    leading = false;
+    const start = o.blockRange[0];
+    if (firstUnsettledBlock === undefined || start < firstUnsettledBlock) {
+      firstUnsettledBlock = start;
+    }
   }
-  return advanceTo;
+  if (settledMax === undefined) return undefined;
+  if (firstUnsettledBlock === undefined) return settledMax;
+  const clamped = Math.min(settledMax, firstUnsettledBlock - 1);
+  return clamped < 0 ? undefined : clamped;
 }
 
 // ---------------------------------------------------------------------------
 // On-chain cursor recovery
 // ---------------------------------------------------------------------------
 
+/** CC3's public RPC enforces a 10 s query timeout, so log windows must stay modest. */
+export const CC3_LOG_WINDOW = 10_000;
+const CC3_LOG_WINDOW_MIN = 500;
+
+export function isRetryableLogError(err: unknown): boolean {
+  const msg = (err as Error)?.message ?? String(err);
+  return /timeout|too many results|response size|limit exceeded|range/i.test(msg);
+}
+
+/**
+ * One `queryFilter` window, halving the span and retrying when the node complains about
+ * timeouts or result size. Returns the logs plus the window size that actually worked.
+ */
+async function queryLogsAdaptive(
+  contract: Contract,
+  filter: unknown,
+  start: number,
+  end: number,
+  onShrink?: (span: number, err: Error) => void,
+): Promise<{ logs: unknown[]; windowSize: number }> {
+  let from = start;
+  let span = end - start + 1;
+  const collected: unknown[] = [];
+  while (from <= end) {
+    const to = Math.min(end, from + span - 1);
+    try {
+      collected.push(...(await contract.queryFilter(filter as never, from, to)));
+      from = to + 1;
+    } catch (e) {
+      if (!isRetryableLogError(e) || span <= CC3_LOG_WINDOW_MIN) throw e;
+      span = Math.max(CC3_LOG_WINDOW_MIN, Math.floor(span / 2));
+      onShrink?.(span, e as Error);
+    }
+  }
+  return { logs: collected, windowSize: span };
+}
+
 /**
  * Highest `sourceBlock` in a RootRelayed event, found by walking CC3 backwards in windows.
  * Returns undefined when the contract has never relayed anything.
+ *
+ * `fromBlock` should be the contract's deployment block: without it the walk trawls millions
+ * of blocks that cannot contain the event, and CC3's 10 s query timeout starts rejecting
+ * windows. `scanForWork` derives it from the deployment file's `txHashes`.
  */
 export async function lastRelayedSourceBlock(
   provider: JsonRpcProvider,
   address: string,
-  opts: { windowSize?: number; maxLookback?: number } = {},
+  opts: { windowSize?: number; maxLookback?: number; fromBlock?: number } = {},
 ): Promise<number | undefined> {
   const contract = attestedWorldId(address, provider);
   const head = await provider.getBlockNumber();
-  const windowSize = opts.windowSize ?? 50_000;
+  let windowSize = opts.windowSize ?? CC3_LOG_WINDOW;
   const maxLookback = opts.maxLookback ?? 2_000_000;
-  const floor = Math.max(0, head - maxLookback);
+  const floor = Math.max(0, opts.fromBlock ?? head - maxLookback);
   const filter = contract.filters.RootRelayed!();
   for (let end = head; end >= floor; end -= windowSize) {
     const start = Math.max(floor, end - windowSize + 1);
-    const logs = await contract.queryFilter(filter, start, end);
-    if (logs.length > 0) {
-      let best = 0;
-      for (const log of logs) {
-        const sourceBlock = Number((log as { args?: unknown[] }).args?.[1] ?? 0);
-        if (sourceBlock > best) best = sourceBlock;
-      }
-      if (best > 0) return best;
+    const res = await queryLogsAdaptive(contract, filter, start, end, (span) => {
+      windowSize = span;
+    });
+    windowSize = Math.min(windowSize, res.windowSize);
+    let best = 0;
+    for (const log of res.logs) {
+      const sourceBlock = Number((log as { args?: unknown[] }).args?.[1] ?? 0);
+      if (sourceBlock > best) best = sourceBlock;
     }
+    if (best > 0) return best;
     if (start === floor) break;
   }
   return undefined;
@@ -277,6 +347,66 @@ export interface RelayContext {
   confirmations?: number;
   /** Source-chain reader with RPC failover; created lazily when absent. */
   logs?: LogSource;
+  /**
+   * Resolved once per run by `finalityDepth()`: the deployed contract's `FINALITY_DEPTH()`
+   * immutable, or the source default when no deployment is reachable.
+   */
+  resolvedFinalityDepth?: number;
+  /** CC3 block the AttestedWorldID was deployed in; floor for RootRelayed scans. */
+  deploymentBlock?: number;
+  /** Deploy transaction hash from the deployments file, used to derive the block above. */
+  deploymentTxHash?: string;
+}
+
+/**
+ * CC3 block the contract was deployed in, from the deployments file's `txHashes`. Bounds
+ * the RootRelayed scan to blocks that could actually contain the event — without it the
+ * walk covers millions of empty blocks and CC3's 10 s query timeout rejects the windows.
+ */
+export async function deploymentBlock(ctx: RelayContext): Promise<number | undefined> {
+  if (ctx.deploymentBlock !== undefined) return ctx.deploymentBlock;
+  if (!ctx.deploymentTxHash) return undefined;
+  try {
+    const receipt = await ctx.cc3.getTransactionReceipt(ctx.deploymentTxHash);
+    if (receipt?.blockNumber !== undefined) {
+      ctx.deploymentBlock = receipt.blockNumber;
+      return receipt.blockNumber;
+    }
+  } catch (e) {
+    ctx.log(`  could not resolve the deployment block: ${(e as Error).message.slice(0, 80)}`);
+  }
+  return undefined;
+}
+
+/**
+ * The finality depth the contract will actually enforce. `FINALITY_DEPTH` is a constructor
+ * immutable (`contracts/src/AttestedWorldID.sol`), so a deployment may use any value; the
+ * hard-coded 32 in `SOURCES` is only a fallback for when no address is available yet.
+ * Memoised on the context so one relay pass reads it at most once per source.
+ */
+export async function finalityDepth(ctx: RelayContext): Promise<number> {
+  if (ctx.resolvedFinalityDepth !== undefined) return ctx.resolvedFinalityDepth;
+  const fallback = ctx.source.finalityDepth;
+  if (ctx.contractAddress) {
+    try {
+      const raw = await attestedWorldId(ctx.contractAddress, ctx.cc3).FINALITY_DEPTH!();
+      const depth = Number(raw);
+      if (Number.isInteger(depth) && depth >= 0) {
+        if (depth !== fallback) {
+          ctx.log(`  ${ctx.source.name}: FINALITY_DEPTH() = ${depth} (default was ${fallback})`);
+        }
+        ctx.resolvedFinalityDepth = depth;
+        return depth;
+      }
+      ctx.log(`  FINALITY_DEPTH() returned ${raw}; using the default ${fallback}`);
+    } catch (e) {
+      ctx.log(
+        `  could not read FINALITY_DEPTH() (${(e as Error).message.slice(0, 80)}); using ${fallback}`,
+      );
+    }
+  }
+  ctx.resolvedFinalityDepth = fallback;
+  return fallback;
 }
 
 export function sourceLogs(ctx: RelayContext): LogSource {
@@ -323,14 +453,15 @@ export async function waitAttested(
     await builder.waitUntilHeightAttested(ctx.source.chainKey, targetHeight, pollMs, timeoutMs);
   }
 
-  const needed = targetHeight + ctx.source.finalityDepth;
+  const depth = await finalityDepth(ctx);
+  const needed = targetHeight + depth;
   const deadline = Date.now() + timeoutMs;
   for (;;) {
     const { height } = await info.getLatestAttestedHeightAndHash(ctx.source.chainKey);
     if (height >= needed) return { attestedTip: height, final: true };
     if (ctx.noWait || Date.now() > deadline) return { attestedTip: height, final: false };
     ctx.log(
-      `  waiting for finality: attested tip ${height}, need ${needed} (block ${targetHeight} + depth ${ctx.source.finalityDepth})`,
+      `  waiting for finality: attested tip ${height}, need ${needed} (block ${targetHeight} + depth ${depth})`,
     );
     await Bun.sleep(pollMs);
   }
@@ -357,6 +488,30 @@ export async function obtainProofs(
     singles.push(singleToBatch(await fetchProof(builder, tx.txHash)));
   }
   return { mode: "single", batches: singles };
+}
+
+/**
+ * The `SourceTx` entries behind one batch's members, in batch order. Used to refetch proofs
+ * for exactly the submission in flight — never for the whole scan group, which would let a
+ * stale-proof retry on one member escalate into a batch over already-relayed members.
+ */
+export function membersAsSourceTxs(
+  batch: NormalizedBatchProof,
+  group: readonly SourceTx[],
+): SourceTx[] {
+  const byHash = new Map(group.map((g) => [g.txHash.toLowerCase(), g]));
+  return batch.members.map(
+    (m) =>
+      byHash.get(m.txHash.toLowerCase()) ?? {
+        txHash: m.txHash,
+        blockNumber: m.blockHeight,
+        txIndex: m.txIndex,
+        logIndex: 0,
+        preRoot: 0n,
+        kind: 0,
+        postRoot: 0n,
+      },
+  );
 }
 
 /** Reproduces the AttestedWorldID guards 1-6 for every member; throws on a permanent mismatch. */
@@ -433,6 +588,8 @@ export interface ScanResult {
   head: number;
   /** Source height attested on CC3 (ChainInfo 0x0FD3). */
   attestedTip: number;
+  /** The finality depth actually in force (from the contract when deployed). */
+  finalityDepth: number;
   txs: SourceTx[];
 }
 
@@ -464,9 +621,17 @@ export async function scanForWork(
   let lastRelayed: number | undefined;
   if (ctx.contractAddress) {
     try {
-      lastRelayed = await lastRelayedSourceBlock(ctx.cc3, ctx.contractAddress);
+      lastRelayed = await lastRelayedSourceBlock(ctx.cc3, ctx.contractAddress, {
+        fromBlock: await deploymentBlock(ctx),
+      });
     } catch (e) {
-      ctx.log(`  could not read RootRelayed history: ${(e as Error).message}`);
+      // Before the first root lands, the contract has no history to read — that is an
+      // empty cursor, not an error. `deriveCursor` then falls back to the lookback window.
+      if (isNoRootsSeen(e)) {
+        ctx.log(`  ${ctx.source.name}: not bootstrapped yet (0 roots) — no on-chain cursor`);
+      } else {
+        ctx.log(`  could not read RootRelayed history: ${(e as Error).message}`);
+      }
     }
   }
 
@@ -478,7 +643,8 @@ export async function scanForWork(
   });
   // Never scan past what the finality guard could accept — it would only produce
   // transactions that must sit pending, and would block `--once` runs waiting.
-  const ceiling = finalScanCeiling(head, attestedTip, ctx.source.finalityDepth);
+  const depth = await finalityDepth(ctx);
+  const ceiling = finalScanCeiling(head, attestedTip, depth);
   const to = Math.max(from - 1, ceiling - (opts.headOffset ?? 0));
 
   const txs =
@@ -492,7 +658,7 @@ export async function scanForWork(
           windowSize: LOG_WINDOW,
           onFailover,
         });
-  return { from, to, head, attestedTip, txs };
+  return { from, to, head, attestedTip, finalityDepth: depth, txs };
 }
 
 // ---------------------------------------------------------------------------
@@ -548,7 +714,7 @@ export async function relaySourceOnce(
 ): Promise<BatchOutcome[]> {
   const scan = await scanForWork(ctx, { fromFlag: opts.fromFlag });
   ctx.log(
-    `${ctx.source.name}: blocks ${scan.from}..${scan.to} (head ${scan.head}, attested tip ${scan.attestedTip}, finality depth ${ctx.source.finalityDepth}) — ${scan.txs.length} TreeChanged tx(s)`,
+    `${ctx.source.name}: blocks ${scan.from}..${scan.to} (head ${scan.head}, attested tip ${scan.attestedTip}, finality depth ${scan.finalityDepth}) — ${scan.txs.length} TreeChanged tx(s)`,
   );
   if (scan.txs.length === 0) {
     ctx.store?.advanceCursor(ctx.source.name, scan.to + 1);
@@ -728,8 +894,19 @@ export async function submitBatch(
       return sendBatch(ctx, contract, b);
     },
     refetch: async () => {
-      ctx.log("  refetching proof and retrying once");
-      return (await obtainProofs(ctx, group)).batches[0]!;
+      // Only the transactions in THIS submission, so a retry cannot pull in members that
+      // were already relayed earlier in the same pass (duplicate evidence + wrong status).
+      const subgroup = membersAsSourceTxs(batch, group);
+      ctx.log(`  refetching proof for ${subgroup.length} tx(s) and retrying once`);
+      const fresh = await obtainProofs(ctx, subgroup, { forceSingle: subgroup.length === 1 });
+      if (fresh.batches.length !== 1) {
+        // getBatchProof degraded to per-tx proofs; submitting batches[0] would silently
+        // relay a subset. Fail loudly instead — the transactions stay recorded, not dropped.
+        throw new Error(
+          `refetch produced ${fresh.batches.length} proofs for a ${subgroup.length}-tx submission; not retrying`,
+        );
+      }
+      return fresh.batches[0]!;
     },
     reasonOf: revertReason,
     onRevert: (reason, cls, action) => ctx.log(`  revert (${cls} → ${action}): ${reason}`),
@@ -757,6 +934,49 @@ export async function submitBatch(
   return { ...outcome, status: res.kind === "pending" ? "skipped" : "failed", error: res.reason };
 }
 
+export interface RelayedRoot {
+  sourceBlock: number;
+  sourceTxIndex: number;
+  preRoot: bigint;
+  postRoot: bigint;
+  kind: number;
+  humansAdded: number;
+}
+
+/**
+ * A batch can relay two transactions from the same source block, so `sourceBlock` alone is
+ * not a key — one evidence line would otherwise carry the other transaction's roots.
+ * `sourceTxIndex` (RootRelayed arg 6) disambiguates them.
+ */
+export function relayedKey(sourceBlock: number, sourceTxIndex: number): string {
+  return `${sourceBlock}:${sourceTxIndex}`;
+}
+
+/** Indexes the RootRelayed events in a CC3 receipt by (sourceBlock, sourceTxIndex). */
+export function parseRootRelayed(logs: readonly unknown[]): Map<string, RelayedRoot> {
+  const iface = loadAttestedWorldIdAbi().iface;
+  const out = new Map<string, RelayedRoot>();
+  for (const raw of logs) {
+    try {
+      const parsed = iface.parseLog(raw as never);
+      if (parsed?.name !== "RootRelayed") continue;
+      const sourceBlock = Number(parsed.args[1]);
+      const sourceTxIndex = Number(parsed.args[6]);
+      out.set(relayedKey(sourceBlock, sourceTxIndex), {
+        sourceBlock,
+        sourceTxIndex,
+        preRoot: BigInt(parsed.args[3]),
+        postRoot: BigInt(parsed.args[2]),
+        kind: Number(parsed.args[4]),
+        humansAdded: Number(parsed.args[5]),
+      });
+    } catch {
+      /* not one of ours */
+    }
+  }
+  return out;
+}
+
 async function recordSuccess(
   ctx: RelayContext,
   batch: NormalizedBatchProof,
@@ -764,23 +984,7 @@ async function recordSuccess(
   res: { cc3TxHash: string; gasUsed: bigint; logs: readonly unknown[]; cc3Block: number },
   opts: ProcessOptions,
 ): Promise<void> {
-  const iface = loadAttestedWorldIdAbi().iface;
-  const relayed = new Map<number, { preRoot: bigint; postRoot: bigint; kind: number; humansAdded: number; txIndex: number }>();
-  for (const raw of res.logs) {
-    try {
-      const parsed = iface.parseLog(raw as never);
-      if (parsed?.name !== "RootRelayed") continue;
-      relayed.set(Number(parsed.args[1]), {
-        preRoot: BigInt(parsed.args[3]),
-        postRoot: BigInt(parsed.args[2]),
-        kind: Number(parsed.args[4]),
-        humansAdded: Number(parsed.args[5]),
-        txIndex: Number(parsed.args[6]),
-      });
-    } catch {
-      /* not ours */
-    }
-  }
+  const relayed = parseRootRelayed(res.logs);
 
   // Attestation lag is measured end to end: source block timestamp → CC3 inclusion timestamp.
   let landedAtSec = Math.floor(Date.now() / 1000);
@@ -794,7 +998,7 @@ async function recordSuccess(
 
   for (const member of batch.members) {
     const src = group.find((g) => g.txHash.toLowerCase() === member.txHash.toLowerCase());
-    const ev = relayed.get(member.blockHeight);
+    const ev = relayed.get(relayedKey(member.blockHeight, member.txIndex));
     const inspection = inspectLocally(member.txBytes, {
       chainKey: batch.chainKey,
       sourceChainKey: ctx.source.chainKey,

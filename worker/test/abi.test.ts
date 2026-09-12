@@ -73,8 +73,17 @@ describe("AttestedWorldID fragments", () => {
     }
   });
 
+  test("QueryAlreadyProcessed is present even without the artifact", () => {
+    // The batch entrypoint reverts this custom error rather than ASCBase's require string,
+    // so the fallback fragments must carry it or classifyRevert sees raw hex.
+    const err = iface.getError("QueryAlreadyProcessed")!;
+    expect(err.inputs.map((i) => i.type)).toEqual(["bytes32"]);
+    expect(err.selector).toBe("0x62e48a65");
+  });
+
   test("every custom error in the interface decodes", () => {
     for (const name of [
+      "QueryAlreadyProcessed",
       "WrongSourceChain",
       "SourceTxReverted",
       "NotIdentityManager",

@@ -21,6 +21,7 @@ import {
   attestedWorldIdAddress,
   cc3RpcUrl,
   dbPath,
+  deploymentTxHash,
   deploymentsPath,
   evidencePath,
   loadDeployments,
@@ -42,6 +43,7 @@ import {
   computeTxIndex,
   getAttestorsCount,
   proofBuilder,
+  readRootState,
 } from "./cc3";
 import { inspectLocally, toHex32 } from "./evmv1";
 import { fetchProof, singleToBatch, txIndexMatches } from "./proofs";
@@ -49,6 +51,7 @@ import {
   calldataBytes,
   deriveCursor,
   encodeCalldata,
+  finalityDepth,
   isProcessed,
   lastRelayedSourceBlock,
   relaySourceOnce,
@@ -230,12 +233,16 @@ program
         continue;
       }
       try {
-        const c = attestedWorldId(addr, cc3);
-        const [latest, count] = await Promise.all([c.latestRoot!(), c.rootCount!()]);
+        const state = await readRootState(attestedWorldId(addr, cc3));
         log(`  ${pad(name, 9)} ${addr}`);
-        log(`            latestRoot ${toHex32(BigInt(latest))}`);
-        log(`            rootCount  ${count}`);
+        log(
+          `            latestRoot ${state.bootstrapped ? toHex32(state.latestRoot!) : "(not bootstrapped yet — 0 roots)"}`,
+        );
+        log(`            rootCount  ${state.rootCount}`);
         log(`            explorer   ${CC3_EXPLORER}/address/${addr}`);
+        if (!state.bootstrapped) {
+          log(`            run: bun run src/cli.ts bootstrap --source ${name}`);
+        }
       } catch (e) {
         log(`  ${pad(name, 9)} ${addr} — read failed: ${(e as Error).message}`);
       }
@@ -271,6 +278,7 @@ program
       cc3,
       signer: opts.dryRun || !privateKey() ? undefined : cc3Signer(cc3),
       contractAddress: address,
+      deploymentTxHash: dep.ok ? deploymentTxHash(dep.data, source) : undefined,
       dryRun: opts.dryRun,
       noWait: !opts.wait,
       log,
@@ -287,8 +295,9 @@ program
     log(`getProof ${Date.now() - t0}ms — block ${probe.headerNumber}, txIndex ${probe.txIndex}, cached ${probe.cached}`);
 
     const att = await waitAttested(ctx, probe.headerNumber, { timeoutMs: opts.wait ? 15 * 60_000 : 1 });
+    const depth = await finalityDepth(ctx);
     log(
-      `attested tip ${att.attestedTip} — finality (block + ${source.finalityDepth} = ${probe.headerNumber + source.finalityDepth}) ${att.final ? "satisfied" : "NOT YET satisfied"}`,
+      `attested tip ${att.attestedTip} — finality (block + ${depth} = ${probe.headerNumber + depth}) ${att.final ? "satisfied" : "NOT YET satisfied"}`,
     );
 
     log(`txBytes ${calldataBytes(probe.txBytes)} bytes, siblings ${probe.merkleProof.siblings.length}, continuity roots ${probe.continuityProof.roots.length}`);
@@ -395,13 +404,15 @@ program
     if (!address && !opts.dryRun) requireDeployments(globals().deployments);
 
     if (address) {
-      const c = attestedWorldId(address, cc3);
-      const count = await c.rootCount!();
-      if (BigInt(count) > 0n) {
-        log(`${source.name} already bootstrapped: rootCount ${count}, latestRoot ${toHex32(BigInt(await c.latestRoot!()))}`);
+      const state = await readRootState(attestedWorldId(address, cc3));
+      if (state.bootstrapped && state.rootCount > 0n) {
+        log(
+          `${source.name} already bootstrapped: rootCount ${state.rootCount}, latestRoot ${toHex32(state.latestRoot!)}`,
+        );
         log("use `relay` to continue from here");
         return;
       }
+      log(`${source.name}: 0 roots so far — seeding the first one`);
     }
 
     let txHash = opts.tx;
@@ -481,6 +492,7 @@ program
           cc3,
           signer,
           contractAddress: dep.ok ? attestedWorldIdAddress(dep.data, source) : undefined,
+          deploymentTxHash: dep.ok ? deploymentTxHash(dep.data, source) : undefined,
           store,
           dryRun: opts.dryRun,
           log,
@@ -554,12 +566,17 @@ program
         const address = dep.ok ? attestedWorldIdAddress(dep.data, source) : undefined;
         if (address) {
           try {
-            const c = attestedWorldId(address, cc3);
-            const [latest, count] = await Promise.all([c.latestRoot!(), c.rootCount!()]);
-            const last = await lastRelayedSourceBlock(cc3, address);
+            const state = await readRootState(attestedWorldId(address, cc3));
+            const deployTx = deploymentTxHash(dep.ok ? dep.data : undefined, source);
+            const fromBlock = deployTx
+              ? (await cc3.getTransactionReceipt(deployTx))?.blockNumber
+              : undefined;
+            const last = await lastRelayedSourceBlock(cc3, address, { fromBlock });
             log(`  contract       ${address}`);
-            log(`  latestRoot     ${toHex32(BigInt(latest))}`);
-            log(`  rootCount      ${count}`);
+            log(
+              `  latestRoot     ${state.bootstrapped ? toHex32(state.latestRoot!) : "(not bootstrapped yet — 0 roots)"}`,
+            );
+            log(`  rootCount      ${state.rootCount}`);
             log(`  last relayed   source block ${last ?? "(none)"}`);
             log(
               `  next cursor    ${deriveCursor({ storeCursor: cursor, lastRelayedBlock: last })}`,

@@ -3,7 +3,14 @@
 import { describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
 import { solidityPackedKeccak256 } from "ethers";
-import { computeQueryId, computeTxIndex, revertReason } from "../src/cc3";
+import {
+  computeQueryId,
+  computeTxIndex,
+  isNoRootsSeen,
+  readRootState,
+  revertReason,
+} from "../src/cc3";
+import { loadAttestedWorldIdAbi } from "../src/abi";
 import { REPO_ROOT, SOURCES } from "../src/config";
 import { readProofFile } from "../src/proofs";
 
@@ -92,5 +99,53 @@ describe("revertReason", () => {
     expect(revertReason({ reason: "Query already processed" })).toBe("Query already processed");
     expect(revertReason({ info: { error: { message: "nonce too low" } } })).toBe("nonce too low");
     expect(revertReason(new Error("boom"))).toBe("boom");
+  });
+});
+
+describe("NoRootsSeen: 'not bootstrapped' is not a failure", () => {
+  const iface = loadAttestedWorldIdAbi().iface;
+  const noRootsData = iface.encodeErrorResult("NoRootsSeen", []);
+
+  test("recognises the error however it is surfaced", () => {
+    expect(isNoRootsSeen({ data: noRootsData })).toBe(true);
+    expect(isNoRootsSeen({ revert: { name: "NoRootsSeen", args: [] } })).toBe(true);
+    expect(isNoRootsSeen(new Error("execution reverted: NoRootsSeen()"))).toBe(true);
+  });
+
+  test("does not swallow unrelated reverts", () => {
+    expect(isNoRootsSeen(new Error("execution reverted: ExpiredRoot()"))).toBe(false);
+    expect(isNoRootsSeen(new Error("nonce too low"))).toBe(false);
+  });
+
+  test("readRootState reports zero roots instead of throwing", async () => {
+    const contract = {
+      rootCount: async () => 0n,
+      latestRoot: async () => {
+        throw { data: noRootsData };
+      },
+    } as never as Parameters<typeof readRootState>[0];
+    expect(await readRootState(contract)).toEqual({ bootstrapped: false, rootCount: 0n });
+  });
+
+  test("readRootState returns the root once one has landed", async () => {
+    const contract = {
+      rootCount: async () => 2n,
+      latestRoot: async () => 255n,
+    } as never as Parameters<typeof readRootState>[0];
+    expect(await readRootState(contract)).toEqual({
+      bootstrapped: true,
+      latestRoot: 255n,
+      rootCount: 2n,
+    });
+  });
+
+  test("a genuine read failure still propagates", async () => {
+    const contract = {
+      rootCount: async () => 0n,
+      latestRoot: async () => {
+        throw new Error("could not decode result data");
+      },
+    } as never as Parameters<typeof readRootState>[0];
+    expect(readRootState(contract)).rejects.toThrow(/could not decode/);
   });
 });

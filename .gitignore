@@ -1,9 +1,14 @@
 .secrets.env
 .env
 .env.*
+# ...but the committed example files are deliverables, not secrets.
+!worker/.env.example
+!web/.env.example
 node_modules/
 .tools/
 contracts/out/
 contracts/cache/
 web/.next/
 *.db
+worker/data/
+worker/.env

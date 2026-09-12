@@ -212,6 +212,8 @@ export function sourceRpcUrls(source: SourceConfig): string[] {
 
 export interface Deployments {
   chainId: number;
+  /** Deployment transaction per contract; used to bound on-chain log scans. */
+  txHashes?: Record<string, string | undefined>;
   contracts: {
     AttestedWorldIDMainnet?: string;
     AttestedWorldIDSepolia?: string;
@@ -288,6 +290,15 @@ export function attestedWorldIdAddress(
 ): string | undefined {
   const addr = deployments?.contracts?.[source.deploymentKey];
   return addr && /^0x[0-9a-fA-F]{40}$/.test(addr) ? addr : undefined;
+}
+
+/** The deploy transaction for a source's AttestedWorldID, when the file records one. */
+export function deploymentTxHash(
+  deployments: Deployments | undefined,
+  source: SourceConfig,
+): string | undefined {
+  const h = deployments?.txHashes?.[source.deploymentKey];
+  return h && /^0x[0-9a-fA-F]{64}$/.test(h) ? h : undefined;
 }
 
 export function evidencePath(override?: string): string {

@@ -30,6 +30,8 @@ export const ATTESTED_WORLD_ID_FRAGMENTS = [
   // --- events ---
   "event RootRelayed(bytes32 indexed queryId, uint64 indexed sourceBlock, uint256 indexed postRoot, uint256 preRoot, uint8 kind, uint32 humansAdded, uint256 sourceTxIndex, address relayer)",
   // --- errors (so revert reasons decode without the artifact) ---
+  // AttestedWorldID's batch entrypoint reverts this instead of ASCBase's require string.
+  "error QueryAlreadyProcessed(bytes32 queryId)",
   "error WrongSourceChain(uint64 got, uint64 want)",
   "error SourceTxReverted()",
   "error NotIdentityManager(address to)",

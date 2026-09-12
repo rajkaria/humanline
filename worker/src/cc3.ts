@@ -148,6 +148,38 @@ export function computeQueryId(
 // Revert decoding
 // ---------------------------------------------------------------------------
 
+/**
+ * World's `WorldIDBridge.latestRoot()` reverts `NoRootsSeen()` before the first root is
+ * relayed, rather than returning 0. That is "not bootstrapped yet", not a failure.
+ */
+export function isNoRootsSeen(err: unknown): boolean {
+  return /NoRootsSeen/.test(revertReason(err));
+}
+
+export interface RootState {
+  /** False when the contract has never received a root (`latestRoot()` reverts). */
+  bootstrapped: boolean;
+  latestRoot?: bigint;
+  rootCount: bigint;
+}
+
+/** Reads `latestRoot`/`rootCount`, treating the pre-bootstrap revert as zero roots. */
+export async function readRootState(contract: Contract): Promise<RootState> {
+  let rootCount = 0n;
+  try {
+    rootCount = BigInt(await contract.rootCount!());
+  } catch (e) {
+    if (!isNoRootsSeen(e)) throw e;
+  }
+  try {
+    return { bootstrapped: true, latestRoot: BigInt(await contract.latestRoot!()), rootCount };
+  } catch (e) {
+    if (isNoRootsSeen(e)) return { bootstrapped: false, rootCount };
+    throw e;
+  }
+}
+
+
 /** Pulls the most useful human-readable reason out of an ethers error. */
 export function revertReason(err: unknown): string {
   const e = err as {
