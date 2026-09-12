@@ -2,6 +2,7 @@
 
 import { ArrowLeftRightIcon, Loader2Icon, LogOutIcon, WalletIcon } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { type Connector, useAccount, useConnect, useDisconnect } from "wagmi";
 
 import { CopyButton } from "@/components/copy-button";
@@ -95,7 +96,7 @@ export function ConnectButton({ className }: { className?: string }) {
 
 /** "Connect wallet", with a picker when more than one wallet is installed. */
 function ConnectWallet({ className }: { className?: string }) {
-  const { connectors, connect, isPending, error, variables } = useConnect();
+  const { connectors, connect, isPending, variables } = useConnect();
   const [open, setOpen] = useState(false);
 
   // EIP-6963 announces each installed wallet as its own connector (id = rdns).
@@ -106,29 +107,35 @@ function ConnectWallet({ className }: { className?: string }) {
   const hasProvider =
     announced.length > 0 || (typeof window !== "undefined" && "ethereum" in window && Boolean(window.ethereum));
 
+  // Failures go to a toast, not inline text: this button sits in the header,
+  // where a wrapped paragraph under it pushes the whole nav out of line.
   const connectTo = (connector: Connector) => {
     setOpen(false);
-    connect({ connector });
+    connect(
+      { connector },
+      { onError: (err) => toast.error("Could not connect", { description: describeError(err) }) },
+    );
+  };
+
+  const onClick = () => {
+    if (!hasProvider) {
+      toast.error("No browser wallet detected", {
+        description: "Install MetaMask or Rabby, then reload this page.",
+      });
+      return;
+    }
+    if (choices.length > 1) setOpen(true);
+    else if (choices[0]) connectTo(choices[0]);
   };
 
   const pendingName = isPending ? (variables?.connector as Connector | undefined)?.name : undefined;
 
   return (
     <div className={className}>
-      <Button
-        onClick={() => (choices.length > 1 ? setOpen(true) : choices[0] && connectTo(choices[0]))}
-        disabled={isPending || !hasProvider}
-        size="sm"
-      >
+      <Button onClick={onClick} disabled={isPending} size="sm">
         {isPending ? <Loader2Icon className="animate-spin" /> : <WalletIcon />}
         {isPending ? `Connecting${pendingName ? ` ${pendingName}` : ""}…` : "Connect wallet"}
       </Button>
-      {error ? <p className="mt-1 max-w-56 text-xs text-destructive">{describeError(error)}</p> : null}
-      {!hasProvider ? (
-        <p className="mt-1 max-w-56 text-xs text-muted-foreground">
-          No browser wallet detected. Install MetaMask or Rabby to continue.
-        </p>
-      ) : null}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>

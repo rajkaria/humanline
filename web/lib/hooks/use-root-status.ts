@@ -65,6 +65,8 @@ export function useRootStatus(root: bigint | undefined) {
     rootIsKnown:
       root !== undefined && root > 0n && known.isSuccess ? (known.data as boolean) : undefined,
     isLoading: reads.isLoading || known.isLoading,
+    /** A background poll or manual refetch is in flight. */
+    isFetching: reads.isFetching || known.isFetching,
     refetch: async () => {
       await Promise.all([reads.refetch(), known.refetch()]);
     },

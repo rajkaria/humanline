@@ -7,14 +7,19 @@ import {
 } from "@worldcoin/idkit";
 import {
   CheckCircle2Icon,
+  CheckIcon,
+  ChevronDownIcon,
   ExternalLinkIcon,
   FingerprintIcon,
   InfoIcon,
+  Loader2Icon,
+  LockIcon,
   RefreshCwIcon,
   ShieldCheckIcon,
   TriangleAlertIcon,
 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useAccount } from "wagmi";
 
 import { HashLink } from "@/components/hash-link";
@@ -34,10 +39,13 @@ import {
   WORLD_APP_ID,
   WORLD_SIMULATOR_URL,
 } from "@/lib/contracts";
+import { formatDuration } from "@/lib/format";
+import { useNow } from "@/lib/hooks/use-now";
 import { useRootStatus } from "@/lib/hooks/use-root-status";
 import { useRpContext } from "@/lib/hooks/use-rp-context";
 import { useProfile } from "@/lib/profile-context";
 import { useTx } from "@/lib/hooks/use-tx";
+import { cn } from "@/lib/utils";
 import { hashSignalAddress, toRegistrationProof, type RegistrationProof } from "@/lib/worldid";
 
 /**
@@ -55,6 +63,12 @@ import { hashSignalAddress, toRegistrationProof, type RegistrationProof } from "
  *
  * The proof is *not* sent to World's cloud verify endpoint to decide anything:
  * `HumanRegistry.register` on Creditcoin is the verification.
+ *
+ * The card reads as three steps — prove, sync, verify — because the middle one
+ * is the part people get stuck on: World issues a proof against its newest
+ * Merkle root, and Creditcoin only accepts it once the relayer has carried that
+ * root across. That wait is normal, so it is presented as progress (polling on
+ * its own, with a toast when it lands), not as a warning.
  */
 export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
   const { address, chainId, isConnected } = useAccount();
@@ -62,6 +76,7 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
 
   const [open, setOpen] = useState(false);
   const [proof, setProof] = useState<RegistrationProof | null>(null);
+  const [receivedAt, setReceivedAt] = useState(0);
   const [proofError, setProofError] = useState<string | null>(null);
 
   const { profile } = useProfile();
@@ -83,6 +98,22 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
   // Whether the root this proof was minted against has reached Creditcoin yet.
   const rootStatus = useRootStatus(proof?.root);
   const rootNotRelayedYet = proof !== null && rootStatus.rootIsKnown === false;
+  const rootConfirmed = proof !== null && rootStatus.rootIsKnown === true;
+
+  // Tell the user the moment the wait is over — they may have looked away.
+  const wasWaiting = useRef(false);
+  useEffect(() => {
+    if (rootNotRelayedYet) {
+      wasWaiting.current = true;
+      return;
+    }
+    if (wasWaiting.current && rootConfirmed) {
+      wasWaiting.current = false;
+      toast.success("Your proof reached Creditcoin", {
+        description: "Step 3 is unlocked — verify whenever you are ready.",
+      });
+    }
+  }, [rootNotRelayedYet, rootConfirmed]);
 
   const signalHash = useMemo(
     () => (address ? hashSignalAddress(address) : undefined),
@@ -108,6 +139,7 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
 
     try {
       setProof(toRegistrationProof(response));
+      setReceivedAt(Math.floor(Date.now() / 1000));
     } catch (cause) {
       setProofError(cause instanceof Error ? cause.message : "Could not decode the proof.");
     }
@@ -124,8 +156,23 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
     });
   }, [proof, registry, tx]);
 
+  const startOver = useCallback(() => {
+    setProof(null);
+    setReceivedAt(0);
+    setProofError(null);
+    wasWaiting.current = false;
+  }, []);
+
   const canOpenWidget =
     isConnected && onRightChain && Boolean(address) && Boolean(rpContext) && !rpLoading;
+
+  const steps: [StepState, StepState, StepState] = !proof
+    ? ["active", "upcoming", "upcoming"]
+    : rootNotRelayedYet
+      ? ["done", "working", "upcoming"]
+      : !rootConfirmed
+        ? ["done", "working", "upcoming"]
+        : ["done", "done", tx.isBusy ? "working" : "active"];
 
   return (
     <Card>
@@ -137,170 +184,143 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
               Verify you are a human
             </CardTitle>
             <CardDescription>
-              A zero-knowledge proof from World App. Nothing that identifies you leaves your
-              device — Creditcoin only ever sees a nullifier.
+              One anonymous proof from World ID. Creditcoin never learns who you are — only that
+              this wallet belongs to a unique human.
             </CardDescription>
           </div>
-          <Badge variant="outline" className="shrink-0 capitalize">
+          <Badge
+            variant="outline"
+            className="shrink-0 capitalize"
+            title={
+              worldEnv === "staging"
+                ? "Staging: proofs come from World's simulator, not a real Orb verification"
+                : "Production: proofs come from Orb-verified World App users"
+            }
+          >
             {worldEnv}
           </Badge>
         </div>
       </CardHeader>
 
       <CardContent className="flex flex-col gap-4">
-        <dl className="grid gap-2 rounded-lg bg-muted/40 p-3 text-xs sm:grid-cols-2">
-          <Field label="App id" value={WORLD_APP_ID} />
-          <Field label="Action" value={WORLD_ACTION} />
-          <Field
-            label="Signal (your wallet)"
-            value={address ?? "connect a wallet"}
-            mono
-          />
-          <Field
-            label="signalHash"
-            value={signalHash === undefined ? "—" : `0x${signalHash.toString(16)}`}
-            mono
-            title="hashToField(abi.encodePacked(address)) — the registry recomputes this from msg.sender"
-          />
-        </dl>
+        <VerifySteps states={steps} />
 
-        {!isConnected ? (
-          <Notice tone="info">
-            Connect a wallet first. The proof is bound to your address, so Humanline needs to
-            know which one before it can ask World App for anything.
-          </Notice>
-        ) : null}
+        {!proof ? (
+          <>
+            {!isConnected ? (
+              <Notice tone="info">
+                Connect a wallet to start. Your proof is tied to that wallet, so it cannot be
+                reused by anyone else.
+              </Notice>
+            ) : null}
 
-        {isConnected && !onRightChain ? (
-          <Notice tone="warn">
-            Switch to Creditcoin CC3 testnet (chainId {creditcoinTestnet.id}) before verifying.
-          </Notice>
-        ) : null}
+            {isConnected && !onRightChain ? (
+              <Notice tone="warn">
+                Switch your wallet to Creditcoin CC3 testnet to continue.
+              </Notice>
+            ) : null}
 
-        {notConfigured ? (
-          <Notice tone="warn" title="World ID signing key not configured">
-            {rpError}{" "}
-            <span className="block pt-1">
-              Set{" "}
-              <code className="font-mono text-[11px]">WORLD_RP_SIGNER_PRIVATE_KEY</code> in{" "}
-              <code className="font-mono text-[11px]">web/.env.local</code> — it comes from the
-              repo-root <code className="font-mono text-[11px]">.secrets.env</code>. It is read
-              only on the server and never reaches the browser.
-            </span>
-          </Notice>
-        ) : rpError ? (
-          <Notice tone="warn" title="Could not prepare the proof request">
-            {rpError}
-            <Button variant="outline" size="sm" className="mt-2" onClick={refresh}>
-              <RefreshCwIcon />
-              Retry
-            </Button>
-          </Notice>
-        ) : null}
-
-        {proofError ? <Notice tone="warn" title="Unusable credential">{proofError}</Notice> : null}
-
-        {!registry ? (
-          <Notice tone="warn">
-            HumanRegistry is not deployed yet, so a proof cannot be submitted. You can still
-            produce one to check the flow.
-          </Notice>
-        ) : null}
-
-        {proof ? (
-          <div className="flex flex-col gap-3 rounded-lg border border-success/30 bg-success/5 p-3">
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <CheckCircle2Icon className="size-4 text-success" />
-              Proof received. It has not been verified yet — that happens on Creditcoin.
-            </div>
-            <dl className="grid gap-1.5 text-xs">
-              <ProofRow label="Merkle root" value={proof.root} />
-              <ProofRow label="Nullifier hash" value={proof.nullifierHash} />
-              <div className="flex items-baseline justify-between gap-3">
-                <dt className="text-muted-foreground">Groth16 proof</dt>
-                <dd className="font-mono text-xs">8 × uint256</dd>
-              </div>
-            </dl>
-            {rootNotRelayedYet ? (
-              <Notice tone="warn" title="This root has not reached Creditcoin yet">
-                World issued your proof against Merkle root{" "}
-                <code className="font-mono text-[11px]">
-                  0x{proof.root.toString(16).slice(0, 12)}…
-                </code>
-                , and the Attestcoin relayer has not carried that one across yet — so the
-                registry would reject it. The relayer runs every 15 minutes; the newest root
-                on Creditcoin is{" "}
-                <code className="font-mono text-[11px]">
-                  {rootStatus.latestRoot === undefined
-                    ? "…"
-                    : `0x${rootStatus.latestRoot.toString(16).slice(0, 12)}…`}
-                </code>
-                .
+            {notConfigured ? (
+              <Notice tone="warn" title="World ID signing key not configured">
+                {rpError}{" "}
                 <span className="block pt-1">
-                  Wait for the next relay and press check again, or watch them land on{" "}
-                  <a href="/relay" className="text-brand underline-offset-4 hover:underline">
-                    /relay
-                  </a>
-                  .
+                  Set{" "}
+                  <code className="font-mono text-[11px]">WORLD_RP_SIGNER_PRIVATE_KEY</code> in{" "}
+                  <code className="font-mono text-[11px]">web/.env.local</code> — it comes from the
+                  repo-root <code className="font-mono text-[11px]">.secrets.env</code>. It is read
+                  only on the server and never reaches the browser.
                 </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-2"
-                  onClick={() => {
-                    void rootStatus.refetch();
-                  }}
-                >
+              </Notice>
+            ) : rpError ? (
+              <Notice tone="warn" title="Could not prepare the proof request">
+                {rpError}
+                <Button variant="outline" size="sm" className="mt-2 self-start" onClick={refresh}>
                   <RefreshCwIcon />
-                  Check again
+                  Retry
                 </Button>
               </Notice>
             ) : null}
-            <Button onClick={submit} disabled={!registry || tx.isBusy || rootNotRelayedYet}>
-              <ShieldCheckIcon />
-              {tx.isBusy ? "Verifying on Creditcoin…" : "Verify on Creditcoin"}
+
+            {proofError ? (
+              <Notice tone="warn" title="That credential can't be used">
+                {proofError}
+              </Notice>
+            ) : null}
+
+            {!registry ? (
+              <Notice tone="warn">
+                HumanRegistry is not deployed on this profile yet, so a proof cannot be submitted.
+                You can still produce one to try the flow.
+              </Notice>
+            ) : null}
+
+            <div className="flex flex-col gap-2">
+              <Button
+                size="lg"
+                disabled={!canOpenWidget}
+                onClick={() => {
+                  setProofError(null);
+                  setOpen(true);
+                }}
+              >
+                {rpLoading ? <Loader2Icon className="animate-spin" /> : <FingerprintIcon />}
+                {rpLoading ? "Preparing…" : "Verify with World ID"}
+              </Button>
+              {worldEnv === "staging" ? (
+                <p className="text-center text-xs text-muted-foreground">
+                  Testing on staging? Scan the QR code with the{" "}
+                  <a
+                    href={WORLD_SIMULATOR_URL}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="inline-flex items-center gap-0.5 text-brand underline-offset-4 hover:underline"
+                  >
+                    World ID Simulator
+                    <ExternalLinkIcon className="size-3" />
+                  </a>{" "}
+                  instead of World App.
+                </p>
+              ) : (
+                <p className="text-center text-xs text-muted-foreground">
+                  Scan the QR code with World App. You need an Orb-verified World ID.
+                </p>
+              )}
+            </div>
+          </>
+        ) : rootNotRelayedYet ? (
+          <>
+            <RelayWaitPanel receivedAt={receivedAt} onCheck={rootStatus.refetch} />
+            <Button size="lg" disabled>
+              <LockIcon />
+              Verify on Creditcoin
             </Button>
-            {tx.error ? <p className="text-xs text-destructive">{tx.error}</p> : null}
-          </div>
+          </>
         ) : (
-          <div className="flex flex-col gap-2">
-            <Button
-              size="lg"
-              disabled={!canOpenWidget}
-              onClick={() => {
-                setProofError(null);
-                setOpen(true);
-              }}
-            >
-              <FingerprintIcon />
-              {rpLoading ? "Preparing proof request…" : "Verify with World ID"}
-            </Button>
-            {worldEnv === "staging" ? (
-              <p className="text-xs text-muted-foreground">
-                On staging, scan the QR code with the{" "}
-                <a
-                  href={WORLD_SIMULATOR_URL}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="inline-flex items-center gap-0.5 text-brand underline-offset-4 hover:underline"
-                >
-                  World ID Simulator
-                  <ExternalLinkIcon className="size-3" />
-                </a>{" "}
-                rather than World App. The proof it issues is a real Semaphore proof against
-                the staging tree, and it is verified on-chain exactly like a production one.
-              </p>
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                Scan the QR code with World App. Your credential has to be Orb-verified and
-                World ID 3.0 — 4.0 credentials only verify on World Chain today, and the card
-                will say so rather than failing on-chain. Roots reach Creditcoin through the
-                Attestcoin relayer every 15 minutes, so a brand-new credential may need one
-                cycle before it can register.
-              </p>
-            )}
-          </div>
+          <ReadyPanel
+            confirming={!rootConfirmed}
+            busy={tx.isBusy}
+            disabled={!registry}
+            error={tx.error}
+            onVerify={() => void submit()}
+          />
         )}
+
+        {proof && !tx.isBusy ? (
+          <button
+            type="button"
+            onClick={startOver}
+            className="self-center text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+          >
+            Start over with a new proof
+          </button>
+        ) : null}
+
+        <TechnicalDetails
+          address={address}
+          signalHash={signalHash}
+          proof={proof}
+          latestRoot={rootStatus.latestRoot}
+        />
 
         {address && rpContext ? (
           <IDKitRequestWidget
@@ -324,6 +344,231 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
   );
 }
 
+type StepState = "done" | "active" | "working" | "upcoming";
+
+const STEP_LABELS = ["Prove", "Sync", "Verify"] as const;
+
+/** Three-segment progress: where the user is, and what is left. */
+export function VerifySteps({ states }: { states: [StepState, StepState, StepState] }) {
+  return (
+    <ol className="grid grid-cols-3 gap-2" aria-label="Verification progress">
+      {STEP_LABELS.map((label, i) => {
+        const state = states[i];
+        const current = state === "active" || state === "working";
+        return (
+          <li key={label} className="flex min-w-0 flex-col gap-1.5" aria-current={current ? "step" : undefined}>
+            <span
+              className={cn(
+                "h-1 rounded-full transition-colors",
+                state === "done" && "bg-success",
+                current && "bg-brand",
+                state === "working" && "animate-pulse",
+                state === "upcoming" && "bg-muted",
+              )}
+              aria-hidden
+            />
+            <span className="flex items-center gap-1.5">
+              <span
+                className={cn(
+                  "flex size-4 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold",
+                  state === "done" && "bg-success/15 text-success",
+                  current && "bg-brand/15 text-brand",
+                  state === "upcoming" && "bg-muted text-muted-foreground",
+                )}
+                aria-hidden
+              >
+                {state === "done" ? (
+                  <CheckIcon className="size-2.5" strokeWidth={3} />
+                ) : state === "working" ? (
+                  <span className="size-1.5 animate-pulse rounded-full bg-brand" />
+                ) : (
+                  i + 1
+                )}
+              </span>
+              <span
+                className={cn(
+                  "truncate text-xs font-medium",
+                  state === "upcoming" ? "text-muted-foreground" : "text-foreground",
+                )}
+              >
+                {label}
+                <span className="sr-only">
+                  {" "}
+                  — {state === "done" ? "done" : state === "upcoming" ? "not started" : "in progress"}
+                </span>
+              </span>
+            </span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+/** Step 2: the proof exists, its root is still in transit. Normal, and self-resolving. */
+export function RelayWaitPanel({
+  receivedAt,
+  onCheck,
+}: {
+  receivedAt: number;
+  onCheck: () => Promise<void>;
+}) {
+  const now = useNow();
+  const [checking, setChecking] = useState(false);
+  const elapsed = now > 0 && receivedAt > 0 ? Math.max(0, now - receivedAt) : 0;
+
+  return (
+    <div
+      className="flex flex-col gap-3 rounded-lg border border-brand/25 bg-brand/5 p-3"
+      role="status"
+      aria-live="polite"
+    >
+      <div className="flex items-start gap-2.5">
+        <span className="relative mt-1 flex size-2.5 shrink-0" aria-hidden>
+          <span className="absolute inline-flex size-full animate-ping rounded-full bg-brand opacity-60" />
+          <span className="relative inline-flex size-2.5 rounded-full bg-brand" />
+        </span>
+        <div className="flex min-w-0 flex-col gap-1">
+          <p className="text-sm font-medium text-foreground">Proof received — syncing to Creditcoin</p>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            World just added you to its latest update. A relayer copies each update to Creditcoin,
+            usually within a few minutes. Nothing to do — this step unlocks on its own.
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-brand/15 pt-2.5">
+        <span className="text-xs text-muted-foreground tabular-nums">
+          Waiting {formatDuration(elapsed)} · auto-checks every 20s
+        </span>
+        <div className="-mr-1.5 flex items-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={checking}
+            onClick={async () => {
+              setChecking(true);
+              try {
+                await onCheck();
+              } finally {
+                setChecking(false);
+              }
+            }}
+          >
+            <RefreshCwIcon className={checking ? "animate-spin" : undefined} />
+            {checking ? "Checking…" : "Check now"}
+          </Button>
+          <a
+            href="/relay"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs font-medium text-brand hover:bg-brand/10"
+          >
+            Watch live
+            <ExternalLinkIcon className="size-3" />
+          </a>
+        </div>
+      </div>
+
+      <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+        <InfoIcon className="size-3 shrink-0" aria-hidden />
+        Keep this tab open — your proof lives here until it is verified.
+      </p>
+    </div>
+  );
+}
+
+/** Step 3: everything is in place; one transaction left. */
+export function ReadyPanel({
+  confirming,
+  busy,
+  disabled,
+  error,
+  onVerify,
+}: {
+  confirming: boolean;
+  busy: boolean;
+  disabled: boolean;
+  error?: string | null;
+  onVerify: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-start gap-2.5 rounded-lg border border-success/25 bg-success/5 p-3">
+        {confirming ? (
+          <Loader2Icon className="mt-0.5 size-4 shrink-0 animate-spin text-success" aria-hidden />
+        ) : (
+          <CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-success" aria-hidden />
+        )}
+        <div className="flex min-w-0 flex-col gap-1">
+          <p className="text-sm font-medium text-foreground">
+            {confirming ? "Proof received — checking Creditcoin…" : "Your proof is ready"}
+          </p>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            One transaction checks the proof on Creditcoin and links this wallet to your World ID.
+            Only an anonymous nullifier is stored.
+          </p>
+        </div>
+      </div>
+      <Button size="lg" onClick={onVerify} disabled={disabled || busy}>
+        {busy ? <Loader2Icon className="animate-spin" /> : <ShieldCheckIcon />}
+        {busy ? "Confirm in your wallet…" : "Verify on Creditcoin"}
+      </Button>
+      {error ? (
+        <p className="text-xs text-destructive" role="alert">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/** Everything a developer or judge wants to inspect, out of everyone else's way. */
+export function TechnicalDetails({
+  address,
+  signalHash,
+  proof,
+  latestRoot,
+}: {
+  address: string | undefined;
+  signalHash: bigint | undefined;
+  proof: RegistrationProof | null;
+  latestRoot: bigint | undefined;
+}) {
+  return (
+    <details className="group rounded-lg bg-muted/30 text-xs">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-foreground [&::-webkit-details-marker]:hidden">
+        Technical details
+        <ChevronDownIcon className="size-3.5 transition-transform group-open:rotate-180" aria-hidden />
+      </summary>
+      <div className="flex flex-col gap-3 border-t border-foreground/5 p-3">
+        <dl className="grid gap-2 sm:grid-cols-2">
+          <Field label="App id" value={WORLD_APP_ID} />
+          <Field label="Action" value={WORLD_ACTION} />
+          <Field label="Signal (your wallet)" value={address ?? "connect a wallet"} mono />
+          <Field
+            label="signalHash"
+            value={signalHash === undefined ? "—" : `0x${signalHash.toString(16)}`}
+            mono
+            title="hashToField(abi.encodePacked(address)) — the registry recomputes this from msg.sender"
+          />
+        </dl>
+        {proof ? (
+          <dl className="grid gap-1.5 border-t border-foreground/5 pt-3">
+            <ProofRow label="Proof Merkle root" value={proof.root} />
+            <ProofRow label="Newest root on Creditcoin" value={latestRoot} />
+            <ProofRow label="Nullifier hash" value={proof.nullifierHash} />
+            <div className="flex items-baseline justify-between gap-3">
+              <dt className="text-muted-foreground">Groth16 proof</dt>
+              <dd className="font-mono text-xs">8 × uint256</dd>
+            </div>
+          </dl>
+        ) : null}
+      </div>
+    </details>
+  );
+}
+
 function Field({
   label,
   value,
@@ -343,13 +588,11 @@ function Field({
   );
 }
 
-function ProofRow({ label, value }: { label: string; value: bigint }) {
+function ProofRow({ label, value }: { label: string; value: bigint | undefined }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd>
-        <HashLink value={value} kind="root" />
-      </dd>
+      <dd>{value === undefined ? <span className="font-mono">…</span> : <HashLink value={value} kind="root" />}</dd>
     </div>
   );
 }
@@ -378,7 +621,7 @@ function Notice({
       />
       <div className="flex min-w-0 flex-col gap-0.5 text-xs">
         {title ? <p className="text-sm font-medium text-foreground">{title}</p> : null}
-        <div className="text-muted-foreground">{children}</div>
+        <div className="flex flex-col text-muted-foreground">{children}</div>
       </div>
     </div>
   );
