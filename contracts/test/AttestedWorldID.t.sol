@@ -21,7 +21,11 @@ import {SemaphoreVerifier} from "worldid/SemaphoreVerifier.sol";
 contract AttestedWorldIDTest is Fixtures {
     uint64 internal constant FINALITY_DEPTH = 32;
     uint32 internal constant MIN_ATTESTORS = 3;
+    uint64 internal constant SOURCE_BLOCK_TIME = 12;
     uint8 internal constant ACTION_ROOT_UPDATE = 0;
+    /// @dev How far the stubbed attested tip sits above the fixture block in these tests. A relayed
+    ///      root is dated `now - (tip - sourceBlock) * SOURCE_BLOCK_TIME`, so this is 12,000 s of age.
+    uint64 internal constant TIP_LEAD = 1_000;
 
     AttestedWorldIDHarness internal relay;
     ProofFixture internal mainnet;
@@ -30,9 +34,12 @@ contract AttestedWorldIDTest is Fixtures {
 
     function setUp() public virtual {
         vm.etch(BLOCK_PROVER, address(new MockNativeQueryVerifier()).code);
-        relay = new AttestedWorldIDHarness(3, MAINNET_IDENTITY_MANAGER, FINALITY_DEPTH, MIN_ATTESTORS);
+        relay = new AttestedWorldIDHarness(
+            3, MAINNET_IDENTITY_MANAGER, FINALITY_DEPTH, MIN_ATTESTORS, SOURCE_BLOCK_TIME
+        );
         mainnet = loadFixture(MAINNET_FIXTURE);
         vm.warp(1_760_000_000);
+        relay.setAttestedTip(uint64(mainnet.headerNumber) + TIP_LEAD);
     }
 
     // -----------------------------------------------------------------------------------
@@ -65,7 +72,8 @@ contract AttestedWorldIDTest is Fixtures {
         assertEq(relay.latestRoot(), postRoot, "latestRoot");
         assertEq(relay.rootCount(), 2, "bootstrap records preRoot and postRoot");
         assertTrue(relay.rootHistory(preRoot) != 0, "preRoot recorded");
-        assertEq(relay.rootHistory(postRoot), uint128(block.timestamp), "postRoot timestamped");
+        assertEq(relay.rootHistory(postRoot), _expectedReceivedAt(mainnet.headerNumber), "postRoot dated by its source block");
+        assertEq(relay.rootHistory(preRoot), relay.rootHistory(postRoot), "bootstrap shares one timestamp");
         assertEq(relay.humansAddedTotal(), humansAdded, "humansAddedTotal");
         assertTrue(relay.isValidRoot(preRoot), "preRoot valid");
         assertTrue(relay.isValidRoot(postRoot), "postRoot valid");
@@ -74,8 +82,11 @@ contract AttestedWorldIDTest is Fixtures {
 
     function test_RelaysTheRealSepoliaRoot() public {
         AttestedWorldIDHarness sepoliaRelay =
-            new AttestedWorldIDHarness(1, SEPOLIA_IDENTITY_MANAGER, FINALITY_DEPTH, MIN_ATTESTORS);
+            new AttestedWorldIDHarness(
+            1, SEPOLIA_IDENTITY_MANAGER, FINALITY_DEPTH, MIN_ATTESTORS, SOURCE_BLOCK_TIME
+        );
         ProofFixture memory sepolia = loadFixture(SEPOLIA_FIXTURE);
+        sepoliaRelay.setAttestedTip(uint64(sepolia.headerNumber) + TIP_LEAD);
 
         (uint256 preRoot, uint8 kind, uint256 postRoot) = _treeChangeFromLogs(sepolia.txBytes);
         uint32 humansAdded = _humansAddedFromCalldata(sepolia.txBytes);
@@ -448,6 +459,78 @@ contract AttestedWorldIDTest is Fixtures {
         relay.verifyProof(preRoot, 1, 2, 3, proof);
     }
 
+    /// @dev A side-fill only needs `rootHistory[preRoot] != 0`, and relaying is permissionless, so
+    ///      without source-block dating anyone could hand a year-old genuine root a fresh week of
+    ///      validity. Two weeks of source blocks below the attested tip must arrive expired.
+    function test_AnAncientSideFilledRootArrivesAlreadyExpired() public {
+        (uint256 preRoot,,) = _bootstrap();
+
+        uint64 twoWeeksOfBlocks = uint64((14 days) / SOURCE_BLOCK_TIME); // 100,800
+        relay.setAttestedTip(uint64(mainnet.headerNumber) + twoWeeksOfBlocks);
+
+        uint256 ancientRoot = uint256(keccak256("ancient"));
+        _executeWith(_registerTx(preRoot, ancientRoot, 1, MAINNET_IDENTITY_MANAGER), mainnet.headerNumber, 6);
+
+        assertEq(
+            relay.rootHistory(ancientRoot),
+            uint128(block.timestamp - 14 days),
+            "dated by its source block, not by arrival"
+        );
+        assertFalse(relay.isValidRoot(ancientRoot), "already past the one-week expiry on arrival");
+        assertTrue(relay.rootHistory(ancientRoot) != 0, "but it is recorded history");
+    }
+
+    function test_AFreshRootArrivesValid() public {
+        (,, uint256 bootRoot) = _bootstrap();
+
+        relay.setAttestedTip(uint64(mainnet.headerNumber) + 40);
+        uint256 freshRoot = uint256(keccak256("fresh"));
+        _executeWith(_registerTx(bootRoot, freshRoot, 1, MAINNET_IDENTITY_MANAGER), mainnet.headerNumber + 1, 9);
+
+        // 39 blocks below the tip: 39 * 12 = 468 seconds old.
+        assertEq(relay.rootHistory(freshRoot), uint128(block.timestamp - 468), "468 seconds old");
+        assertTrue(relay.isValidRoot(freshRoot), "fresh");
+    }
+
+    /// @dev World's own rule: the tip is always valid, however it was dated.
+    function test_AnAncientRootIsStillValidWhenItIsTheTip() public {
+        (,, uint256 bootRoot) = _bootstrap();
+
+        relay.setAttestedTip(uint64(mainnet.headerNumber) + uint64((14 days) / SOURCE_BLOCK_TIME));
+        uint256 ancientTip = uint256(keccak256("ancient-tip"));
+        _executeWith(_registerTx(bootRoot, ancientTip, 1, MAINNET_IDENTITY_MANAGER), mainnet.headerNumber, 6);
+
+        assertEq(relay.latestRoot(), ancientTip, "it advanced the tip");
+        assertEq(relay.rootHistory(ancientTip), uint128(block.timestamp - 14 days), "dated two weeks back");
+        assertTrue(relay.isValidRoot(ancientTip), "the tip never expires");
+
+        // The moment something fresher takes the tip, its real age applies.
+        relay.setAttestedTip(uint64(mainnet.headerNumber) + 40);
+        uint256 newerTip = uint256(keccak256("newer-tip"));
+        _executeWith(_registerTx(ancientTip, newerTip, 1, MAINNET_IDENTITY_MANAGER), mainnet.headerNumber + 1, 9);
+
+        assertEq(relay.latestRoot(), newerTip, "the fresh root took over");
+        assertFalse(relay.isValidRoot(ancientTip), "and the two-week-old root is expired");
+    }
+
+    /// @dev The derived age can exceed the chain's own clock on a young chain. Zero is
+    ///      `NULL_ROOT_TIME` and would read back as "never seen", so the stamp floors at 1.
+    function test_TheDerivedTimestampFloorsAtOne() public {
+        AttestedWorldIDHarness youngChain = new AttestedWorldIDHarness(
+            3, MAINNET_IDENTITY_MANAGER, FINALITY_DEPTH, MIN_ATTESTORS, SOURCE_BLOCK_TIME
+        );
+        youngChain.setAttestedTip(uint64(mainnet.headerNumber) + 1_000_000);
+        vm.warp(1_000);
+
+        _executeOn(youngChain, mainnet);
+
+        (uint256 preRoot,, uint256 postRoot) = _treeChangeFromLogs(mainnet.txBytes);
+        assertEq(youngChain.rootHistory(postRoot), 1, "floored, not zeroed");
+        assertEq(youngChain.rootHistory(preRoot), 1, "floored, not zeroed");
+        assertTrue(youngChain.isValidRoot(postRoot), "still the tip");
+        assertTrue(youngChain.isValidRoot(preRoot), "and nothing can be a week stale on a 1000-second-old chain");
+    }
+
     function test_IsValidRootIsFalseForUnknownAndZeroRoots() public {
         assertFalse(relay.isValidRoot(0), "zero before any relay");
         _execute(mainnet);
@@ -507,6 +590,10 @@ contract AttestedWorldIDTest is Fixtures {
     // -----------------------------------------------------------------------------------
     //                                        HELPERS
     // -----------------------------------------------------------------------------------
+
+    function _expectedReceivedAt(uint64 sourceBlock) internal view returns (uint128) {
+        return uint128(block.timestamp - uint256(relay.attestedTip() - sourceBlock) * SOURCE_BLOCK_TIME);
+    }
 
     function _execute(ProofFixture memory f) internal {
         _executeOn(relay, f);

@@ -35,6 +35,8 @@ contract Deploy is Script {
 
     uint64 internal constant FINALITY_DEPTH = 32;
     uint32 internal constant MIN_ATTESTORS = 3;
+    /// @notice Average seconds per block on both Ethereum chains; used to date relayed roots.
+    uint64 internal constant SOURCE_BLOCK_TIME = 12;
 
     string internal constant DEFAULT_APP_ID = "app_87b24915fcf733f10df1b0c46dd1f783";
     string internal constant DEFAULT_ACTION = "humanline-register";
@@ -84,9 +86,13 @@ contract Deploy is Script {
         }
 
         AttestedWorldID mainnetRelay =
-            new AttestedWorldID(MAINNET_CHAIN_KEY, MAINNET_IDENTITY_MANAGER, FINALITY_DEPTH, MIN_ATTESTORS);
+            new AttestedWorldID(
+            MAINNET_CHAIN_KEY, MAINNET_IDENTITY_MANAGER, FINALITY_DEPTH, MIN_ATTESTORS, SOURCE_BLOCK_TIME
+        );
         AttestedWorldID sepoliaRelay =
-            new AttestedWorldID(SEPOLIA_CHAIN_KEY, SEPOLIA_IDENTITY_MANAGER, FINALITY_DEPTH, MIN_ATTESTORS);
+            new AttestedWorldID(
+            SEPOLIA_CHAIN_KEY, SEPOLIA_IDENTITY_MANAGER, FINALITY_DEPTH, MIN_ATTESTORS, SOURCE_BLOCK_TIME
+        );
 
         HUSD husd = new HUSD();
         HumanRegistry registry =
@@ -145,6 +151,7 @@ contract Deploy is Script {
         vm.serializeString(configKey, "action", action);
         vm.serializeUint(configKey, "termSeconds", term);
         vm.serializeUint(configKey, "graceSeconds", grace);
+        vm.serializeUint(configKey, "sourceBlockTime", SOURCE_BLOCK_TIME);
         vm.serializeUint(configKey, "initialLimit", INITIAL_LIMIT);
         vm.serializeUint(configKey, "maxLimit", MAX_LIMIT);
         string memory configJson = vm.serializeUint(configKey, "feeBps", FEE_BPS);

@@ -44,6 +44,7 @@ SEPOLIA_CHAIN_KEY=1
 SEPOLIA_IDENTITY_MANAGER=0xb2EaD588f14e69266d1b87936b75325181377076
 FINALITY_DEPTH=32
 MIN_ATTESTORS=3
+SOURCE_BLOCK_TIME=12        # seconds per block on both Ethereum chains; dates relayed roots
 
 INITIAL_LIMIT=25000000     # 25 hUSD
 MAX_LIMIT=2000000000       # 2,000 hUSD
@@ -88,10 +89,10 @@ deploy() {
   echo "  $label -> ${addr}  (${txh})"
 }
 
-deploy AttestedWorldIDMainnet AttestedWorldID "constructor(uint64,address,uint64,uint32)" \
-  "$MAINNET_CHAIN_KEY" "$MAINNET_IDENTITY_MANAGER" "$FINALITY_DEPTH" "$MIN_ATTESTORS"
-deploy AttestedWorldIDSepolia AttestedWorldID "constructor(uint64,address,uint64,uint32)" \
-  "$SEPOLIA_CHAIN_KEY" "$SEPOLIA_IDENTITY_MANAGER" "$FINALITY_DEPTH" "$MIN_ATTESTORS"
+deploy AttestedWorldIDMainnet AttestedWorldID "constructor(uint64,address,uint64,uint32,uint64)" \
+  "$MAINNET_CHAIN_KEY" "$MAINNET_IDENTITY_MANAGER" "$FINALITY_DEPTH" "$MIN_ATTESTORS" "$SOURCE_BLOCK_TIME"
+deploy AttestedWorldIDSepolia AttestedWorldID "constructor(uint64,address,uint64,uint32,uint64)" \
+  "$SEPOLIA_CHAIN_KEY" "$SEPOLIA_IDENTITY_MANAGER" "$FINALITY_DEPTH" "$MIN_ATTESTORS" "$SOURCE_BLOCK_TIME"
 deploy HUSD HUSD ""
 
 if [[ "$WORLD_ID_SOURCE" == "mainnet" ]]; then
@@ -115,6 +116,7 @@ ADDRESSES="$ADDRESSES_JSON" TXHASHES="$TXHASHES_JSON" CHAIN_ID="$CHAIN_ID" DEPLO
 PROFILE="$PROFILE" WORLD_ID_SOURCE="$WORLD_ID_SOURCE" WORLD_APP_ID="$WORLD_APP_ID" \
 WORLD_ACTION="$WORLD_ACTION" TERM_SECONDS="$TERM_SECONDS" GRACE_SECONDS="$GRACE_SECONDS" \
 INITIAL_LIMIT="$INITIAL_LIMIT" MAX_LIMIT="$MAX_LIMIT" FEE_BPS="$FEE_BPS" OUT="$OUT" \
+SOURCE_BLOCK_TIME="$SOURCE_BLOCK_TIME" \
 bun -e '
 const rows = (s) => Object.fromEntries((s ?? "").split("\n").filter(Boolean).map((l) => l.split("\t")));
 const out = {
@@ -131,6 +133,7 @@ const out = {
     initialLimit: Number(process.env.INITIAL_LIMIT),
     maxLimit: Number(process.env.MAX_LIMIT),
     feeBps: Number(process.env.FEE_BPS),
+    sourceBlockTime: Number(process.env.SOURCE_BLOCK_TIME),
   },
   deployedAt: Math.floor(Date.now() / 1000),
   deployer: process.env.DEPLOYER,

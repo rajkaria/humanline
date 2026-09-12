@@ -44,20 +44,32 @@ contract AttestedWorldID is ASCBase, WorldIDBridge, IAttestedWorldID {
     uint64 public immutable override FINALITY_DEPTH;
     /// @inheritdoc IAttestedWorldID
     uint32 public immutable override MIN_ATTESTORS;
+    /// @inheritdoc IAttestedWorldID
+    uint64 public immutable override SOURCE_BLOCK_TIME;
 
     /// @inheritdoc IAttestedWorldID
     uint256 public override rootCount;
     /// @inheritdoc IAttestedWorldID
     uint256 public override humansAddedTotal;
 
-    constructor(uint64 sourceChainKey, address identityManager, uint64 finalityDepth, uint32 minAttestors)
-        ASCBase()
-        WorldIDBridge(TREE_DEPTH)
-    {
+    /// @param sourceChainKey Creditcoin chain key of the chain being mirrored.
+    /// @param identityManager The World ID identity manager on that chain.
+    /// @param finalityDepth Attested blocks that must sit above a source block before it is relayable.
+    /// @param minAttestors Minimum bonded attestor count for the source chain.
+    /// @param sourceBlockTime Average seconds per source-chain block; 12 for both Ethereum chains.
+    ///        Used to date a relayed root by its source block rather than by arrival time.
+    constructor(
+        uint64 sourceChainKey,
+        address identityManager,
+        uint64 finalityDepth,
+        uint32 minAttestors,
+        uint64 sourceBlockTime
+    ) ASCBase() WorldIDBridge(TREE_DEPTH) {
         SOURCE_CHAIN_KEY = sourceChainKey;
         IDENTITY_MANAGER = identityManager;
         FINALITY_DEPTH = finalityDepth;
         MIN_ATTESTORS = minAttestors;
+        SOURCE_BLOCK_TIME = sourceBlockTime;
     }
 
     // ---------------------------------------------------------------------------------------
@@ -214,29 +226,59 @@ contract AttestedWorldID is ASCBase, WorldIDBridge, IAttestedWorldID {
         }
 
         // 8. Finality and quorum, straight from the Creditcoin precompiles.
+        uint64 attestedTip = _attestedTip();
+        if (attestedTip < blockHeight + FINALITY_DEPTH) revert NotFinal(attestedTip, blockHeight);
         {
-            uint64 attestedTip = _attestedTip();
-            if (attestedTip < blockHeight + FINALITY_DEPTH) revert NotFinal(attestedTip, blockHeight);
             uint32 attestors = _attestorCount();
             if (attestors < MIN_ATTESTORS) revert ThinQuorum(attestors, MIN_ATTESTORS);
         }
 
-        // 9. Record the root(s) through Worldcoin's own bookkeeping.
+        // 9. Record the root(s), dated by the *source block*, not by arrival.
+        uint128 receivedAt = _receivedAt(attestedTip, blockHeight);
         uint256 recorded = 1;
         if (bootstrap && update.preRoot != 0 && update.preRoot != update.postRoot) {
-            _receiveRoot(update.preRoot);
+            _receiveRootAt(update.preRoot, receivedAt);
             recorded = 2;
         }
         if (advance) {
-            _receiveRoot(update.postRoot);
+            _receiveRootAt(update.postRoot, receivedAt);
         } else {
             uint256 tip = _latestRoot;
-            _receiveRoot(update.postRoot);
+            _receiveRootAt(update.postRoot, receivedAt);
             _latestRoot = tip;
         }
 
         rootCount += recorded;
         humansAddedTotal += update.humansAdded;
+    }
+
+    /// @dev How old a root is, in Creditcoin time, derived from how far the source block sits below
+    ///      the attested tip: `now - (attestedTip - sourceBlock) * SOURCE_BLOCK_TIME`.
+    ///
+    ///      Relaying is permissionless and a side-fill only needs `rootHistory[preRoot] != 0`, so
+    ///      without this anyone could introduce a year-old genuine World root and hand it a fresh
+    ///      week of validity. The one-week expiry exists to bound how long a stale root may prove
+    ///      an identity that has since been deleted from the tree; dating roots by their source
+    ///      block is what makes that bound mean anything. A root older than the expiry therefore
+    ///      arrives already expired. `latestRoot` stays unconditionally valid, per World's own
+    ///      semantics in `WorldIDBridge.requireValidRoot`.
+    ///
+    ///      Floored at 1: zero is `NULL_ROOT_TIME`, which would read back as "never seen".
+    function _receivedAt(uint64 attestedTip, uint64 sourceBlock) internal view returns (uint128) {
+        uint256 age = uint256(attestedTip - sourceBlock) * SOURCE_BLOCK_TIME;
+        return block.timestamp > age ? uint128(block.timestamp - age) : uint128(1);
+    }
+
+    /// @dev `WorldIDBridge._receiveRoot` with an explicit timestamp. Same writes, same overwrite
+    ///      guard, same event; the vendored file hard-codes `block.timestamp` and must not be
+    ///      edited, and both `rootHistory` and `_latestRoot` are `internal` there.
+    function _receiveRootAt(uint256 newRoot, uint128 timestamp) internal {
+        if (rootHistory[newRoot] != NULL_ROOT_TIME) revert CannotOverwriteRoot();
+
+        _latestRoot = newRoot;
+        rootHistory[newRoot] = timestamp;
+
+        emit RootAdded(newRoot, timestamp);
     }
 
     /// @dev Step 4 + 5. Keeps only `TreeChanged` logs emitted by the identity manager itself, so a

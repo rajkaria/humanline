@@ -12,10 +12,13 @@ contract AttestedWorldIDHarness is AttestedWorldID {
     uint64 public attestedTip;
     uint32 public attestorCount;
 
-    constructor(uint64 sourceChainKey, address identityManager, uint64 finalityDepth, uint32 minAttestors)
-        AttestedWorldID(sourceChainKey, identityManager, finalityDepth, minAttestors)
-    {
-        attestedTip = type(uint64).max;
+    constructor(
+        uint64 sourceChainKey,
+        address identityManager,
+        uint64 finalityDepth,
+        uint32 minAttestors,
+        uint64 sourceBlockTime
+    ) AttestedWorldID(sourceChainKey, identityManager, finalityDepth, minAttestors, sourceBlockTime) {
         attestorCount = type(uint32).max;
     }
 

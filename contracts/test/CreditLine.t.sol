@@ -99,8 +99,9 @@ contract CreditLineTest is Test {
         assertEq(husd.balanceOf(alice), 1_000e6 + amount, "cash received");
         assertEq(pool.lineOf(ALICE_HUMAN).principal, amount + fee, "principal includes the fee");
         assertEq(pool.lineOf(ALICE_HUMAN).dueAt, dueAt, "due date set");
-        assertEq(pool.totalBorrowed(), amount + fee, "outstanding");
-        assertEq(pool.totalAssets(), 1_000e6 + fee, "the fee accrues to lenders at draw time");
+        assertEq(pool.totalBorrowed(), amount, "ex-fee principal out on loan");
+        assertEq(pool.principalOf(ALICE_HUMAN), amount, "ex-fee slice of the balance");
+        assertEq(pool.totalAssets(), 1_000e6, "an unearned fee is not a pool asset");
 
         vm.warp(uint256(dueAt) - 1);
         vm.expectEmit(true, true, true, true, address(pool));
@@ -383,22 +384,99 @@ contract CreditLineTest is Test {
     //                                    SHARE MATH
     // -----------------------------------------------------------------------------------
 
-    function test_FirstDepositMintsOneForOne() public {
+    /// @dev Shares are minted against a virtual offset (1,000 virtual shares backed by 1 virtual
+    ///      asset), so the first deposit mints `assets * 1e3` rather than `assets`. The round trip
+    ///      is still exact.
+    function test_FirstDepositMintsAgainstTheVirtualOffset() public {
         uint256 shares = _deposit(lender, 1_000e6);
-        assertEq(shares, 1_000e6, "1:1");
-        assertEq(pool.totalShares(), 1_000e6, "supply");
-        assertEq(pool.sharesOf(lender), 1_000e6, "balance");
+        assertEq(shares, 1_000e6 * 1e3, "assets * VIRTUAL_SHARES");
+        assertEq(pool.totalShares(), 1e12, "supply");
+        assertEq(pool.sharesOf(lender), 1e12, "balance");
         assertEq(pool.totalAssets(), 1_000e6, "assets");
+
+        assertEq(_withdraw(lender, shares), 1_000e6, "a lone depositor gets exactly their deposit back");
     }
 
-    function test_ALaterDepositPaysForAccruedFees() public {
+    /// @dev I-1: a write-off that empties the pool while shares are outstanding used to make
+    ///      `totalAssets()` zero and `deposit` divide by zero - an unnamed panic, with no admin to
+    ///      reset it, i.e. a permanently bricked pool. The virtual asset keeps the denominator at 1.
+    function test_DepositStillWorksAfterAWriteOffEmptiesThePool() public {
+        uint256 lenderShares = _deposit(lender, 24e6);
+        _openAndBorrow(alice, 24e6); // drains the idle balance entirely
+
+        vm.warp(block.timestamp + TERM + GRACE + 1);
+        vm.prank(stranger);
+        pool.markDefault(ALICE_HUMAN);
+
+        assertEq(pool.totalAssets(), 0, "the pool is empty");
+        assertGt(pool.totalShares(), 0, "but shares are still outstanding");
+
+        uint256 rescueShares = _depositIn(pool, lender2, 100e6);
+        assertGt(rescueShares, 0, "a new lender can re-seed the pool");
+
+        // The wiped-out lender's shares are worth nothing, and cannot dilute the rescuer.
+        assertEq(_withdraw(lender, lenderShares), 0, "old shares are worthless");
+        assertApproxEqAbs(_withdraw(lender2, rescueShares), 100e6, 2, "the rescuer keeps their money");
+    }
+
+    /// @dev I-3: the classic first-depositor donation attack. With the virtual offset the attacker
+    ///      forfeits most of the donation to the virtual tranche, and the next depositor's loss is
+    ///      bounded by roughly 1 / VIRTUAL_SHARES.
+    function test_ADonationAttackCannotSkimTheNextDepositor() public {
+        address attacker = address(0xA77AC4);
+        deal(address(husd), attacker, 10_000e6);
+        vm.prank(attacker);
+        husd.approve(address(pool), type(uint256).max);
+
+        uint256 attackerShares = _depositIn(pool, attacker, 1); // open with one unit
+        vm.prank(attacker);
+        husd.transfer(address(pool), 1_000e6); // donate, inflating the share price
+
+        uint256 victimShares = _depositIn(pool, lender, 1_000e6);
+        uint256 victimOut = _withdraw(lender, victimShares);
+
+        assertGe(victimOut, 999e6, "the victim keeps >99.9% of their deposit");
+        assertLe(1_000e6 - victimOut, 1_000e6 / 1e3, "loss bounded by 1 / VIRTUAL_SHARES");
+
+        uint256 attackerOut = _withdraw(attacker, attackerShares);
+        assertLt(attackerOut, 1_000e6 + 1, "the attack loses money; the donation is not recoverable");
+    }
+
+    /// @dev Fees are income when they are paid, not when the loan is drawn, so the share price only
+    ///      moves after a repayment lands. A lender who arrives afterwards pays for that.
+    function test_ALaterDepositPaysForRealisedFees() public {
         _depositIn(bigPool, lender, 1_000e6);
-        _openAndBorrowIn(bigPool, alice, 100e6); // books a 1 hUSD fee, so the pool is worth 1,001
+        _openAndBorrowIn(bigPool, alice, 100e6);
+        assertEq(bigPool.totalAssets(), 1_000e6, "drawing the loan changed nothing for lenders");
+
+        vm.prank(alice);
+        bigPool.repay(101e6);
+        assertEq(bigPool.totalAssets(), 1_001e6, "the fee is income once it is paid");
 
         uint256 shares = _depositIn(bigPool, lender2, 1_001e6);
-        assertEq(shares, 1_000e6, "1,001 assets buys 1,000 shares once the pool is worth 1.001x");
-        assertLt(shares, 1_001e6, "the late lender pays for fees they did not earn");
-        assertEq(bigPool.sharesOf(lender), 1_000e6, "the early lender paid 1,000 for the same stake");
+        assertEq(shares, 1e12, "1,001 assets now buys what 1,000 bought before");
+        assertEq(bigPool.sharesOf(lender), 1e12, "the early lender paid 1,000 for the same stake");
+    }
+
+    /// @dev I-4: while a loan is outstanding, a lender's exit is capped at what they put in. Before
+    ///      the fee was booked at draw time, this same position was worth 402 for 400 - unearned
+    ///      interest that the first lender out could take with them, leaving the rest to absorb a
+    ///      default.
+    function test_ALenderCannotWithdrawUnearnedInterest() public {
+        uint256 shares = _depositIn(bigPool, lender, 1_000e6);
+        _openAndBorrowIn(bigPool, alice, 500e6); // owes 505; the pool has lent 500
+
+        assertEq(bigPool.totalAssets(), 1_000e6, "no mark-up on an unpaid loan");
+        assertEq(_withdrawFrom(bigPool, lender, shares / 10), 100e6, "10% of the pool is 10% of what went in");
+
+        vm.warp(block.timestamp + TERM + GRACE + 1);
+        vm.prank(stranger);
+        bigPool.markDefault(ALICE_HUMAN);
+
+        // The exiting lender took 100 and left 400 exposed to a 500 loan; the loss is 500, so the
+        // remaining 900 shares' worth is 400 - their share of nothing. No one exited ahead.
+        assertEq(bigPool.totalAssets(), 400e6, "900 idle minus the 500 that never came back");
+        assertEq(_withdrawFrom(bigPool, lender, (shares * 9) / 10), 400e6, "and the rest is all that is left");
     }
 
     function test_TwoLendersShareAWriteOffProRata() public {
@@ -407,6 +485,8 @@ contract CreditLineTest is Test {
 
         uint256 lender2Shares = _depositIn(bigPool, lender2, 500e6);
         uint256 lenderShares = bigPool.sharesOf(lender);
+        assertEq(lenderShares, 1e12, "L1 stake");
+        assertEq(lender2Shares, 5e11, "L2 stake, priced off an unchanged pool");
 
         vm.warp(block.timestamp + TERM + GRACE + 1);
         vm.prank(stranger);
@@ -425,28 +505,28 @@ contract CreditLineTest is Test {
             1e10,
             "equal value per share"
         );
-        assertLt(lenderOut, 1_000e6, "the early lender took a loss");
-        assertLt(lender2Out, 500e6, "so did the late lender");
+        assertEq(lenderOut, 933_333_333, "two thirds of the pool, two thirds of the loss");
+        assertEq(lender2Out, 466_666_667, "one third of each");
         assertEq(lenderOut + lender2Out, assetsAfterLoss, "the pool is emptied exactly");
         assertEq(bigPool.totalShares(), 0, "all shares burned");
     }
 
     function test_WithdrawIsLimitedToIdleLiquidity() public {
         uint256 shares = _depositIn(bigPool, lender, 1_000e6);
-        _openAndBorrowIn(bigPool, alice, 500e6); // 500 out, 505 owed, pool worth 1,005
+        _openAndBorrowIn(bigPool, alice, 500e6); // 500 out on loan, 505 owed, pool still worth 1,000
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                ICreditLine.InsufficientLiquidity.selector, uint256(1_005e6), uint256(500e6)
+                ICreditLine.InsufficientLiquidity.selector, uint256(1_000e6), uint256(500e6)
             )
         );
         vm.prank(lender);
         bigPool.withdraw(shares);
 
         // A smaller slice still fits inside the idle balance.
-        uint256 out = _withdrawFrom(bigPool, lender, 400e6);
-        assertEq(out, 402e6, "40% of a pool worth 1,005");
-        assertEq(bigPool.sharesOf(lender), 600e6, "the rest stays invested");
+        uint256 out = _withdrawFrom(bigPool, lender, (shares * 4) / 10);
+        assertEq(out, 400e6, "40% of a pool worth 1,000, not a unit more");
+        assertEq(bigPool.sharesOf(lender), 6e11, "the rest stays invested");
     }
 
     function test_WithdrawingMoreSharesThanHeldReverts() public {

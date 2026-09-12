@@ -335,6 +335,25 @@
   },
   {
     "type": "function",
+    "name": "principalOf",
+    "inputs": [
+      {
+        "name": "human",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "repay",
     "inputs": [
       {
@@ -381,6 +400,19 @@
   {
     "type": "function",
     "name": "totalBorrowed",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "totalPrincipal",
     "inputs": [],
     "outputs": [
       {

@@ -35,12 +35,15 @@ contract AttestedWorldIDForkTest is Fixtures {
 
     uint64 internal constant FINALITY_DEPTH = 32;
     uint32 internal constant MIN_ATTESTORS = 3;
+    uint64 internal constant SOURCE_BLOCK_TIME = 12;
 
     modifier onlyFork() {
         if (!_forkEnabled()) {
             vm.skip(true);
             return;
         }
+        // A plain Foundry EVM starts at timestamp 1; relayed roots are dated relative to now.
+        vm.warp(1_760_000_000);
         _;
     }
 
@@ -181,7 +184,9 @@ contract AttestedWorldIDForkTest is Fixtures {
         _stubAttestorStash(f.chainKey, realAttestors);
 
         AttestedWorldID relay =
-            new AttestedWorldID(f.chainKey, MAINNET_IDENTITY_MANAGER, FINALITY_DEPTH, MIN_ATTESTORS);
+            new AttestedWorldID(
+            f.chainKey, MAINNET_IDENTITY_MANAGER, FINALITY_DEPTH, MIN_ATTESTORS, SOURCE_BLOCK_TIME
+        );
 
         EvmV1Decoder.ReceiptFields memory receipt = EvmV1Decoder.decodeReceiptFields(f.txBytes);
         EvmV1Decoder.LogEntry[] memory logs =
@@ -217,12 +222,29 @@ contract AttestedWorldIDForkTest is Fixtures {
         assertEq(relay.humansAddedTotal(), 100, "100 real humans");
     }
 
-    /// @notice bn128 precompiles, which the Semaphore verifier needs, exist on CC3.
-    function testFork_Bn128PrecompilesExist() public onlyFork {
-        (bool okAdd,) = address(0x06).staticcall(new bytes(128));
-        (bool okMul,) = address(0x07).staticcall(new bytes(96));
-        (bool okPairing,) = address(0x08).staticcall(new bytes(0));
-        assertTrue(okAdd && okMul && okPairing, "0x06/0x07/0x08 answer");
+    /// @notice Known-answer test for the bn128 precompiles the Semaphore verifier depends on.
+    /// @dev Not `staticcall` from inside the test: a call to a codeless address succeeds on every
+    ///      EVM, so `(bool ok, ) = address(0x08).staticcall(...)` is an assertion that cannot fail.
+    ///      These go out over RPC to the real node and check the returned words.
+    function testFork_Bn128PrecompilesAnswerCorrectly() public onlyFork {
+        // ecPairing with no pairs is the empty product: it must return 1.
+        bytes memory pairing = _ethCall(address(0x08), "");
+        assertEq(pairing.length, 32, "0x08 returns one word");
+        assertEq(abi.decode(pairing, (uint256)), 1, "the empty pairing check succeeds");
+
+        // ecAdd of the point at infinity with itself is the point at infinity: 64 zero bytes.
+        bytes memory sum = _ethCall(address(0x06), new bytes(128));
+        assertEq(sum.length, 64, "0x06 returns a G1 point");
+        (uint256 x, uint256 y) = abi.decode(sum, (uint256, uint256));
+        assertEq(x, 0, "O + O = O (x)");
+        assertEq(y, 0, "O + O = O (y)");
+
+        // ecMul of the point at infinity by 5 is still the point at infinity.
+        bytes memory product = _ethCall(address(0x07), abi.encode(uint256(0), uint256(0), uint256(5)));
+        assertEq(product.length, 64, "0x07 returns a G1 point");
+        (uint256 px, uint256 py) = abi.decode(product, (uint256, uint256));
+        assertEq(px, 0, "5 * O = O (x)");
+        assertEq(py, 0, "5 * O = O (y)");
     }
 
     // -----------------------------------------------------------------------------------

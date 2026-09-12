@@ -81,6 +81,9 @@ interface IAttestedWorldID {
     function FINALITY_DEPTH() external view returns (uint64);
     /// @notice Minimum bonded attestor count for the source chain.
     function MIN_ATTESTORS() external view returns (uint32);
+    /// @notice Average seconds per source-chain block, used to date a relayed root by its source
+    ///         block instead of by the moment it happened to be relayed.
+    function SOURCE_BLOCK_TIME() external view returns (uint64);
     /// @notice Largest `executeBatch` size.
     function MAX_BATCH() external view returns (uint256);
 

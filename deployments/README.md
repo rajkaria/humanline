@@ -27,7 +27,8 @@ as generated output, not something to hand-edit.
     "graceSeconds": 604800,
     "initialLimit": 25000000,           // 25 hUSD, six decimals
     "maxLimit": 2000000000,             // 2,000 hUSD
-    "feeBps": 100                       // 1% per term
+    "feeBps": 100,                      // 1% per term
+    "sourceBlockTime": 12               // seconds per source block; dates relayed roots
   },
   "deployedAt": 1760000000,
   "deployer": "0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3"

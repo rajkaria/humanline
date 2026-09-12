@@ -21,6 +21,11 @@
         "name": "minAttestors",
         "type": "uint32",
         "internalType": "uint32"
+      },
+      {
+        "name": "sourceBlockTime",
+        "type": "uint64",
+        "internalType": "uint64"
       }
     ],
     "stateMutability": "nonpayable"
@@ -73,6 +78,19 @@
         "name": "",
         "type": "uint32",
         "internalType": "uint32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "SOURCE_BLOCK_TIME",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint64",
+        "internalType": "uint64"
       }
     ],
     "stateMutability": "view"

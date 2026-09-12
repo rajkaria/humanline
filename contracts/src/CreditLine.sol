@@ -13,17 +13,33 @@ import {IHumanRegistry} from "./interfaces/IHumanRegistry.sol";
 ///      a default and come back with a fresh wallet, because the line is keyed by the World ID
 ///      nullifier and the freeze travels with it.
 ///
-///      Pool accounting. `totalAssets = idle balance + totalBorrowed`. Borrowing moves value from
-///      idle to outstanding and books the term fee into `totalBorrowed` immediately, so lenders'
-///      shares appreciate the moment a loan is drawn. A default burns the whole outstanding
-///      principal, fee included, straight out of `totalBorrowed`: the pool eats the loss pro rata,
+///      Pool accounting. `totalAssets = idle balance + totalPrincipal`, where `totalPrincipal` is
+///      the *ex-fee* amount still out on loan. A draw moves value from idle to outstanding and
+///      leaves `totalAssets` unchanged: the term fee is income only once it is actually paid, so a
+///      lender cannot withdraw more than they put in while a loan is still running, and cannot
+///      exit ahead of a default with someone else's unearned interest. A repayment clears the
+///      ex-fee principal first; whatever comes in on top is fee income, already sitting in the
+///      balance. A default writes off the ex-fee principal, and the pool eats that loss pro rata,
 ///      exactly as an uncollateralised lender should.
+///
+///      Shares are priced with OpenZeppelin's virtual-offset rule:
+///        `shares = assets * (totalShares + VIRTUAL_SHARES) / (totalAssets + 1)`
+///        `assets = shares * (totalAssets + 1) / (totalShares + VIRTUAL_SHARES)`
+///      The `+ 1` makes the pool impossible to brick: a write-off that empties it leaves the
+///      denominator at 1 rather than 0, so a new deposit re-seeds the pool instead of reverting
+///      with an arithmetic panic, and the worthless legacy shares stay worthless. The
+///      `+ VIRTUAL_SHARES` bounds the classic first-depositor donation attack: an attacker who
+///      opens with one unit and then donates has to give up most of the donation to the virtual
+///      tranche, and the next depositor's rounding loss is capped at roughly `1 / VIRTUAL_SHARES`.
 ///
 ///      No owner, no pause, no upgrade. Every parameter is an immutable constructor argument.
 contract CreditLine is ICreditLine {
     using SafeERC20 for IERC20;
 
     uint256 private constant BPS = 10_000;
+
+    /// @dev Virtual share tranche backed by one virtual asset. See the contract-level note.
+    uint256 private constant VIRTUAL_SHARES = 1e3;
 
     /// @inheritdoc ICreditLine
     address public immutable override ASSET;
@@ -40,14 +56,17 @@ contract CreditLine is ICreditLine {
     /// @inheritdoc ICreditLine
     uint64 public immutable override GRACE;
 
-    /// @inheritdoc ICreditLine
-    uint256 public override totalBorrowed;
+    /// @notice Ex-fee principal still out on loan across every line. This, not the borrowers'
+    ///         fee-inclusive balances, is what the pool counts as an asset.
+    uint256 public totalPrincipal;
     /// @inheritdoc ICreditLine
     uint256 public override totalShares;
     /// @inheritdoc ICreditLine
     mapping(address => uint256) public override sharesOf;
 
     mapping(uint256 => Line) private _lines;
+    /// @dev Per human: the ex-fee slice of `Line.principal` that is still outstanding.
+    mapping(uint256 => uint256) private _principalExFee;
 
     constructor(
         address asset,
@@ -75,12 +94,11 @@ contract CreditLine is ICreditLine {
     function deposit(uint256 assets) external override returns (uint256 shares) {
         if (assets == 0) revert ZeroAmount();
 
-        uint256 supply = totalShares;
         // Priced against the pool as it stands *before* the incoming transfer.
-        shares = supply == 0 ? assets : (assets * supply) / totalAssets();
+        shares = (assets * (totalShares + VIRTUAL_SHARES)) / (totalAssets() + 1);
         if (shares == 0) revert ZeroAmount();
 
-        totalShares = supply + shares;
+        totalShares += shares;
         sharesOf[msg.sender] += shares;
 
         IERC20(ASSET).safeTransferFrom(msg.sender, address(this), assets);
@@ -96,7 +114,7 @@ contract CreditLine is ICreditLine {
         uint256 held = sharesOf[msg.sender];
         if (held < shares) revert InsufficientShares(held, shares);
 
-        assets = (shares * totalAssets()) / totalShares;
+        assets = (shares * (totalAssets() + 1)) / (totalShares + VIRTUAL_SHARES);
 
         uint256 idle = IERC20(ASSET).balanceOf(address(this));
         if (assets > idle) revert InsufficientLiquidity(assets, idle);
@@ -146,7 +164,8 @@ contract CreditLine is ICreditLine {
 
         if (line.principal == 0) line.dueAt = uint64(block.timestamp) + TERM;
         line.principal += owed;
-        totalBorrowed += owed;
+        _principalExFee[human] += amount;
+        totalPrincipal += amount;
 
         IERC20(ASSET).safeTransfer(msg.sender, amount);
         emit Borrowed(human, msg.sender, amount, fee, line.dueAt);
@@ -168,8 +187,14 @@ contract CreditLine is ICreditLine {
         uint256 paid = amount > principal ? principal : amount;
         uint256 remaining = principal - paid;
 
+        // Clear the ex-fee principal first; anything on top of it is earned fee income, which the
+        // incoming transfer puts straight into the idle balance.
+        uint256 exFee = _principalExFee[human];
+        uint256 principalPaid = paid > exFee ? exFee : paid;
+        _principalExFee[human] = exFee - principalPaid;
+        totalPrincipal -= principalPaid;
+
         line.principal = remaining;
-        totalBorrowed -= paid;
 
         IERC20(ASSET).safeTransferFrom(msg.sender, address(this), paid);
         emit Repaid(human, msg.sender, paid, remaining);
@@ -193,8 +218,13 @@ contract CreditLine is ICreditLine {
 
         line.frozen = true;
         line.principal = 0;
-        totalBorrowed -= principal;
 
+        // The pool only ever counted the ex-fee slice as an asset, so that is all it can lose.
+        totalPrincipal -= _principalExFee[human];
+        _principalExFee[human] = 0;
+
+        // `writtenOff` is the borrower's whole outstanding debt, fee included; the pool's realised
+        // loss is the ex-fee part of it.
         emit Defaulted(human, principal, msg.sender);
     }
 
@@ -216,7 +246,19 @@ contract CreditLine is ICreditLine {
 
     /// @inheritdoc ICreditLine
     function totalAssets() public view override returns (uint256) {
-        return IERC20(ASSET).balanceOf(address(this)) + totalBorrowed;
+        return IERC20(ASSET).balanceOf(address(this)) + totalPrincipal;
+    }
+
+    /// @inheritdoc ICreditLine
+    /// @dev The ex-fee amount out on loan. Borrowers owe more than this - their balances carry the
+    ///      term fee - but unearned fees are not pool assets.
+    function totalBorrowed() external view override returns (uint256) {
+        return totalPrincipal;
+    }
+
+    /// @notice The ex-fee slice of a human's outstanding balance; the rest is the accrued term fee.
+    function principalOf(uint256 human) external view returns (uint256) {
+        return _principalExFee[human];
     }
 
     /// @inheritdoc ICreditLine
