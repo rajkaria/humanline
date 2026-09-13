@@ -1,22 +1,22 @@
 {
-  "generatedAt": "2026-09-13T08:46:04.695Z",
+  "generatedAt": "2026-09-13T09:17:14.146Z",
   "cc3": {
     "chainId": 102031,
-    "head": 5479827,
+    "head": 5479958,
     "blockGasLimit": 75000000
   },
   "gasByBatchSize": [
     {
       "n": 1,
-      "observed": 19,
+      "observed": 20,
       "min": 237972,
       "median": 276948,
       "max": 279188
     },
     {
       "n": 2,
-      "observed": 6,
-      "min": 496720,
+      "observed": 7,
+      "min": 329140,
       "median": 520016,
       "max": 633808
     },
@@ -36,17 +36,17 @@
     }
   ],
   "liveFit": {
-    "intercept": 74291.25473684265,
-    "slope": 212867.43578947333,
-    "r2": 0.9134772631745496,
-    "n": 28
+    "intercept": 75475.0076335877,
+    "slope": 207934.3129770993,
+    "r2": 0.8824479788470362,
+    "n": 30
   },
   "liveModel": {
-    "intercept": 162662.86598265576,
-    "b1": 108666.09668667772,
-    "b2": 439.89473656272395,
-    "r2": 0.9962854985179083,
-    "n": 28
+    "intercept": 169638.5925993552,
+    "b1": 99959.3265276728,
+    "b2": 470.5575017839579,
+    "r2": 0.9938273539395873,
+    "n": 30
   },
   "probe": {
     "points": [
@@ -210,28 +210,28 @@
   },
   "proofSizes": {
     "calldata": {
-      "count": 36,
+      "count": 38,
       "min": 3684,
       "p50": 6532,
       "p90": 31268,
       "max": 39876,
-      "mean": 12098.222222222223
+      "mean": 11881.052631578947
     },
     "txBytes": {
-      "count": 42,
+      "count": 45,
       "min": 2400,
       "p50": 5216,
       "p90": 5216,
       "max": 5216,
-      "mean": 5081.9047619047615
+      "mean": 5028.266666666666
     },
     "continuityRoots": {
-      "count": 29,
+      "count": 31,
       "min": 2,
       "p50": 7,
-      "p90": 573,
+      "p90": 447,
       "max": 671,
-      "mean": 141.06896551724137
+      "mean": 132.16129032258064
     },
     "histogram": [
       {
@@ -247,12 +247,12 @@
       {
         "from": 6000,
         "to": 8000,
-        "count": 24
+        "count": 25
       },
       {
         "from": 8000,
         "to": 10000,
-        "count": 2
+        "count": 3
       },
       {
         "from": 10000,
@@ -332,15 +332,15 @@
     ]
   },
   "precompile": {
-    "fromBlock": 5474068,
-    "toBlock": 5479827,
+    "fromBlock": 5474199,
+    "toBlock": 5479958,
     "hours": 24.041666666666668,
-    "logs": 8306,
-    "txs": 4935,
+    "logs": 8262,
+    "txs": 4907,
     "callers": [
       {
         "to": "0x0c019ee3298111b3b067ae1ba93f73d93ee5230e",
-        "txs": 2035,
+        "txs": 2029,
         "humanline": false
       },
       {
@@ -350,12 +350,12 @@
       },
       {
         "to": "0xf7283adefb2801db75160a49da2f7e5e8fdc36c5",
-        "txs": 625,
+        "txs": 624,
         "humanline": false
       },
       {
         "to": "0xb462c2772b8003e3c511c373ddc5715642b34d4c",
-        "txs": 343,
+        "txs": 333,
         "humanline": false
       },
       {
@@ -370,12 +370,12 @@
       },
       {
         "to": "0x1fc6c2cfb9e339012b70d45977737b9e411efdc9",
-        "txs": 75,
+        "txs": 76,
         "humanline": false
       },
       {
         "to": "0xa15564c2fcd3c63f3f9e45e9ef17d104c8445817",
-        "txs": 48,
+        "txs": 45,
         "humanline": false
       },
       {
@@ -385,7 +385,7 @@
       },
       {
         "to": "0x0d5c854ec2df99c458cbbe639493435292fb22fc",
-        "txs": 36,
+        "txs": 33,
         "humanline": false
       },
       {
@@ -395,7 +395,7 @@
       },
       {
         "to": "0x3a7c3cc67034197208923587b8dc5c4674cbcef7",
-        "txs": 19,
+        "txs": 21,
         "humanline": true
       },
       {
@@ -405,16 +405,16 @@
       },
       {
         "to": "0x76131b6547b584e9f101618239a26b2accd8aa43",
-        "txs": 15,
-        "humanline": false
-      },
-      {
-        "to": "0xc2a1583f9a469ee98f2a1acf6297a0d6a073f276",
-        "txs": 14,
+        "txs": 13,
         "humanline": false
       },
       {
         "to": "0xf7f1e82cfa97d07812d8a61dd4c05b1c228f5851",
+        "txs": 13,
+        "humanline": false
+      },
+      {
+        "to": "0x8f14b2cc1b807203d332de6e3da6274176fdb584",
         "txs": 13,
         "humanline": false
       },
@@ -429,8 +429,8 @@
         "humanline": false
       },
       {
-        "to": "0x8f14b2cc1b807203d332de6e3da6274176fdb584",
-        "txs": 12,
+        "to": "0xc2a1583f9a469ee98f2a1acf6297a0d6a073f276",
+        "txs": 10,
         "humanline": false
       },
       {
@@ -439,12 +439,12 @@
         "humanline": false
       },
       {
-        "to": "0x0000000000000000000000000000000000000fd2",
-        "txs": 8,
+        "to": "0x5c5bee8b3d942cb7782071e13a272c7ae9f7c907",
+        "txs": 10,
         "humanline": false
       },
       {
-        "to": "0x5c5bee8b3d942cb7782071e13a272c7ae9f7c907",
+        "to": "0x0000000000000000000000000000000000000fd2",
         "txs": 8,
         "humanline": false
       },
@@ -534,21 +534,6 @@
         "humanline": false
       },
       {
-        "to": "0xaac41539949d6a8810a42944182a51ccafc421f1",
-        "txs": 2,
-        "humanline": false
-      },
-      {
-        "to": "0x9a6c6f042f82142b43d66ab430015eca1e5a9d15",
-        "txs": 2,
-        "humanline": false
-      },
-      {
-        "to": "0xfa19b4ddcea765ce8662ec9ea15438adce44e237",
-        "txs": 2,
-        "humanline": false
-      },
-      {
         "to": "0xf1b7edd3510bd465fb6b66b7bee0b347684cf3ae",
         "txs": 2,
         "humanline": false
@@ -589,11 +574,6 @@
         "humanline": false
       },
       {
-        "to": "0x1ca573b695309b2bfaf7f306b76dc16443708117",
-        "txs": 1,
-        "humanline": false
-      },
-      {
         "to": "0x92b54b2988f6672688806821e7893101c0eac104",
         "txs": 1,
         "humanline": false
@@ -620,6 +600,11 @@
       },
       {
         "to": "0x2a8142db4c3b90333339a6e25b225e808098bdb0",
+        "txs": 1,
+        "humanline": false
+      },
+      {
+        "to": "0xfa19b4ddcea765ce8662ec9ea15438adce44e237",
         "txs": 1,
         "humanline": false
       },
@@ -697,30 +682,35 @@
         "to": "0x55a8d53a9d3f960f40571d9647c14708bbb0b85a",
         "txs": 1,
         "humanline": false
+      },
+      {
+        "to": "0x05958dd789eac1de84e864d6b3956c90d3e90d0f",
+        "txs": 1,
+        "humanline": false
       }
     ],
-    "humanlineTxs": 36,
-    "humanlineShare": 0.00729483282674772
+    "humanlineTxs": 38,
+    "humanlineShare": 0.0077440391277766455
   },
-  "relayTxCount": 36,
+  "relayTxCount": 38,
   "latency": {
     "summary": {
-      "count": 49,
+      "count": 52,
       "min": 826,
-      "p50": 1581,
-      "p90": 8596,
+      "p50": 1101,
+      "p90": 7362,
       "max": 10015,
-      "mean": 3215.7551020408164
+      "mean": 3090.0576923076924
     },
-    "spanHours": 23.4125,
+    "spanHours": 23.6625,
     "byRelay": {
       "sepolia": {
-        "count": 28,
+        "count": 31,
         "min": 837,
-        "p50": 1581,
-        "p90": 7362,
+        "p50": 1101,
+        "p90": 6573,
         "max": 9783,
-        "mean": 3113.464285714286
+        "mean": 2912.516129032258
       },
       "mainnet": {
         "count": 21,

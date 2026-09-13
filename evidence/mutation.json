@@ -1,0 +1,1853 @@
+{
+  "generatedAt": "2026-09-13T09:09:38.753Z",
+  "tool": "scripts/mutation.ts (delete-guard, flip-relation)",
+  "suites": "forge test --no-match-contract Invariant|Fork --fail-fast -q (FOUNDRY_FUZZ_RUNS=64)",
+  "total": 192,
+  "evaluated": 192,
+  "killed": 183,
+  "survived": 8,
+  "stillborn": 1,
+  "score": 0.9581,
+  "survivors": [
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 126,
+      "operator": "delete-guard",
+      "original": "if (msg.sig != ASCBase.execute.selector) revert UnsupportedEntrypoint(msg.sig);",
+      "mutated": "        // mutant: guard removed",
+      "status": "survived",
+      "ms": 297822
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 325,
+      "operator": "delete-guard",
+      "original": "if (data.length < 4) revert CalldataLogMismatch();",
+      "mutated": "        // mutant: guard removed",
+      "status": "survived",
+      "ms": 109732
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 325,
+      "operator": "flip-relation",
+      "original": "if (data.length < 4) revert CalldataLogMismatch();",
+      "mutated": "        if (data.length <= 4) revert CalldataLogMismatch();",
+      "status": "survived",
+      "ms": 110502
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 332,
+      "operator": "delete-guard",
+      "original": "if (data.length < 4 + 12 * 32) revert CalldataLogMismatch();",
+      "mutated": "            // mutant: guard removed",
+      "status": "survived",
+      "ms": 103633
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 337,
+      "operator": "delete-guard",
+      "original": "if (tail > type(uint32).max) revert CalldataLogMismatch();",
+      "mutated": "            // mutant: guard removed",
+      "status": "survived",
+      "ms": 100517
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 337,
+      "operator": "flip-relation",
+      "original": "if (tail > type(uint32).max) revert CalldataLogMismatch();",
+      "mutated": "            if (tail >= type(uint32).max) revert CalldataLogMismatch();",
+      "status": "survived",
+      "ms": 100268
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 344,
+      "operator": "delete-guard",
+      "original": "if (data.length < 4 + 11 * 32) revert CalldataLogMismatch();",
+      "mutated": "            // mutant: guard removed",
+      "status": "survived",
+      "ms": 96923
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 138,
+      "operator": "delete-guard",
+      "original": "if (assets == 0) revert ZeroAmount();",
+      "mutated": "        // mutant: guard removed",
+      "status": "survived",
+      "ms": 50359
+    }
+  ],
+  "byFile": {
+    "RelayReward.sol": {
+      "mutants": 12,
+      "killed": 12
+    },
+    "EthRepay.sol": {
+      "mutants": 14,
+      "killed": 14
+    },
+    "HumanLinks.sol": {
+      "mutants": 24,
+      "killed": 24
+    },
+    "HUSD.sol": {
+      "mutants": 2,
+      "killed": 2
+    },
+    "AttestedWorldID.sol": {
+      "mutants": 40,
+      "killed": 33
+    },
+    "ProvenSource.sol": {
+      "mutants": 24,
+      "killed": 24
+    },
+    "HumanRegistry.sol": {
+      "mutants": 4,
+      "killed": 4
+    },
+    "CreditLine.sol": {
+      "mutants": 40,
+      "killed": 39
+    },
+    "CreditHistory.sol": {
+      "mutants": 31,
+      "killed": 31
+    }
+  },
+  "outcomes": [
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 88,
+      "operator": "delete-guard",
+      "original": "if (n == 0) revert EmptyBatch();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 102253
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 88,
+      "operator": "flip-relation",
+      "original": "if (n == 0) revert EmptyBatch();",
+      "mutated": "        if (n != 0) revert EmptyBatch();",
+      "status": "killed",
+      "ms": 102036
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 89,
+      "operator": "delete-guard",
+      "original": "if (n > MAX_BATCH) revert BatchTooLarge(n);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 101856
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 89,
+      "operator": "flip-relation",
+      "original": "if (n > MAX_BATCH) revert BatchTooLarge(n);",
+      "mutated": "        if (n >= MAX_BATCH) revert BatchTooLarge(n);",
+      "status": "killed",
+      "ms": 101879
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 90,
+      "operator": "flip-relation",
+      "original": "if (encodedTransactions.length != n || merkleProofs.length != n) revert BatchLengthMismatch();",
+      "mutated": "        if (encodedTransactions.length == n || merkleProofs.length != n) revert BatchLengthMismatch();",
+      "status": "killed",
+      "ms": 526558
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 90,
+      "operator": "delete-guard",
+      "original": "if (encodedTransactions.length != n || merkleProofs.length != n) revert BatchLengthMismatch();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 537308
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 93,
+      "operator": "flip-relation",
+      "original": "if (blockHeights[i] < blockHeights[i - 1]) revert BatchOutOfOrder();",
+      "mutated": "            if (blockHeights[i] <= blockHeights[i - 1]) revert BatchOutOfOrder();",
+      "status": "killed",
+      "ms": 227830
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 93,
+      "operator": "delete-guard",
+      "original": "if (blockHeights[i] < blockHeights[i - 1]) revert BatchOutOfOrder();",
+      "mutated": "            // mutant: guard removed",
+      "status": "killed",
+      "ms": 248473
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 99,
+      "operator": "delete-guard",
+      "original": "if (!verified) revert BatchProofRejected();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 229679
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 104,
+      "operator": "delete-guard",
+      "original": "if (processedQueries[queryId]) revert QueryAlreadyProcessed(queryId);",
+      "mutated": "            // mutant: guard removed",
+      "status": "killed",
+      "ms": 225382
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 126,
+      "operator": "flip-relation",
+      "original": "if (msg.sig != ASCBase.execute.selector) revert UnsupportedEntrypoint(msg.sig);",
+      "mutated": "        if (msg.sig == ASCBase.execute.selector) revert UnsupportedEntrypoint(msg.sig);",
+      "status": "killed",
+      "ms": 295672
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 126,
+      "operator": "delete-guard",
+      "original": "if (msg.sig != ASCBase.execute.selector) revert UnsupportedEntrypoint(msg.sig);",
+      "mutated": "        // mutant: guard removed",
+      "status": "survived",
+      "ms": 297822
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 188,
+      "operator": "delete-guard",
+      "original": "if (receipt.receiptStatus != 1) revert SourceTxReverted();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 291791
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 188,
+      "operator": "flip-relation",
+      "original": "if (receipt.receiptStatus != 1) revert SourceTxReverted();",
+      "mutated": "        if (receipt.receiptStatus == 1) revert SourceTxReverted();",
+      "status": "killed",
+      "ms": 274271
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 208,
+      "operator": "delete-guard",
+      "original": "if (callee != IDENTITY_MANAGER) revert NotIdentityManager(callee);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 156642
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 208,
+      "operator": "flip-relation",
+      "original": "if (callee != IDENTITY_MANAGER) revert NotIdentityManager(callee);",
+      "mutated": "        if (callee == IDENTITY_MANAGER) revert NotIdentityManager(callee);",
+      "status": "killed",
+      "ms": 148966
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 230,
+      "operator": "delete-guard",
+      "original": "if (attestedTip < blockHeight + FINALITY_DEPTH) revert NotFinal(attestedTip, blockHeight);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 141130
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 230,
+      "operator": "flip-relation",
+      "original": "if (attestedTip < blockHeight + FINALITY_DEPTH) revert NotFinal(attestedTip, blockHeight);",
+      "mutated": "        if (attestedTip <= blockHeight + FINALITY_DEPTH) revert NotFinal(attestedTip, blockHeight);",
+      "status": "killed",
+      "ms": 142198
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 233,
+      "operator": "flip-relation",
+      "original": "if (attestors < MIN_ATTESTORS) revert ThinQuorum(attestors, MIN_ATTESTORS);",
+      "mutated": "            if (attestors <= MIN_ATTESTORS) revert ThinQuorum(attestors, MIN_ATTESTORS);",
+      "status": "killed",
+      "ms": 136681
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 233,
+      "operator": "delete-guard",
+      "original": "if (attestors < MIN_ATTESTORS) revert ThinQuorum(attestors, MIN_ATTESTORS);",
+      "mutated": "            // mutant: guard removed",
+      "status": "killed",
+      "ms": 138940
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 276,
+      "operator": "delete-guard",
+      "original": "if (rootHistory[newRoot] != NULL_ROOT_TIME) revert CannotOverwriteRoot();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 79074
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 276,
+      "operator": "flip-relation",
+      "original": "if (rootHistory[newRoot] != NULL_ROOT_TIME) revert CannotOverwriteRoot();",
+      "mutated": "        if (rootHistory[newRoot] == NULL_ROOT_TIME) revert CannotOverwriteRoot();",
+      "status": "killed",
+      "ms": 78743
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 304,
+      "operator": "delete-guard",
+      "original": "if (found == 0) revert NoTreeChange();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 84018
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 304,
+      "operator": "flip-relation",
+      "original": "if (found == 0) revert NoTreeChange();",
+      "mutated": "        if (found != 0) revert NoTreeChange();",
+      "status": "killed",
+      "ms": 85494
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 305,
+      "operator": "delete-guard",
+      "original": "if (found > 1) revert AmbiguousTreeChange(found);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 85696
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 305,
+      "operator": "flip-relation",
+      "original": "if (found > 1) revert AmbiguousTreeChange(found);",
+      "mutated": "        if (found >= 1) revert AmbiguousTreeChange(found);",
+      "status": "killed",
+      "ms": 85296
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 325,
+      "operator": "delete-guard",
+      "original": "if (data.length < 4) revert CalldataLogMismatch();",
+      "mutated": "        // mutant: guard removed",
+      "status": "survived",
+      "ms": 109732
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 325,
+      "operator": "flip-relation",
+      "original": "if (data.length < 4) revert CalldataLogMismatch();",
+      "mutated": "        if (data.length <= 4) revert CalldataLogMismatch();",
+      "status": "survived",
+      "ms": 110502
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 332,
+      "operator": "flip-relation",
+      "original": "if (data.length < 4 + 12 * 32) revert CalldataLogMismatch();",
+      "mutated": "            if (data.length <= 4 + 12 * 32) revert CalldataLogMismatch();",
+      "status": "killed",
+      "ms": 100297
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 332,
+      "operator": "delete-guard",
+      "original": "if (data.length < 4 + 12 * 32) revert CalldataLogMismatch();",
+      "mutated": "            // mutant: guard removed",
+      "status": "survived",
+      "ms": 103633
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 337,
+      "operator": "delete-guard",
+      "original": "if (tail > type(uint32).max) revert CalldataLogMismatch();",
+      "mutated": "            // mutant: guard removed",
+      "status": "survived",
+      "ms": 100517
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 337,
+      "operator": "flip-relation",
+      "original": "if (tail > type(uint32).max) revert CalldataLogMismatch();",
+      "mutated": "            if (tail >= type(uint32).max) revert CalldataLogMismatch();",
+      "status": "survived",
+      "ms": 100268
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 339,
+      "operator": "delete-guard",
+      "original": "if (lengthWordAt + 32 > data.length) revert CalldataLogMismatch();",
+      "mutated": "            // mutant: guard removed",
+      "status": "killed",
+      "ms": 70652
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 339,
+      "operator": "flip-relation",
+      "original": "if (lengthWordAt + 32 > data.length) revert CalldataLogMismatch();",
+      "mutated": "            if (lengthWordAt + 32 >= data.length) revert CalldataLogMismatch();",
+      "status": "killed",
+      "ms": 74265
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 341,
+      "operator": "delete-guard",
+      "original": "if (count > type(uint32).max) revert CalldataLogMismatch();",
+      "mutated": "            // mutant: guard removed",
+      "status": "killed",
+      "ms": 95238
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 341,
+      "operator": "flip-relation",
+      "original": "if (count > type(uint32).max) revert CalldataLogMismatch();",
+      "mutated": "            if (count >= type(uint32).max) revert CalldataLogMismatch();",
+      "status": "killed",
+      "ms": 96209
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 344,
+      "operator": "flip-relation",
+      "original": "if (data.length < 4 + 11 * 32) revert CalldataLogMismatch();",
+      "mutated": "            if (data.length <= 4 + 11 * 32) revert CalldataLogMismatch();",
+      "status": "killed",
+      "ms": 95171
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 344,
+      "operator": "delete-guard",
+      "original": "if (data.length < 4 + 11 * 32) revert CalldataLogMismatch();",
+      "mutated": "            // mutant: guard removed",
+      "status": "survived",
+      "ms": 96923
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 352,
+      "operator": "delete-guard",
+      "original": "if (calldataPreRoot != preRoot || calldataPostRoot != postRoot) revert CalldataLogMismatch();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 130892
+    },
+    {
+      "file": "AttestedWorldID.sol",
+      "line": 352,
+      "operator": "flip-relation",
+      "original": "if (calldataPreRoot != preRoot || calldataPostRoot != postRoot) revert CalldataLogMismatch();",
+      "mutated": "        if (calldataPreRoot == preRoot || calldataPostRoot != postRoot) revert CalldataLogMismatch();",
+      "status": "killed",
+      "ms": 126396
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 74,
+      "operator": "delete-guard",
+      "original": "if (links == address(0) || boostBps > BPS || minGapBlocks == 0) revert BadParameters();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 63639
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 74,
+      "operator": "flip-relation",
+      "original": "if (links == address(0) || boostBps > BPS || minGapBlocks == 0) revert BadParameters();",
+      "mutated": "        if (links == address(0) || boostBps >= BPS || minGapBlocks == 0) revert BadParameters();",
+      "status": "killed",
+      "ms": 62872
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 80,
+      "operator": "delete-guard",
+      "original": "if (pools[i].pool == address(0)) revert BadParameters();",
+      "mutated": "            // mutant: guard removed",
+      "status": "killed",
+      "ms": 66681
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 80,
+      "operator": "flip-relation",
+      "original": "if (pools[i].pool == address(0)) revert BadParameters();",
+      "mutated": "            if (pools[i].pool != address(0)) revert BadParameters();",
+      "status": "killed",
+      "ms": 66726
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 85,
+      "operator": "delete-guard",
+      "original": "if (poolOf[r.chainKey] == address(0) || r.token == address(0) || r.decimals > 36) revert BadParameters();",
+      "mutated": "            // mutant: guard removed",
+      "status": "killed",
+      "ms": 66161
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 85,
+      "operator": "flip-relation",
+      "original": "if (poolOf[r.chainKey] == address(0) || r.token == address(0) || r.decimals > 36) revert BadParameters();",
+      "mutated": "            if (poolOf[r.chainKey] == address(0) || r.token == address(0) || r.decimals >= 36) revert BadParameters();",
+      "status": "killed",
+      "ms": 66142
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 100,
+      "operator": "delete-guard",
+      "original": "if (log.topics.length != 4 || log.topics[0] != BORROW_TOPIC) revert NotABorrowLog();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 39365
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 100,
+      "operator": "flip-relation",
+      "original": "if (log.topics.length != 4 || log.topics[0] != BORROW_TOPIC) revert NotABorrowLog();",
+      "mutated": "        if (log.topics.length == 4 || log.topics[0] != BORROW_TOPIC) revert NotABorrowLog();",
+      "status": "killed",
+      "ms": 38823
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 106,
+      "operator": "delete-guard",
+      "original": "if (user != onBehalfOf) revert BorrowedForSomeoneElse(user, onBehalfOf);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 41625
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 106,
+      "operator": "flip-relation",
+      "original": "if (user != onBehalfOf) revert BorrowedForSomeoneElse(user, onBehalfOf);",
+      "mutated": "        if (user == onBehalfOf) revert BorrowedForSomeoneElse(user, onBehalfOf);",
+      "status": "killed",
+      "ms": 41042
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 135,
+      "operator": "flip-relation",
+      "original": "if (log.topics.length != 4 || log.topics[0] != REPAY_TOPIC) revert NotARepayLog();",
+      "mutated": "        if (log.topics.length == 4 || log.topics[0] != REPAY_TOPIC) revert NotARepayLog();",
+      "status": "killed",
+      "ms": 39336
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 135,
+      "operator": "delete-guard",
+      "original": "if (log.topics.length != 4 || log.topics[0] != REPAY_TOPIC) revert NotARepayLog();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 39362
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 141,
+      "operator": "delete-guard",
+      "original": "if (repayer != user) revert RepaidBySomeoneElse(user, repayer);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 39322
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 141,
+      "operator": "flip-relation",
+      "original": "if (repayer != user) revert RepaidBySomeoneElse(user, repayer);",
+      "mutated": "        if (repayer == user) revert RepaidBySomeoneElse(user, repayer);",
+      "status": "killed",
+      "ms": 39030
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 142,
+      "operator": "delete-guard",
+      "original": "if (useATokens) revert RepaidWithATokens();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 36944
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 145,
+      "operator": "delete-guard",
+      "original": "if (b.human == 0) revert UnknownBorrow(borrowId);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 36569
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 145,
+      "operator": "flip-relation",
+      "original": "if (b.human == 0) revert UnknownBorrow(borrowId);",
+      "mutated": "        if (b.human != 0) revert UnknownBorrow(borrowId);",
+      "status": "killed",
+      "ms": 35952
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 146,
+      "operator": "delete-guard",
+      "original": "if (b.wallet != user || b.reserve != reserve || b.chainKey != t.chainKey) revert BorrowMismatch(borrowId);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 36249
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 146,
+      "operator": "flip-relation",
+      "original": "if (b.wallet != user || b.reserve != reserve || b.chainKey != t.chainKey) revert BorrowMismatch(borrowId);",
+      "mutated": "        if (b.wallet == user || b.reserve != reserve || b.chainKey != t.chainKey) revert BorrowMismatch(borrowId);",
+      "status": "killed",
+      "ms": 36266
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 148,
+      "operator": "delete-guard",
+      "original": "if (t.blockHeight < earliest) revert TooSoon(t.blockHeight, earliest);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 36189
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 148,
+      "operator": "flip-relation",
+      "original": "if (t.blockHeight < earliest) revert TooSoon(t.blockHeight, earliest);",
+      "mutated": "        if (t.blockHeight <= earliest) revert TooSoon(t.blockHeight, earliest);",
+      "status": "killed",
+      "ms": 36433
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 149,
+      "operator": "delete-guard",
+      "original": "if (b.remaining == 0) revert BorrowFullyRepaid(borrowId);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 35358
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 149,
+      "operator": "flip-relation",
+      "original": "if (b.remaining == 0) revert BorrowFullyRepaid(borrowId);",
+      "mutated": "        if (b.remaining != 0) revert BorrowFullyRepaid(borrowId);",
+      "status": "killed",
+      "ms": 36015
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 194,
+      "operator": "delete-guard",
+      "original": "if (d == 0) revert UnsupportedReserve(chainKey, token);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 35334
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 194,
+      "operator": "flip-relation",
+      "original": "if (d == 0) revert UnsupportedReserve(chainKey, token);",
+      "mutated": "        if (d != 0) revert UnsupportedReserve(chainKey, token);",
+      "status": "killed",
+      "ms": 35898
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 204,
+      "operator": "delete-guard",
+      "original": "if (log.address_ != poolOf[t.chainKey]) revert UnsupportedPool(t.chainKey, log.address_);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 35569
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 204,
+      "operator": "flip-relation",
+      "original": "if (log.address_ != poolOf[t.chainKey]) revert UnsupportedPool(t.chainKey, log.address_);",
+      "mutated": "        if (log.address_ == poolOf[t.chainKey]) revert UnsupportedPool(t.chainKey, log.address_);",
+      "status": "killed",
+      "ms": 33013
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 208,
+      "operator": "delete-guard",
+      "original": "if (_decimalsPlusOne[chainKey][reserve] == 0) revert UnsupportedReserve(chainKey, reserve);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 32898
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 208,
+      "operator": "flip-relation",
+      "original": "if (_decimalsPlusOne[chainKey][reserve] == 0) revert UnsupportedReserve(chainKey, reserve);",
+      "mutated": "        if (_decimalsPlusOne[chainKey][reserve] != 0) revert UnsupportedReserve(chainKey, reserve);",
+      "status": "killed",
+      "ms": 31593
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 213,
+      "operator": "flip-relation",
+      "original": "if (human == 0) revert WalletNotLinked(wallet);",
+      "mutated": "        if (human != 0) revert WalletNotLinked(wallet);",
+      "status": "killed",
+      "ms": 31547
+    },
+    {
+      "file": "CreditHistory.sol",
+      "line": 213,
+      "operator": "delete-guard",
+      "original": "if (human == 0) revert WalletNotLinked(wallet);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 31595
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 115,
+      "operator": "flip-relation",
+      "original": "if (exposurePerBondedCtc == 0) revert ZeroAmount();",
+      "mutated": "        if (exposurePerBondedCtc != 0) revert ZeroAmount();",
+      "status": "stillborn",
+      "ms": 7053
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 115,
+      "operator": "delete-guard",
+      "original": "if (exposurePerBondedCtc == 0) revert ZeroAmount();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 50073
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 117,
+      "operator": "delete-guard",
+      "original": "if (!exists || chainId != sourceChainId) revert WrongSecurityChain(securityChainKey, chainId, sourceChainId);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 50108
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 117,
+      "operator": "flip-relation",
+      "original": "if (!exists || chainId != sourceChainId) revert WrongSecurityChain(securityChainKey, chainId, sourceChainId);",
+      "mutated": "        if (!exists || chainId == sourceChainId) revert WrongSecurityChain(securityChainKey, chainId, sourceChainId);",
+      "status": "killed",
+      "ms": 50518
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 138,
+      "operator": "flip-relation",
+      "original": "if (assets == 0) revert ZeroAmount();",
+      "mutated": "        if (assets != 0) revert ZeroAmount();",
+      "status": "killed",
+      "ms": 49725
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 138,
+      "operator": "delete-guard",
+      "original": "if (assets == 0) revert ZeroAmount();",
+      "mutated": "        // mutant: guard removed",
+      "status": "survived",
+      "ms": 50359
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 142,
+      "operator": "delete-guard",
+      "original": "if (shares == 0) revert ZeroAmount();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 48513
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 142,
+      "operator": "flip-relation",
+      "original": "if (shares == 0) revert ZeroAmount();",
+      "mutated": "        if (shares != 0) revert ZeroAmount();",
+      "status": "killed",
+      "ms": 44930
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 155,
+      "operator": "flip-relation",
+      "original": "if (shares == 0) revert ZeroAmount();",
+      "mutated": "        if (shares != 0) revert ZeroAmount();",
+      "status": "killed",
+      "ms": 44912
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 155,
+      "operator": "delete-guard",
+      "original": "if (shares == 0) revert ZeroAmount();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 45011
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 158,
+      "operator": "flip-relation",
+      "original": "if (held < shares) revert InsufficientShares(held, shares);",
+      "mutated": "        if (held <= shares) revert InsufficientShares(held, shares);",
+      "status": "killed",
+      "ms": 44524
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 158,
+      "operator": "delete-guard",
+      "original": "if (held < shares) revert InsufficientShares(held, shares);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 44863
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 163,
+      "operator": "delete-guard",
+      "original": "if (assets > idle) revert InsufficientLiquidity(assets, idle);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 44604
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 163,
+      "operator": "flip-relation",
+      "original": "if (assets > idle) revert InsufficientLiquidity(assets, idle);",
+      "mutated": "        if (assets >= idle) revert InsufficientLiquidity(assets, idle);",
+      "status": "killed",
+      "ms": 45845
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 180,
+      "operator": "delete-guard",
+      "original": "if (line.openedAt != 0) revert LineExists(human);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 45902
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 180,
+      "operator": "flip-relation",
+      "original": "if (line.openedAt != 0) revert LineExists(human);",
+      "mutated": "        if (line.openedAt == 0) revert LineExists(human);",
+      "status": "killed",
+      "ms": 46147
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 192,
+      "operator": "flip-relation",
+      "original": "if (amount == 0) revert ZeroAmount();",
+      "mutated": "        if (amount != 0) revert ZeroAmount();",
+      "status": "killed",
+      "ms": 45715
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 192,
+      "operator": "delete-guard",
+      "original": "if (amount == 0) revert ZeroAmount();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 46174
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 196,
+      "operator": "delete-guard",
+      "original": "if (line.openedAt == 0) revert NoLine(human);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 45986
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 196,
+      "operator": "flip-relation",
+      "original": "if (line.openedAt == 0) revert NoLine(human);",
+      "mutated": "        if (line.openedAt != 0) revert NoLine(human);",
+      "status": "killed",
+      "ms": 45266
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 197,
+      "operator": "delete-guard",
+      "original": "if (line.frozen) revert LineFrozen(human);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 45087
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 203,
+      "operator": "flip-relation",
+      "original": "if (owed > available) revert OverLimit(owed, available);",
+      "mutated": "        if (owed >= available) revert OverLimit(owed, available);",
+      "status": "killed",
+      "ms": 44817
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 203,
+      "operator": "delete-guard",
+      "original": "if (owed > available) revert OverLimit(owed, available);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 45249
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 206,
+      "operator": "delete-guard",
+      "original": "if (amount > idle) revert InsufficientLiquidity(amount, idle);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 45061
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 206,
+      "operator": "flip-relation",
+      "original": "if (amount > idle) revert InsufficientLiquidity(amount, idle);",
+      "mutated": "        if (amount >= idle) revert InsufficientLiquidity(amount, idle);",
+      "status": "killed",
+      "ms": 44658
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 209,
+      "operator": "delete-guard",
+      "original": "if (totalPrincipal + amount > cap) revert ExposureCapExceeded(totalPrincipal + amount, cap);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 45087
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 209,
+      "operator": "flip-relation",
+      "original": "if (totalPrincipal + amount > cap) revert ExposureCapExceeded(totalPrincipal + amount, cap);",
+      "mutated": "        if (totalPrincipal + amount >= cap) revert ExposureCapExceeded(totalPrincipal + amount, cap);",
+      "status": "killed",
+      "ms": 44962
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 234,
+      "operator": "delete-guard",
+      "original": "if (amount == 0) revert ZeroAmount();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 44750
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 234,
+      "operator": "flip-relation",
+      "original": "if (amount == 0) revert ZeroAmount();",
+      "mutated": "        if (amount != 0) revert ZeroAmount();",
+      "status": "killed",
+      "ms": 45031
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 237,
+      "operator": "delete-guard",
+      "original": "if (line.openedAt == 0) revert NoLine(human);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 44953
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 237,
+      "operator": "flip-relation",
+      "original": "if (line.openedAt == 0) revert NoLine(human);",
+      "mutated": "        if (line.openedAt != 0) revert NoLine(human);",
+      "status": "killed",
+      "ms": 44521
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 240,
+      "operator": "delete-guard",
+      "original": "if (principal == 0) revert NothingOwed(human);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 45479
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 240,
+      "operator": "flip-relation",
+      "original": "if (principal == 0) revert NothingOwed(human);",
+      "mutated": "        if (principal != 0) revert NothingOwed(human);",
+      "status": "killed",
+      "ms": 45727
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 266,
+      "operator": "flip-relation",
+      "original": "if (line.openedAt == 0) revert NoLine(human);",
+      "mutated": "        if (line.openedAt != 0) revert NoLine(human);",
+      "status": "killed",
+      "ms": 45454
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 266,
+      "operator": "delete-guard",
+      "original": "if (line.openedAt == 0) revert NoLine(human);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 45778
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 269,
+      "operator": "delete-guard",
+      "original": "if (principal == 0) revert NothingOwed(human);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 45287
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 269,
+      "operator": "flip-relation",
+      "original": "if (principal == 0) revert NothingOwed(human);",
+      "mutated": "        if (principal != 0) revert NothingOwed(human);",
+      "status": "killed",
+      "ms": 45318
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 272,
+      "operator": "delete-guard",
+      "original": "if (block.timestamp <= deadline) revert NotInDefault(human, line.dueAt, GRACE);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 44907
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 272,
+      "operator": "flip-relation",
+      "original": "if (block.timestamp <= deadline) revert NotInDefault(human, line.dueAt, GRACE);",
+      "mutated": "        if (block.timestamp < deadline) revert NotInDefault(human, line.dueAt, GRACE);",
+      "status": "killed",
+      "ms": 45115
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 411,
+      "operator": "delete-guard",
+      "original": "if (human == 0) revert NotHuman(wallet);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 45004
+    },
+    {
+      "file": "CreditLine.sol",
+      "line": 411,
+      "operator": "flip-relation",
+      "original": "if (human == 0) revert NotHuman(wallet);",
+      "mutated": "        if (human != 0) revert NotHuman(wallet);",
+      "status": "killed",
+      "ms": 45042
+    },
+    {
+      "file": "EthRepay.sol",
+      "line": 80,
+      "operator": "flip-relation",
+      "original": "if (_locked != 1) revert Reentrancy();",
+      "mutated": "        if (_locked == 1) revert Reentrancy();",
+      "status": "killed",
+      "ms": 89239
+    },
+    {
+      "file": "EthRepay.sol",
+      "line": 80,
+      "operator": "delete-guard",
+      "original": "if (_locked != 1) revert Reentrancy();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 89784
+    },
+    {
+      "file": "EthRepay.sol",
+      "line": 95,
+      "operator": "delete-guard",
+      "original": "if (links == address(0) || creditLine == address(0) || repayAddress == address(0)) revert BadParameters();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 90229
+    },
+    {
+      "file": "EthRepay.sol",
+      "line": 95,
+      "operator": "flip-relation",
+      "original": "if (links == address(0) || creditLine == address(0) || repayAddress == address(0)) revert BadParameters();",
+      "mutated": "        if (links != address(0) || creditLine == address(0) || repayAddress == address(0)) revert BadParameters();",
+      "status": "killed",
+      "ms": 90657
+    },
+    {
+      "file": "EthRepay.sol",
+      "line": 103,
+      "operator": "delete-guard",
+      "original": "if (s.token == address(0) || s.decimals > 36) revert BadParameters();",
+      "mutated": "            // mutant: guard removed",
+      "status": "killed",
+      "ms": 89959
+    },
+    {
+      "file": "EthRepay.sol",
+      "line": 103,
+      "operator": "flip-relation",
+      "original": "if (s.token == address(0) || s.decimals > 36) revert BadParameters();",
+      "mutated": "            if (s.token == address(0) || s.decimals >= 36) revert BadParameters();",
+      "status": "killed",
+      "ms": 90115
+    },
+    {
+      "file": "EthRepay.sol",
+      "line": 124,
+      "operator": "delete-guard",
+      "original": "if (to != REPAY_ADDRESS) revert NotToRepayAddress(to);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 62400
+    },
+    {
+      "file": "EthRepay.sol",
+      "line": 124,
+      "operator": "flip-relation",
+      "original": "if (to != REPAY_ADDRESS) revert NotToRepayAddress(to);",
+      "mutated": "        if (to == REPAY_ADDRESS) revert NotToRepayAddress(to);",
+      "status": "killed",
+      "ms": 63196
+    },
+    {
+      "file": "EthRepay.sol",
+      "line": 128,
+      "operator": "delete-guard",
+      "original": "if (human == 0) revert WalletNotLinked(from);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 62551
+    },
+    {
+      "file": "EthRepay.sol",
+      "line": 128,
+      "operator": "flip-relation",
+      "original": "if (human == 0) revert WalletNotLinked(from);",
+      "mutated": "        if (human != 0) revert WalletNotLinked(from);",
+      "status": "killed",
+      "ms": 62548
+    },
+    {
+      "file": "EthRepay.sol",
+      "line": 131,
+      "operator": "delete-guard",
+      "original": "if (amount == 0) revert ZeroTransfer();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 62580
+    },
+    {
+      "file": "EthRepay.sol",
+      "line": 131,
+      "operator": "flip-relation",
+      "original": "if (amount == 0) revert ZeroTransfer();",
+      "mutated": "        if (amount != 0) revert ZeroTransfer();",
+      "status": "killed",
+      "ms": 62467
+    },
+    {
+      "file": "EthRepay.sol",
+      "line": 143,
+      "operator": "flip-relation",
+      "original": "if (float < applied) revert ReserveShort(applied, float);",
+      "mutated": "            if (float <= applied) revert ReserveShort(applied, float);",
+      "status": "killed",
+      "ms": 79121
+    },
+    {
+      "file": "EthRepay.sol",
+      "line": 143,
+      "operator": "delete-guard",
+      "original": "if (float < applied) revert ReserveShort(applied, float);",
+      "mutated": "            // mutant: guard removed",
+      "status": "killed",
+      "ms": 80129
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 70,
+      "operator": "flip-relation",
+      "original": "if (to != from) revert NotSelfSend(from, to);",
+      "mutated": "        if (to == from) revert NotSelfSend(from, to);",
+      "status": "killed",
+      "ms": 84310
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 70,
+      "operator": "delete-guard",
+      "original": "if (to != from) revert NotSelfSend(from, to);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 85201
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 73,
+      "operator": "delete-guard",
+      "original": "if (chainId != block.chainid || target != address(this)) revert WrongLinkTarget(chainId, target);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 83065
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 73,
+      "operator": "flip-relation",
+      "original": "if (chainId != block.chainid || target != address(this)) revert WrongLinkTarget(chainId, target);",
+      "mutated": "        if (chainId == block.chainid || target != address(this)) revert WrongLinkTarget(chainId, target);",
+      "status": "killed",
+      "ms": 85171
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 74,
+      "operator": "flip-relation",
+      "original": "if (creditcoinWallet != msg.sender) revert IntentForAnotherWallet(creditcoinWallet, msg.sender);",
+      "mutated": "        if (creditcoinWallet == msg.sender) revert IntentForAnotherWallet(creditcoinWallet, msg.sender);",
+      "status": "killed",
+      "ms": 74386
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 74,
+      "operator": "delete-guard",
+      "original": "if (creditcoinWallet != msg.sender) revert IntentForAnotherWallet(creditcoinWallet, msg.sender);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 74727
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 76,
+      "operator": "delete-guard",
+      "original": "if (human != callerHuman) revert IntentForAnotherHuman(human, callerHuman);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 70397
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 76,
+      "operator": "flip-relation",
+      "original": "if (human != callerHuman) revert IntentForAnotherHuman(human, callerHuman);",
+      "mutated": "        if (human == callerHuman) revert IntentForAnotherHuman(human, callerHuman);",
+      "status": "killed",
+      "ms": 69620
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 83,
+      "operator": "flip-relation",
+      "original": "if (block.timestamp > deadline) revert SignatureExpired(deadline);",
+      "mutated": "        if (block.timestamp >= deadline) revert SignatureExpired(deadline);",
+      "status": "killed",
+      "ms": 69916
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 83,
+      "operator": "delete-guard",
+      "original": "if (block.timestamp > deadline) revert SignatureExpired(deadline);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 71094
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 87,
+      "operator": "delete-guard",
+      "original": "if (recovered != wallet) revert BadSignature(recovered, wallet);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 74141
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 87,
+      "operator": "flip-relation",
+      "original": "if (recovered != wallet) revert BadSignature(recovered, wallet);",
+      "mutated": "        if (recovered == wallet) revert BadSignature(recovered, wallet);",
+      "status": "killed",
+      "ms": 74813
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 138,
+      "operator": "delete-guard",
+      "original": "if (wallet == address(0)) revert ZeroWallet();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 73806
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 138,
+      "operator": "flip-relation",
+      "original": "if (wallet == address(0)) revert ZeroWallet();",
+      "mutated": "        if (wallet != address(0)) revert ZeroWallet();",
+      "status": "killed",
+      "ms": 74367
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 140,
+      "operator": "delete-guard",
+      "original": "if (existing != 0) revert WalletAlreadyLinked(wallet, existing);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 74330
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 140,
+      "operator": "flip-relation",
+      "original": "if (existing != 0) revert WalletAlreadyLinked(wallet, existing);",
+      "mutated": "        if (existing == 0) revert WalletAlreadyLinked(wallet, existing);",
+      "status": "killed",
+      "ms": 73922
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 142,
+      "operator": "delete-guard",
+      "original": "if (wallets.length >= MAX_LINKS) revert TooManyLinks(human);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 66381
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 142,
+      "operator": "flip-relation",
+      "original": "if (wallets.length >= MAX_LINKS) revert TooManyLinks(human);",
+      "mutated": "        if (wallets.length > MAX_LINKS) revert TooManyLinks(human);",
+      "status": "killed",
+      "ms": 66402
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 161,
+      "operator": "delete-guard",
+      "original": "if (data.length != INTENT_LENGTH || bytes4(data) != LINK_MARKER) revert NotALinkIntent();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 65922
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 161,
+      "operator": "flip-relation",
+      "original": "if (data.length != INTENT_LENGTH || bytes4(data) != LINK_MARKER) revert NotALinkIntent();",
+      "mutated": "        if (data.length == INTENT_LENGTH || bytes4(data) != LINK_MARKER) revert NotALinkIntent();",
+      "status": "killed",
+      "ms": 66932
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 170,
+      "operator": "delete-guard",
+      "original": "if (wallet > type(uint160).max || targetWord > type(uint160).max) revert NotALinkIntent();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 65922
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 170,
+      "operator": "flip-relation",
+      "original": "if (wallet > type(uint160).max || targetWord > type(uint160).max) revert NotALinkIntent();",
+      "mutated": "        if (wallet >= type(uint160).max || targetWord > type(uint160).max) revert NotALinkIntent();",
+      "status": "killed",
+      "ms": 68217
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 177,
+      "operator": "delete-guard",
+      "original": "if (human == 0) revert NotHuman(wallet);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 65033
+    },
+    {
+      "file": "HumanLinks.sol",
+      "line": 177,
+      "operator": "flip-relation",
+      "original": "if (human == 0) revert NotHuman(wallet);",
+      "mutated": "        if (human != 0) revert NotHuman(wallet);",
+      "status": "killed",
+      "ms": 65033
+    },
+    {
+      "file": "HumanRegistry.sol",
+      "line": 53,
+      "operator": "delete-guard",
+      "original": "if (nullifierHash == 0) revert ZeroNullifier();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 567827
+    },
+    {
+      "file": "HumanRegistry.sol",
+      "line": 53,
+      "operator": "flip-relation",
+      "original": "if (nullifierHash == 0) revert ZeroNullifier();",
+      "mutated": "        if (nullifierHash != 0) revert ZeroNullifier();",
+      "status": "killed",
+      "ms": 604002
+    },
+    {
+      "file": "HumanRegistry.sol",
+      "line": 61,
+      "operator": "delete-guard",
+      "original": "if (boundWallet == msg.sender) revert SameWallet();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 622594
+    },
+    {
+      "file": "HumanRegistry.sol",
+      "line": 61,
+      "operator": "flip-relation",
+      "original": "if (boundWallet == msg.sender) revert SameWallet();",
+      "mutated": "        if (boundWallet != msg.sender) revert SameWallet();",
+      "status": "killed",
+      "ms": 622706
+    },
+    {
+      "file": "HUSD.sol",
+      "line": 37,
+      "operator": "delete-guard",
+      "original": "if (block.timestamp < until) revert FaucetCooldown(until);",
+      "mutated": "            // mutant: guard removed",
+      "status": "killed",
+      "ms": 225135
+    },
+    {
+      "file": "HUSD.sol",
+      "line": 37,
+      "operator": "flip-relation",
+      "original": "if (block.timestamp < until) revert FaucetCooldown(until);",
+      "mutated": "            if (block.timestamp <= until) revert FaucetCooldown(until);",
+      "status": "killed",
+      "ms": 229986
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 66,
+      "operator": "delete-guard",
+      "original": "if (chainKeys.length == 0 || chainKeys.length != chainIds.length) revert BadSourceConfig();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 264767
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 66,
+      "operator": "flip-relation",
+      "original": "if (chainKeys.length == 0 || chainKeys.length != chainIds.length) revert BadSourceConfig();",
+      "mutated": "        if (chainKeys.length != 0 || chainKeys.length != chainIds.length) revert BadSourceConfig();",
+      "status": "killed",
+      "ms": 268174
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 86,
+      "operator": "flip-relation",
+      "original": "if (expectedChainId == 0) revert UnsupportedSourceChain(proof.chainKey);",
+      "mutated": "        if (expectedChainId != 0) revert UnsupportedSourceChain(proof.chainKey);",
+      "status": "killed",
+      "ms": 263095
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 86,
+      "operator": "delete-guard",
+      "original": "if (expectedChainId == 0) revert UnsupportedSourceChain(proof.chainKey);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 264400
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 91,
+      "operator": "delete-guard",
+      "original": "if (!verified) revert ProofRejected();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 232236
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 94,
+      "operator": "delete-guard",
+      "original": "if (tip < proof.blockHeight + FINALITY_DEPTH) revert NotFinal(tip, proof.blockHeight);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 229573
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 94,
+      "operator": "flip-relation",
+      "original": "if (tip < proof.blockHeight + FINALITY_DEPTH) revert NotFinal(tip, proof.blockHeight);",
+      "mutated": "        if (tip <= proof.blockHeight + FINALITY_DEPTH) revert NotFinal(tip, proof.blockHeight);",
+      "status": "killed",
+      "ms": 136959
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 96,
+      "operator": "flip-relation",
+      "original": "if (attestors < MIN_ATTESTORS) revert ThinQuorum(attestors, MIN_ATTESTORS);",
+      "mutated": "        if (attestors <= MIN_ATTESTORS) revert ThinQuorum(attestors, MIN_ATTESTORS);",
+      "status": "killed",
+      "ms": 136500
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 96,
+      "operator": "delete-guard",
+      "original": "if (attestors < MIN_ATTESTORS) revert ThinQuorum(attestors, MIN_ATTESTORS);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 136689
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 105,
+      "operator": "delete-guard",
+      "original": "if (t.receipt.receiptStatus != 1) revert SourceTxReverted();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 132408
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 105,
+      "operator": "flip-relation",
+      "original": "if (t.receipt.receiptStatus != 1) revert SourceTxReverted();",
+      "mutated": "        if (t.receipt.receiptStatus == 1) revert SourceTxReverted();",
+      "status": "killed",
+      "ms": 128069
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 108,
+      "operator": "delete-guard",
+      "original": "if (signedFor != expectedChainId) revert WrongTxChainId(signedFor, expectedChainId);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 127918
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 108,
+      "operator": "flip-relation",
+      "original": "if (signedFor != expectedChainId) revert WrongTxChainId(signedFor, expectedChainId);",
+      "mutated": "        if (signedFor == expectedChainId) revert WrongTxChainId(signedFor, expectedChainId);",
+      "status": "killed",
+      "ms": 108371
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 115,
+      "operator": "delete-guard",
+      "original": "if (consumed[id]) revert AlreadyConsumed(id);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 107294
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 126,
+      "operator": "delete-guard",
+      "original": "if (logIndex >= count) revert LogIndexOutOfRange(logIndex, count);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 107543
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 126,
+      "operator": "flip-relation",
+      "original": "if (logIndex >= count) revert LogIndexOutOfRange(logIndex, count);",
+      "mutated": "        if (logIndex > count) revert LogIndexOutOfRange(logIndex, count);",
+      "status": "killed",
+      "ms": 107903
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 162,
+      "operator": "delete-guard",
+      "original": "if (chunks.length < 3 || chunks[1].length < 32) revert UnsupportedTxType(txType);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 180945
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 162,
+      "operator": "flip-relation",
+      "original": "if (chunks.length < 3 || chunks[1].length < 32) revert UnsupportedTxType(txType);",
+      "mutated": "        if (chunks.length <= 3 || chunks[1].length < 32) revert UnsupportedTxType(txType);",
+      "status": "killed",
+      "ms": 181035
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 166,
+      "operator": "delete-guard",
+      "original": "if (v < 35) revert UnprotectedLegacyTx();",
+      "mutated": "            // mutant: guard removed",
+      "status": "killed",
+      "ms": 160672
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 166,
+      "operator": "flip-relation",
+      "original": "if (v < 35) revert UnprotectedLegacyTx();",
+      "mutated": "            if (v <= 35) revert UnprotectedLegacyTx();",
+      "status": "killed",
+      "ms": 160409
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 168,
+      "operator": "delete-guard",
+      "original": "if (id > type(uint64).max) revert UnsupportedTxType(txType);",
+      "mutated": "            // mutant: guard removed",
+      "status": "killed",
+      "ms": 160008
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 168,
+      "operator": "flip-relation",
+      "original": "if (id > type(uint64).max) revert UnsupportedTxType(txType);",
+      "mutated": "            if (id >= type(uint64).max) revert UnsupportedTxType(txType);",
+      "status": "killed",
+      "ms": 160007
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 173,
+      "operator": "flip-relation",
+      "original": "if (id > type(uint64).max) revert UnsupportedTxType(txType);",
+      "mutated": "            if (id >= type(uint64).max) revert UnsupportedTxType(txType);",
+      "status": "killed",
+      "ms": 91478
+    },
+    {
+      "file": "ProvenSource.sol",
+      "line": 173,
+      "operator": "delete-guard",
+      "original": "if (id > type(uint64).max) revert UnsupportedTxType(txType);",
+      "mutated": "            // mutant: guard removed",
+      "status": "killed",
+      "ms": 92914
+    },
+    {
+      "file": "RelayReward.sol",
+      "line": 95,
+      "operator": "flip-relation",
+      "original": "if (_locked != 1) revert Reentrancy();",
+      "mutated": "        if (_locked == 1) revert Reentrancy();",
+      "status": "killed",
+      "ms": 21914
+    },
+    {
+      "file": "RelayReward.sol",
+      "line": 95,
+      "operator": "delete-guard",
+      "original": "if (_locked != 1) revert Reentrancy();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 22112
+    },
+    {
+      "file": "RelayReward.sol",
+      "line": 105,
+      "operator": "flip-relation",
+      "original": "if (relays_.length == 0) revert NoRelays();",
+      "mutated": "        if (relays_.length != 0) revert NoRelays();",
+      "status": "killed",
+      "ms": 21980
+    },
+    {
+      "file": "RelayReward.sol",
+      "line": 105,
+      "operator": "delete-guard",
+      "original": "if (relays_.length == 0) revert NoRelays();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 22086
+    },
+    {
+      "file": "RelayReward.sol",
+      "line": 106,
+      "operator": "delete-guard",
+      "original": "if (rewardPerRoot == 0) revert ZeroReward();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 22092
+    },
+    {
+      "file": "RelayReward.sol",
+      "line": 106,
+      "operator": "flip-relation",
+      "original": "if (rewardPerRoot == 0) revert ZeroReward();",
+      "mutated": "        if (rewardPerRoot != 0) revert ZeroReward();",
+      "status": "killed",
+      "ms": 22144
+    },
+    {
+      "file": "RelayReward.sol",
+      "line": 108,
+      "operator": "flip-relation",
+      "original": "if (relays_[i] == address(0)) revert UnknownRelay(address(0));",
+      "mutated": "            if (relays_[i] != address(0)) revert UnknownRelay(address(0));",
+      "status": "killed",
+      "ms": 21443
+    },
+    {
+      "file": "RelayReward.sol",
+      "line": 108,
+      "operator": "delete-guard",
+      "original": "if (relays_[i] == address(0)) revert UnknownRelay(address(0));",
+      "mutated": "            // mutant: guard removed",
+      "status": "killed",
+      "ms": 21551
+    },
+    {
+      "file": "RelayReward.sol",
+      "line": 146,
+      "operator": "delete-guard",
+      "original": "if (!isRelay[target]) revert UnknownRelay(target);",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 21393
+    },
+    {
+      "file": "RelayReward.sol",
+      "line": 186,
+      "operator": "delete-guard",
+      "original": "if (amount == 0) revert NothingToClaim();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 21442
+    },
+    {
+      "file": "RelayReward.sol",
+      "line": 186,
+      "operator": "flip-relation",
+      "original": "if (amount == 0) revert NothingToClaim();",
+      "mutated": "        if (amount != 0) revert NothingToClaim();",
+      "status": "killed",
+      "ms": 21488
+    },
+    {
+      "file": "RelayReward.sol",
+      "line": 190,
+      "operator": "delete-guard",
+      "original": "if (!ok) revert ClaimFailed();",
+      "mutated": "        // mutant: guard removed",
+      "status": "killed",
+      "ms": 21481
+    }
+  ]
+}

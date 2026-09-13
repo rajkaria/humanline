@@ -87,9 +87,10 @@ the attestation bound moved on, which is why recorded inputs now keep only check
 
 From `docs/MEASUREMENTS.md`, all reproducible by one command each:
 
-- 93.6% line and 93.5% branch coverage, 12 stateful invariants with anti-vacuity guards, a scripted
-  mutation run at 89.5% (every survivor then pinned by a test or shown equivalent), Slither triaged.
-- Relay gas ≈ 162k + 109k per World ID update + 441 per continuity root (R² 0.996 over every relay
+- 93.6% line and 93.5% branch coverage, 12 stateful invariants with anti-vacuity guards, a 95.8%
+  mutation score over every guard in the contracts (the 8 survivors are equivalent mutants), Slither
+  triaged.
+- Relay gas ≈ 170k + 100k per World ID update + 471 per continuity root (R² 0.994 over every relay
   since deployment); a full batch of ten fits about thirty times in one CC3 block.
 - Median time from an Ethereum block to its root landing on Creditcoin: about half an hour.
 

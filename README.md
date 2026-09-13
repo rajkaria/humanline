@@ -366,7 +366,7 @@ See [`web/README.md`](web/README.md).
 | Everything | contracts + worker + web, typecheck and lint | `bash scripts/verify.sh` |
 | Invariants | 12 stateful invariants with anti-vacuity guards: pool accounting, frozen stays frozen, one line per human, exposure cap, roots advance only along the chain, no replay across `execute`/`executeBatch`, orphan roots refused, wallet-link uniqueness | `cd contracts && forge test --match-contract Invariant` |
 | Coverage | 93.6% of lines and 93.5% of branches in `contracts/src` | `bash scripts/coverage.sh` → `evidence/coverage.txt` |
-| Mutation | every one-line guard deleted or its relation flipped, scored against the unit and fuzz suites | `bun run scripts/mutation.ts --jobs 4` → `evidence/mutation.json` |
+| Mutation | 95.8%: every one-line guard deleted or its relation flipped, 183 of 191 mutants killed by the unit and fuzz suites; the 8 survivors are shown equivalent | `bun run scripts/mutation.ts --jobs 4` → `evidence/mutation.json` |
 | Slither | 99 findings, every High and Medium triaged in [`docs/MEASUREMENTS.md`](docs/MEASUREMENTS.md) | `cd contracts && uvx --from slither-analyzer slither . --config-file slither.config.json` |
 | Live attacks | 12 of 12 refused with the named revert, against the deployed contracts | `bun run worker/src/cli.ts attack` → `evidence/attacks.json` |
 | Measurements | gas per batch size with regression, the 10/11 cap, attestation vs checkpoint, latency, proof size, share of `0x0FD2` traffic | `bun run worker/src/cli.ts measure` → [`docs/MEASUREMENTS.md`](docs/MEASUREMENTS.md) |

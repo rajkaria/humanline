@@ -218,6 +218,14 @@ contract CreditHistoryTest is Fixtures {
         vm.expectRevert(ICreditHistory.BadParameters.selector);
         new CreditHistoryHarness(address(links), noPool, _reserves(), MIN_GAP, BOOST_BPS, MAX_BOOST);
 
+        // A zero pool is refused on its own, not only because a reserve on that chain then has no pool:
+        // here the zero pool sits on Ethereum mainnet (chain key 3), where no reserve is configured.
+        ICreditHistory.AavePool[] memory extraZero = new ICreditHistory.AavePool[](2);
+        extraZero[0] = _pools()[0];
+        extraZero[1] = ICreditHistory.AavePool({chainKey: 3, chainId: 1, pool: address(0)});
+        vm.expectRevert(ICreditHistory.BadParameters.selector);
+        new CreditHistoryHarness(address(links), extraZero, _reserves(), MIN_GAP, BOOST_BPS, MAX_BOOST);
+
         assertEq(
             address(new CreditHistoryHarness(address(links), _pools(), _reserves(), MIN_GAP, 10_000, MAX_BOOST)) != address(0),
             true,

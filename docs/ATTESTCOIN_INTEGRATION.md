@@ -797,7 +797,7 @@ A relay transaction costs on the order of 0.0002 CTC on CC3 testnet.
 
 **Measured across every relay since deployment.** `bun run worker/src/cli.ts measure` reads every
 `RootRelayed` transaction on both instances and fits gas against batch size and continuity span:
-gas ≈ 162,015 + 108,745 per update + 441 per continuity root (R² 0.996 over 25 transactions). Sizes the
+gas ≈ 169,639 + 99,959 per update + 471 per continuity root (R² 0.994 over 30 transactions). Sizes the
 live relay never needed are measured on a fresh copy of the live bytecode through an `eth_call` state
 override, with real consecutive Sepolia updates: 1 to 6 updates cost 265,480 to 1,422,550 gas, a full
 batch of 10 projects to about 2.5 M gas, which fits about 30 times in one 75 M-gas CC3 block, and 11 is
