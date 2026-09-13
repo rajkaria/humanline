@@ -1,0 +1,76 @@
+name: web
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      - "contracts/abi/**"
+      - "contracts/test/fixtures/**"
+      - "deployments/**"
+      - "bun.lock"
+      - ".github/workflows/web.yml"
+  pull_request:
+    paths:
+      - "web/**"
+      - "contracts/abi/**"
+      - "deployments/**"
+      - "bun.lock"
+      - ".github/workflows/web.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        working-directory: web
+        run: bun run typecheck
+
+      - name: Lint
+        working-directory: web
+        run: bun run lint
+
+      - name: Tests
+        working-directory: web
+        run: bun run test
+
+      - name: Production build
+        working-directory: web
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: bun run build
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lighthouse against the live site
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            https://humanline.credit/
+            https://humanline.credit/judge
+            https://humanline.credit/relay
+          runs: 1
+          uploadArtifacts: true
+          temporaryPublicStorage: false

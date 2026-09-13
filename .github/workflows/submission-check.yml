@@ -1,0 +1,35 @@
+name: submission-check
+
+# Every address, transaction and humanline.credit URL the README and docs cite must resolve:
+# contracts have code and are verified on Blockscout, transactions exist on the chain they are
+# linked to, and pages answer. Placeholders are reported.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "README.md"
+      - "docs/**"
+      - "deployments/**"
+      - "evidence/README.md"
+      - "scripts/submission-check.ts"
+      - ".github/workflows/submission-check.yml"
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Check every cited address, transaction and URL
+        run: bun run scripts/submission-check.ts --summary "$GITHUB_STEP_SUMMARY"

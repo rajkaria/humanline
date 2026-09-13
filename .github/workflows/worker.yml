@@ -1,0 +1,49 @@
+name: worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "worker/**"
+      - "contracts/test/fixtures/**"
+      - "contracts/abi/**"
+      - "evidence/proof-diff.jsonl"
+      - "bun.lock"
+      - ".github/workflows/worker.yml"
+  pull_request:
+    paths:
+      - "worker/**"
+      - "contracts/test/fixtures/**"
+      - "contracts/abi/**"
+      - "bun.lock"
+      - ".github/workflows/worker.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worker-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Tests (no network)
+        working-directory: worker
+        run: bun test
+
+      - name: Typecheck
+        working-directory: worker
+        run: bunx tsc --noEmit -p .

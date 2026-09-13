@@ -1,0 +1,22 @@
+title = "Humanline secret scanning"
+
+[extend]
+useDefault = true
+
+# Real secrets live only in the git-ignored .secrets.env and in CI/Vercel secret stores.
+# These paths hold public test vectors (Foundry/viem test keys such as 0x11…11), real public
+# proof fixtures, generated snapshots and lockfile hashes, which the default rules misread.
+[allowlist]
+description = "Public test vectors, proof fixtures, generated snapshots and lockfiles"
+paths = [
+  '''contracts/test/.*''',
+  '''web/test/.*''',
+  '''worker/test/.*''',
+  '''contracts/abi/.*''',
+  '''web/lib/generated/.*''',
+  '''evidence/.*''',
+  '''deployments/.*''',
+  '''(^|/)bun\.lock$''',
+  '''(^|/)package-lock\.json$''',
+  '''docs/deck\.(pdf|pptx)$''',
+]

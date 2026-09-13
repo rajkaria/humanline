@@ -1,0 +1,107 @@
+name: contracts
+
+# Build, unit + fuzz + invariant tests (CI profile: 2,048 fuzz runs, 128 × 128 invariant
+# sequences), live Creditcoin fork tests, coverage, and Slither.
+on:
+  push:
+    branches: [main]
+    paths: ["contracts/**", ".github/workflows/contracts.yml"]
+  pull_request:
+    paths: ["contracts/**", ".github/workflows/contracts.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: contracts-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Solidity dependencies
+        working-directory: contracts
+        run: npm ci
+
+      - name: Build
+        working-directory: contracts
+        run: forge build --sizes
+
+      - name: Unit, fuzz and invariant tests (CI profile)
+        working-directory: contracts
+        env:
+          FOUNDRY_PROFILE: ci
+        run: forge test -vv
+
+      # The precompiles are native to Creditcoin, so these read the live CC3 testnet node.
+      - name: Live Creditcoin fork tests
+        working-directory: contracts
+        env:
+          CC3_FORK: "1"
+        run: forge test --match-contract Fork -vv
+
+      - name: Coverage
+        working-directory: contracts
+        run: |
+          forge coverage --ir-minimum --report summary --report lcov \
+            --no-match-coverage "(test|script|vendor|node_modules)" --no-match-contract Fork | tee coverage.txt
+          {
+            echo "### Solidity coverage"
+            echo '```'
+            grep -E "^\| (File|src/|Total)" coverage.txt || cat coverage.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lcov
+          path: contracts/lcov.info
+          if-no-files-found: ignore
+
+  slither:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Solidity dependencies
+        working-directory: contracts
+        run: npm ci
+
+      - uses: crytic/slither-action@v0.4.1
+        id: slither
+        with:
+          target: contracts
+          slither-config: contracts/slither.config.json
+          fail-on: none
+          sarif: results.sarif
+
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always() && hashFiles('results.sarif') != ''
+        with:
+          sarif_file: results.sarif
+          category: slither

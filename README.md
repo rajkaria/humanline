@@ -336,6 +336,15 @@ See [`web/README.md`](web/README.md).
 | Worker (Bun) | 215, no network | `cd worker && bun test` |
 | Web (Bun) | 338, including in-browser proof verification, the self-relay planner, real-proof encoding, relay statistics and the cross-chain link/history/repay helpers | `cd web && bun test` |
 | Everything | contracts + worker + web, typecheck and lint | `bash scripts/verify.sh` |
+| Invariants | 12 stateful invariants with anti-vacuity guards: pool accounting, frozen stays frozen, one line per human, exposure cap, roots advance only along the chain, no replay across `execute`/`executeBatch`, orphan roots refused, wallet-link uniqueness | `cd contracts && forge test --match-contract Invariant` |
+| Mutation | every one-line guard deleted or its relation flipped, scored against the unit and fuzz suites | `bun run scripts/mutation.ts` → `evidence/mutation.json` |
+| Submission | every cited address, transaction and humanline.credit URL resolves; contracts Blockscout-verified | `bun run scripts/submission-check.ts` |
+
+CI runs on every push to `main`:
+[contracts](.github/workflows/contracts.yml) (build, CI-profile fuzz and invariants, live fork tests, coverage, Slither),
+[worker](.github/workflows/worker.yml), [web](.github/workflows/web.yml) (typecheck, lint, tests, production build, Lighthouse),
+[CodeQL](.github/workflows/codeql.yml), [gitleaks](.github/workflows/gitleaks.yml) and
+[submission-check](.github/workflows/submission-check.yml).
 
 The 7 fork tests are the ones worth reading: they confirm that the real `0x0FD2` returns `true` for
 both proof fixtures and agrees the mainnet transaction index is 173, that the real `0x0FD3` tracks
