@@ -61,7 +61,10 @@ const lineAbi = parseAbi([
   "function openLine()",
   "function borrow(uint256)",
   "function repay(uint256)",
+  "function markDefault(uint256 human)",
   "function lineOf(uint256) view returns ((uint256 limit,uint256 principal,uint64 dueAt,uint64 openedAt,uint32 loansRepaid,uint32 loansLate,bool frozen))",
+  "function lineOfWallet(address) view returns ((uint256 limit,uint256 principal,uint64 dueAt,uint64 openedAt,uint32 loansRepaid,uint32 loansLate,bool frozen))",
+  "error LineFrozen(uint256 human)",
 ]);
 const erc20Abi = parseAbi([
   "function approve(address,uint256) returns (bool)",
@@ -145,11 +148,15 @@ async function proveAndRegister(identity: string, account: PrivateKeyAccount): P
   return { human: nullifier, tx };
 }
 
-async function creditLoop(account: PrivateKeyAccount, human: bigint): Promise<Record<string, Hex>> {
+async function creditLoop(
+  account: PrivateKeyAccount,
+  human: bigint,
+): Promise<{ txs: Record<string, Hex>; limitBefore: string; principal: string; limitAfter: string }> {
   const txs: Record<string, Hex> = {};
   let line = await client.readContract({ address: C.CreditLine, abi: lineAbi, functionName: "lineOf", args: [human] });
   if (line.openedAt === 0n) txs.openLine = await send(account, "openLine", { address: C.CreditLine, abi: lineAbi, functionName: "openLine" });
   line = await client.readContract({ address: C.CreditLine, abi: lineAbi, functionName: "lineOf", args: [human] });
+  const limitBefore = line.limit;
   if (line.principal === 0n) {
     const amount = (line.limit * 4n) / 5n; // 80% of the limit
     txs.borrow = await send(account, `borrow ${formatUnits(amount, 6)} hUSD`, { address: C.CreditLine, abi: lineAbi, functionName: "borrow", args: [amount] });
@@ -160,11 +167,12 @@ async function creditLoop(account: PrivateKeyAccount, human: bigint): Promise<Re
     // The 1% term fee comes from the borrower's own funds: the test stablecoin's public faucet.
     txs.feeFaucet = await send(account, "hUSD faucet for the 1% fee", { address: C.HUSD, abi: erc20Abi, functionName: "faucet" });
   }
+  const principal = line.principal;
   txs.approve = await send(account, "approve", { address: C.HUSD, abi: erc20Abi, functionName: "approve", args: [C.CreditLine, line.principal] });
   txs.repay = await send(account, `repay ${formatUnits(line.principal, 6)} hUSD on time`, { address: C.CreditLine, abi: lineAbi, functionName: "repay", args: [line.principal] });
   line = await client.readContract({ address: C.CreditLine, abi: lineAbi, functionName: "lineOf", args: [human] });
   console.log(`  line: limit ${formatUnits(line.limit, 6)} hUSD, loans repaid ${line.loansRepaid}`);
-  return txs;
+  return { txs, limitBefore: String(limitBefore), principal: String(principal), limitAfter: String(line.limit) };
 }
 
 const [command, arg] = process.argv.slice(2);
@@ -173,7 +181,7 @@ if (command === "human" && arg) {
   console.log(`identity #${arg} → wallet ${account.address}`);
   const gasTx = await fund(account);
   const { human, tx } = await proveAndRegister(arg, account);
-  const txs = await creditLoop(account, human);
+  const { txs, ...limits } = await creditLoop(account, human);
   appendFileSync(
     EVIDENCE,
     JSON.stringify({
@@ -183,8 +191,105 @@ if (command === "human" && arg) {
       simulatorIdentity: Number(arg),
       wallet: account.address,
       human: `0x${human.toString(16).padStart(64, "0")}`,
+      ...limits,
       txs: { gas: gasTx, register: tx, ...txs },
     }) + "\n",
+  );
+} else if (command === "default" && arg) {
+  // A default follows the person: borrow, miss the term and the grace period, get marked in
+  // default, then come back from a brand-new wallet with the same World ID and find the line frozen.
+  const first = walletFor(arg);
+  console.log(`identity #${arg} → wallet ${first.address}`);
+  const txs: Record<string, Hex | null> = { gas: await fund(first) };
+  const { human, tx } = await proveAndRegister(arg, first);
+  txs.register = tx;
+  let line = await client.readContract({ address: C.CreditLine, abi: lineAbi, functionName: "lineOf", args: [human] });
+  if (line.openedAt === 0n) txs.openLine = await send(first, "openLine", { address: C.CreditLine, abi: lineAbi, functionName: "openLine" });
+  line = await client.readContract({ address: C.CreditLine, abi: lineAbi, functionName: "lineOf", args: [human] });
+  if (!line.frozen && line.principal === 0n) {
+    // Principal plus the term fee must fit the limit, so draw the largest amount that does.
+    const amount = (line.limit * 10_000n) / (10_000n + BigInt(dep.config.feeBps));
+    txs.borrow = await send(first, `borrow ${formatUnits(amount, 6)} hUSD and never repay`, {
+      address: C.CreditLine,
+      abi: lineAbi,
+      functionName: "borrow",
+      args: [amount],
+    });
+    line = await client.readContract({ address: C.CreditLine, abi: lineAbi, functionName: "lineOf", args: [human] });
+  }
+  if (!line.frozen) {
+    const deadline = Number(line.dueAt) + Number(dep.config.graceSeconds);
+    for (;;) {
+      const block = await client.getBlock();
+      if (Number(block.timestamp) > deadline) break;
+      console.log(`  due ${new Date(Number(line.dueAt) * 1000).toISOString()}, grace ends in ${deadline - Number(block.timestamp)} s`);
+      await Bun.sleep(Math.min(60_000, (deadline - Number(block.timestamp) + 15) * 1000));
+    }
+    // Anyone can call markDefault; the deployer does, from a wallet unrelated to the borrower.
+    txs.markDefault = await send(deployer, "markDefault (called by a stranger)", { address: C.CreditLine, abi: lineAbi, functionName: "markDefault", args: [human] });
+  }
+
+  const second = walletFor(`${arg}b`);
+  console.log(`same person, new wallet ${second.address}`);
+  txs.gasNewWallet = await fund(second);
+  const rebind = await proveAndRegister(arg, second);
+  if (rebind.human !== human) throw new Error("the simulator produced a different human; select the same identity");
+  txs.registerNewWallet = rebind.tx;
+  const inherited = await client.readContract({ address: C.CreditLine, abi: lineAbi, functionName: "lineOfWallet", args: [second.address] });
+  let borrowRefusal = "";
+  try {
+    await client.simulateContract({ account: second, address: C.CreditLine, abi: lineAbi, functionName: "borrow", args: [1_000_000n] });
+    throw new Error("borrow from the new wallet was not refused");
+  } catch (error) {
+    borrowRefusal = error instanceof Error ? (error.message.match(/LineFrozen|reverted[^\n]*/)?.[0] ?? error.message.slice(0, 120)) : String(error);
+  }
+  console.log(`  new wallet inherits frozen=${inherited.frozen}; borrow refused: ${borrowRefusal}`);
+  if (!inherited.frozen) throw new Error("the new wallet's line is not frozen");
+  appendFileSync(
+    EVIDENCE,
+    JSON.stringify({
+      kind: "seed-demo-default",
+      at: new Date().toISOString(),
+      profile: dep.profile,
+      human: `0x${human.toString(16).padStart(64, "0")}`,
+      firstWallet: first.address,
+      newWallet: second.address,
+      frozenOnNewWallet: inherited.frozen,
+      borrowFromNewWallet: borrowRefusal,
+      txs: Object.fromEntries(Object.entries(txs).filter(([, v]) => v)),
+    }) + "\n",
+  );
+} else if (command === "rebind-deployer") {
+  // Bind a simulator identity back to the deployer wallet (the wallet in evidence/e2e-worldid-staging.md).
+  const { human, tx } = await proveAndRegister("deployer", deployer);
+  console.log(`  deployer is human 0x${human.toString(16).slice(0, 12)}…, register ${tx ?? "(already bound)"}`);
+} else if (command === "link" && arg) {
+  // HumanLinks, live: a brand-new Ethereum key signs the EIP-712 Link naming this human and their
+  // Creditcoin wallet, and the Creditcoin wallet submits it. The same signature on Sepolia or
+  // mainnet is what lets CreditHistory and EthRepay credit that wallet's activity to the human.
+  const account = walletFor(arg);
+  const human = await client.readContract({ address: C.HumanRegistry, abi: registryAbi, functionName: "humanOf", args: [account.address] });
+  if (human === 0n) throw new Error(`seed human ${arg} is not registered`);
+  const ethereum = walletFor(`eth-${arg}`);
+  const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600);
+  const signature = await ethereum.signTypedData({
+    domain: { name: "Humanline HumanLinks", version: "1", chainId: creditcoinTestnet.id, verifyingContract: C.HumanLinks },
+    types: { Link: [{ name: "human", type: "uint256" }, { name: "creditcoinWallet", type: "address" }, { name: "wallet", type: "address" }, { name: "deadline", type: "uint256" }] },
+    primaryType: "Link",
+    message: { human, creditcoinWallet: account.address, wallet: ethereum.address, deadline },
+  });
+  const linksAbi = parseAbi([
+    "function linkBySignature(address wallet, uint256 deadline, bytes signature)",
+    "function humanOfWallet(address) view returns (uint256)",
+    "function linkCount(uint256) view returns (uint256)",
+  ]);
+  const tx = await send(account, `linkBySignature ${ethereum.address}`, { address: C.HumanLinks, abi: linksAbi, functionName: "linkBySignature", args: [ethereum.address, deadline, signature] });
+  const linkedTo = await client.readContract({ address: C.HumanLinks, abi: linksAbi, functionName: "humanOfWallet", args: [ethereum.address] });
+  const count = await client.readContract({ address: C.HumanLinks, abi: linksAbi, functionName: "linkCount", args: [human] });
+  console.log(`  humanOfWallet = ${linkedTo === human ? "this human" : linkedTo}; links ${count}`);
+  appendFileSync(
+    EVIDENCE,
+    JSON.stringify({ kind: "seed-demo-link", at: new Date().toISOString(), profile: dep.profile, human: `0x${human.toString(16).padStart(64, "0")}`, creditcoinWallet: account.address, linkedWallet: ethereum.address, method: "signature", tx, linkCount: Number(count) }) + "\n",
   );
 } else if (command === "poll") {
   const humans = Object.keys(wallets).sort();

@@ -113,6 +113,10 @@ export type CreditLoopEvidence = {
   limitAfter?: string;
   principalAfterBorrow?: string;
   loansRepaid?: string;
+  /** `seed` for the CreditLine v3 demo humans, absent for the original v2 log. */
+  source?: "seed";
+  /** The same cycle run by other seeded humans: their on-time repay transactions. */
+  repeats?: TxReference[];
 };
 
 /** `faucet: 0xabc… status=1 gas=91379` → a labelled step. */
@@ -152,6 +156,113 @@ function parseCreditLoop(): CreditLoopEvidence | null {
   };
 }
 
-export const CREDIT_LOOP_EVIDENCE = parseCreditLoop();
+// ------------------------------------------------------------- seeded demo
+
+type SeedRow = {
+  kind?: string;
+  wallet?: string;
+  human?: string;
+  limitBefore?: string;
+  limitAfter?: string;
+  principal?: string;
+  txs?: Record<string, string>;
+  [key: string]: unknown;
+};
+
+function seedRows(): SeedRow[] {
+  const raw = (RAW as { seedDemo?: string }).seedDemo;
+  if (!raw) return [];
+  return raw.split("\n").flatMap((line) => {
+    try {
+      return line.trim() ? [JSON.parse(line) as SeedRow] : [];
+    } catch {
+      return [];
+    }
+  });
+}
+
+const SEED = seedRows();
+
+const STEP_LABELS: Record<string, string> = {
+  gas: "Gas for a fresh wallet",
+  register: "Register (Groth16 on CC3)",
+  openLine: "Open line",
+  borrow: "Borrow",
+  feeFaucet: "hUSD faucet for the 1% fee",
+  approve: "Approve",
+  repay: "Repay on time",
+  markDefault: "markDefault, called by a stranger",
+  gasNewWallet: "Gas for the new wallet",
+  registerNewWallet: "Same World ID, new wallet",
+};
+
+function stepsOf(txs: Record<string, string> | undefined): TxReference[] {
+  return Object.entries(txs ?? {}).flatMap(([key, hash]) =>
+    TX_HASH.test(hash) ? [{ label: STEP_LABELS[key] ?? key, hash: hash as `0x${string}` }] : [],
+  );
+}
+
+/**
+ * The newest credit loop: a seeded human on CreditLine v3, from World ID proof to an on-time repay.
+ * Preferred over the older v2 log when present; the other seeded humans are listed as repeats.
+ */
+function parseSeedCreditLoop(): CreditLoopEvidence | null {
+  const humans = SEED.filter((r) => r.kind === "seed-demo-human" && TX_HASH.test(r.txs?.repay ?? ""));
+  const main = humans.find((r) => r.txs?.register && r.txs?.borrow) ?? humans[0];
+  if (!main) return null;
+  return {
+    log: humans.map((r) => JSON.stringify(r, null, 2)).join("\n"),
+    steps: stepsOf(main.txs),
+    limitBefore: main.limitBefore,
+    limitAfter: main.limitAfter,
+    principalAfterBorrow: main.principal,
+    loansRepaid: "1",
+    source: "seed",
+    repeats: humans
+      .filter((r) => r !== main)
+      .map((r) => ({ label: `Human ${r.human?.slice(0, 10)}…`, hash: r.txs!.repay as `0x${string}`, detail: "on-time repay" })),
+  };
+}
+
+export const CREDIT_LOOP_EVIDENCE = parseSeedCreditLoop() ?? parseCreditLoop();
+
+export type DefaultEvidence = {
+  human: string;
+  firstWallet: string;
+  newWallet: string;
+  frozenOnNewWallet: boolean;
+  borrowFromNewWallet: string;
+  steps: TxReference[];
+};
+
+/** A default follows the person: the seeded run that defaulted and came back from a new wallet. */
+function parseDefault(): DefaultEvidence | null {
+  const row = SEED.find((r) => r.kind === "seed-demo-default");
+  if (!row || typeof row.human !== "string") return null;
+  return {
+    human: row.human,
+    firstWallet: String(row.firstWallet),
+    newWallet: String(row.newWallet),
+    frozenOnNewWallet: row.frozenOnNewWallet === true,
+    borrowFromNewWallet: String(row.borrowFromNewWallet ?? ""),
+    steps: stepsOf(row.txs),
+  };
+}
+
+export const DEFAULT_EVIDENCE = parseDefault();
+
+export type LinkEvidence = { human: string; creditcoinWallet: string; linkedWallet: string; tx: `0x${string}`; linkCount: number };
+
+export const LINK_EVIDENCE: LinkEvidence | null = (() => {
+  const row = SEED.find((r) => r.kind === "seed-demo-link");
+  if (!row || typeof row.tx !== "string" || !TX_HASH.test(row.tx)) return null;
+  return {
+    human: String(row.human),
+    creditcoinWallet: String(row.creditcoinWallet),
+    linkedWallet: String(row.linkedWallet),
+    tx: row.tx as `0x${string}`,
+    linkCount: Number(row.linkCount ?? 1),
+  };
+})();
 
 export const hasE2eEvidence = Boolean(WORLD_ID_EVIDENCE || CREDIT_LOOP_EVIDENCE);

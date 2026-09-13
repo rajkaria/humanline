@@ -2,10 +2,9 @@ name: live-attacks
 
 # Fires the twelve named attacks at the deployed CC3 testnet contracts as read-only eth_calls and
 # fails if any is not refused with its expected named revert. No keys, no gas: every call is a
-# simulation against live state, so this runs on a schedule as a standing proof, not a one-off demo.
+# simulation against live state. The six-hourly schedule lives in Vercel Cron (`/api/cron/attacks`)
+# because GitHub's schedule for this workflow did not fire reliably; this keeps push and manual runs.
 on:
-  schedule:
-    - cron: "23 */6 * * *"
   push:
     branches: [main]
     paths:

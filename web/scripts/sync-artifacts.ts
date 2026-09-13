@@ -131,6 +131,7 @@ const E2E: Array<{ file: string; key: string; json?: boolean }> = [
   { file: "e2e-worldid-staging.md", key: "worldIdStaging" },
   { file: "e2e-worldid-staging-result.json", key: "worldIdStagingResult", json: true },
   { file: "e2e-credit-loop.log", key: "creditLoop" },
+  { file: "seed-demo.jsonl", key: "seedDemo" },
 ];
 
 const e2e: Record<string, unknown> = {};

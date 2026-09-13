@@ -1,4 +1,4 @@
-import { BadgeCheckIcon, BanknoteIcon, FingerprintIcon } from "lucide-react";
+import { BadgeCheckIcon, BanknoteIcon, FingerprintIcon, Link2Icon, SnowflakeIcon } from "lucide-react";
 
 import { CopyButton } from "@/components/copy-button";
 import { HashLink } from "@/components/hash-link";
@@ -15,6 +15,8 @@ import {
 import { formatUsd, truncateUint256 } from "@/lib/format";
 import {
   CREDIT_LOOP_EVIDENCE,
+  DEFAULT_EVIDENCE,
+  LINK_EVIDENCE,
   WORLD_ID_EVIDENCE,
   type TxReference,
 } from "@/lib/e2e";
@@ -47,7 +49,71 @@ export function E2eEvidence() {
     <div className="grid gap-4 lg:grid-cols-2">
       {WORLD_ID_EVIDENCE ? <PersonhoodCard /> : null}
       {CREDIT_LOOP_EVIDENCE ? <CreditLoopCard /> : null}
+      {DEFAULT_EVIDENCE ? <DefaultCard /> : null}
+      {LINK_EVIDENCE ? <LinkCard /> : null}
     </div>
+  );
+}
+
+function DefaultCard() {
+  const e = DEFAULT_EVIDENCE!;
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <SnowflakeIcon className="size-4 text-destructive" />
+            A default follows the person
+          </CardTitle>
+          {e.frozenOnNewWallet ? <Badge className="bg-destructive/15 text-destructive">frozen on the new wallet</Badge> : null}
+        </div>
+        <CardDescription>
+          A seeded human borrowed and never repaid. Past the due date and grace period, a stranger
+          marked the line in default. The same World ID then registered from a brand-new wallet, and
+          the line came with it, frozen. A new keypair is not a new borrower.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-3">
+        <dl className="flex flex-col divide-y divide-foreground/10 text-xs">
+          <StatRow label="Human (nullifier)" mono={false} value={<HashLink value={e.human as `0x${string}`} />} />
+          <StatRow label="Wallet that defaulted" mono={false} value={<HashLink value={e.firstWallet as `0x${string}`} scope="creditcoin" kind="address" />} />
+          <StatRow label="New wallet, same human" mono={false} value={<HashLink value={e.newWallet as `0x${string}`} scope="creditcoin" kind="address" />} />
+          <StatRow label="Borrow from the new wallet" mono={false} value={<span className="font-mono">{e.borrowFromNewWallet || "refused"}</span>} />
+        </dl>
+        <ol className="flex flex-col divide-y divide-foreground/10">
+          {e.steps.map((step) => (
+            <StepRow key={step.hash} step={step} />
+          ))}
+        </ol>
+      </CardContent>
+    </Card>
+  );
+}
+
+function LinkCard() {
+  const e = LINK_EVIDENCE!;
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Link2Icon className="size-4 text-brand" />
+          An Ethereum wallet, linked to a human
+        </CardTitle>
+        <CardDescription>
+          A fresh Ethereum key signed the EIP-712 Link naming this human and their Creditcoin wallet,
+          and <code className="font-mono text-xs">HumanLinks</code> on Creditcoin recorded it. From
+          here, that wallet&apos;s Aave history and USDC repayments can count for this person.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <dl className="flex flex-col divide-y divide-foreground/10 text-xs">
+          <StatRow label="Human (nullifier)" mono={false} value={<HashLink value={e.human as `0x${string}`} />} />
+          <StatRow label="Creditcoin wallet" mono={false} value={<HashLink value={e.creditcoinWallet as `0x${string}`} scope="creditcoin" kind="address" />} />
+          <StatRow label="Linked Ethereum wallet" mono={false} value={<HashLink value={e.linkedWallet as `0x${string}`} />} />
+          <StatRow label="linkBySignature on Creditcoin" mono={false} value={<HashLink value={e.tx} scope="creditcoin" kind="tx" />} />
+        </dl>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -154,8 +220,9 @@ function CreditLoopCard() {
           ) : null}
         </div>
         <CardDescription>
-          Faucet, deposit, open, borrow, repay. Every step a real transaction on CC3
-          testnet, ending with an on-time repayment that raised the limit.
+          {e.source === "seed"
+            ? "A fresh wallet proves a World ID, opens a CreditLine v3 line, borrows and repays on time. Every step is a real transaction on CC3 testnet, and the on-time repayment raised the limit. Seeded by Humanline's own wallets, recorded in evidence/seed-demo.jsonl."
+            : "Faucet, deposit, open, borrow, repay. Every step a real transaction on CC3 testnet, ending with an on-time repayment that raised the limit."}
         </CardDescription>
       </CardHeader>
 
@@ -184,6 +251,19 @@ function CreditLoopCard() {
             <StepRow key={step.hash} step={step} />
           ))}
         </ol>
+
+        {e.repeats && e.repeats.length > 0 ? (
+          <div className="flex flex-col gap-1">
+            <p className="text-xs text-muted-foreground">
+              The same cycle, run by {e.repeats.length} more humans:
+            </p>
+            <ol className="flex flex-col divide-y divide-foreground/10">
+              {e.repeats.map((step) => (
+                <StepRow key={step.hash} step={step} />
+              ))}
+            </ol>
+          </div>
+        ) : null}
 
         <details className="rounded-lg bg-muted/30 p-3">
           <summary className="cursor-pointer text-xs font-medium text-muted-foreground">
