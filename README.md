@@ -14,7 +14,7 @@
 [![Attacks](https://img.shields.io/badge/live_attacks-12%2F12_refused-dc2626)](https://humanline.credit/judge)
 [![Coverage](https://img.shields.io/badge/coverage-93.6%25_lines-16a34a)](docs/MEASUREMENTS.md)
 [![Mutation](https://img.shields.io/badge/mutation_score-95.8%25-16a34a)](docs/MEASUREMENTS.md)
-[![SDK](https://img.shields.io/badge/npm-%40humanline%2Fsdk-cb3837)](packages/sdk)
+[![npm](https://img.shields.io/npm/v/@humanline/sdk?label=%40humanline%2Fsdk&color=cb3837)](https://www.npmjs.com/package/@humanline/sdk)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 [![contracts](https://github.com/rajkaria/humanline/actions/workflows/contracts.yml/badge.svg)](https://github.com/rajkaria/humanline/actions/workflows/contracts.yml)

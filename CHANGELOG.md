@@ -9,6 +9,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Deployed
 
+- **`@humanline/sdk` 0.1.0 is on npm** (https://www.npmjs.com/package/@humanline/sdk). The published
+  build carries the CreditLine v3 addresses for both deployments.
 - **Cross-chain credit identity is live on CC3 for both deployments.** `HumanLinks`, `CreditHistory`,
   `EthRepay` and CreditLine v3 went out through `contracts/script/deploy-cross-chain.sh`, which moved
   the pool liquidity out of CreditLine v2 and seeded each `EthRepay` float with 20 hUSD. Staging:

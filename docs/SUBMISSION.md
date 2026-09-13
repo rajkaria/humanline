@@ -227,7 +227,7 @@ Confirm each before submitting. These are the organizers' stated conditions, and
 
 ## Pre-submit checklist
 
-- [x] Contracts deployed and verified on Blockscout (twelve, across both deployments); every address above is live, checked by `submission-check`.
+- [x] Contracts deployed and verified on Blockscout (eighteen, across both deployments); every address above is live, checked by `submission-check`.
 - [x] Relay running every 5 minutes from Vercel Cron with GitHub Actions as backup, independent of any laptop; any user can self-relay, and `RelayReward` pays third parties. `/relay` shows the track record.
 - [x] Twelve attacks refused by name against the deployed contracts (`bun run worker/src/cli.ts attack`), re-run every six hours in CI and live on `/judge`.
 - [x] `docs/MEASUREMENTS.md` generated from the live chains; coverage 93.6% lines, mutation score and Slither triage published.
@@ -239,5 +239,5 @@ Confirm each before submitting. These are the organizers' stated conditions, and
 - [ ] Video recorded, uploaded, ungated; `{{VIDEO_URL}}` replaced.
 - [ ] Description block under 300 words and integration summary under 400 words, both checked with `wc -w`.
 - [x] Foundry suite green (234 including 14 live fork tests and 12 invariants), worker tests green (216), web tests green (411), SDK tests green (10), all runnable from a fresh clone without a wallet (`bash scripts/verify.sh`).
-- [ ] `@humanline/sdk` published: `cd packages/sdk && npm publish --access public` (maintainer action).
+- [x] `@humanline/sdk` 0.1.0 published on npm (https://www.npmjs.com/package/@humanline/sdk), shipping the CreditLine v3 addresses.
 - [ ] Submitted before 2026-09-13 23:59 ET, not at 23:58.
