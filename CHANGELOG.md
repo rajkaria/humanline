@@ -7,6 +7,23 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Deployed
+
+- **Cross-chain credit identity is live on CC3 for both deployments.** `HumanLinks`, `CreditHistory`,
+  `EthRepay` and CreditLine v3 went out through `contracts/script/deploy-cross-chain.sh`, which moved
+  the pool liquidity out of CreditLine v2 and seeded each `EthRepay` float with 20 hUSD. Staging:
+  CreditLine `0xbb97982f…56d9`, HumanLinks `0xbbf6f64c…781c`, CreditHistory `0xa4833b1b…3404`,
+  EthRepay `0x231ce1ce…fc48`. Orb tree: CreditLine `0x30ca59ac…77d7`, HumanLinks `0x78ac98d4…b327`,
+  CreditHistory `0x803e9fdc…3c8a`, EthRepay `0x71c58397…f60a`. All eight are verified on Blockscout.
+  The v2 lines are recorded under `previous` in each deployment file.
+
+### Fixed
+
+- `verify-blockscout.sh` resolves a relative `DEPLOYMENT` path before changing directory, so the
+  Orb-tree deployment's CreditLine v3 and cross-chain contracts are verified rather than skipped.
+- `/relay` counts the wallets `web/scripts/self-relay.ts` generates as Humanline's, and leads with
+  latency and uptime since the 5-minute relay went live while keeping the all-time figures.
+
 ### Added
 
 - **Prover independence.** `bun run src/cli.ts local-proof <tx> --source sepolia` builds an

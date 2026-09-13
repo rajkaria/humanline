@@ -6,20 +6,26 @@
     "AttestedWorldIDSepolia": "0x3a7c3cc67034197208923587b8dc5c4674cbcef7",
     "HUSD": "0x4bd7f4c6648deb8f107932572ce7e85aca259640",
     "HumanRegistry": "0x62c2fd99ea587e4b466175ad248468782bd5298d",
-    "CreditLine": "0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9",
+    "CreditLine": "0xbb97982f1138f36bfa3ba4706dad5134a10556d9",
     "HumanGate": "0xa3e021de49cec8819ea1bd37a8b5a9df005b776c",
     "RelayReward": "0x9766480a872ad7df2a5cf86f9e307804a3f7afe0",
-    "HumanPoll": "0xd7854346fea444f6ac966d2ce764a4f029e013bc"
+    "HumanPoll": "0xd7854346fea444f6ac966d2ce764a4f029e013bc",
+    "HumanLinks": "0xbbf6f64c3aff6715c42711329e3292b3c967781c",
+    "CreditHistory": "0xa4833b1b667a729e80248004ac91cfa3a2ff3404",
+    "EthRepay": "0x231ce1ceb88edefad482fc6dfd49a8454cd1fc48"
   },
   "txHashes": {
     "AttestedWorldIDMainnet": "0x04bb7e2ed8f5be32d6f4163bb6a74e3410c895406c068b00f23454e079dd827a",
     "AttestedWorldIDSepolia": "0x58fa9551f257b194f25f344bfe48826550e023463173f0ebad975a468f051fb1",
     "HUSD": "0x83194732dbff9c49f8e7dff7f18bfbd7793aa5dc69ef69507b43b7d7a7a74c86",
     "HumanRegistry": "0x078308c11d3c9e2d6080d6f8b2b61a3a2d4eefee7ba5538f67af595eb4e8705b",
-    "CreditLine": "0x496821a48adb23597bf1db2adbf65f76aecf5a18889ab38cd7ec9ff92c86a70c",
+    "CreditLine": "0xc81a260502dcdb27916b5e50dbae4cb3aef4dc78b52854ca2fb54b5401441811",
     "HumanGate": "0x3c5ef7e76ef28d4672064dc17e19e099bf94930eaf7b2e19d0d1eeb4f3d94956",
     "RelayReward": "0x97daaf15b3113baf1bcb72ebc862e7d9d2677978a81cdeabd6950db2900280e3",
-    "HumanPoll": "0x7baeebe643676c5c9dbbfc17d7aa3963e55834fe7306bca10bc8fd127d8a1306"
+    "HumanPoll": "0x7baeebe643676c5c9dbbfc17d7aa3963e55834fe7306bca10bc8fd127d8a1306",
+    "HumanLinks": "0x2be6037ea01689d019f0e6be39116b1c7704178e1b5138bb6b65c133f2848cdd",
+    "CreditHistory": "0x632d0e650ec9ace7f811d37269f744543084284dc1854eeaa6e8ba25325ab71f",
+    "EthRepay": "0xf2556e331a57668a8b82e40c054b665e1cfb3a7cd4728a2e6c16d60e4e2cb13a"
   },
   "config": {
     "worldIdSource": "sepolia",
@@ -39,7 +45,34 @@
     },
     "securityChainKey": 1,
     "sourceChainId": 11155111,
-    "exposurePerBondedCtc": 10000000
+    "exposurePerBondedCtc": 10000000,
+    "crossChain": {
+      "sourceChains": [
+        {
+          "chainKey": 1,
+          "chainId": 11155111
+        },
+        {
+          "chainKey": 3,
+          "chainId": 1
+        }
+      ],
+      "finalityDepth": 32,
+      "minAttestors": 3,
+      "maxLinks": 8,
+      "aavePools": "[(1,11155111,0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951),(3,1,0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2)]",
+      "reserves": "[(1,0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8,6),(1,0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357,18),(1,0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0,6),(3,0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48,6),(3,0xdAC17F958D2ee523a2206206994597C13D831ec7,6),(3,0x6B175474E89094C44Da98b954EedeAC495271d0F,18)]",
+      "stablecoins": "[(1,11155111,0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238,6),(3,1,0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48,6)]",
+      "minGapBlocks": 7200,
+      "boostBps": 2500,
+      "maxBoost": 500000000,
+      "repayAddress": "0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3",
+      "floatSeeded": 20000000,
+      "floatTx": "0x0e7c579d09663cee3dc5113c664a1981f2261fa31d79c325e364fd23e799fd05",
+      "liquidityMigrated": 440199998,
+      "depositTx": "0xc2502482bbb7d4e5f6449265d2ea95a0bbba1c7f6c9afb973857d97091539211",
+      "deployedAtBlock": 5481236
+    }
   },
   "deployedAt": 1789204231,
   "deployer": "0x45B9c98bc6Dbe96a8Ee470743637e6A0e36dCCA3",
@@ -48,7 +81,13 @@
       "address": "0x1bd40163e41e44d2f139d95de88b640f6ea461f7",
       "txHash": "0x7cbc9fb216e75ea37e0c233af26a6c3bc456686c8298318d6e0b48b32725170b",
       "note": "no exposure cap; superseded by CreditLine v2 (attestor-bond security budget)"
+    },
+    "CreditLineV2": {
+      "address": "0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9",
+      "txHash": "0x496821a48adb23597bf1db2adbf65f76aecf5a18889ab38cd7ec9ff92c86a70c",
+      "note": "attestor-bond cap, no cross-chain history; superseded by CreditLine v3 (CreditHistory boost + repayFor)",
+      "migrationTx": "0xcf7d1c84dd9f292116016a69799954fff7a260e262c3e678663e134a6732df03"
     }
   },
-  "creditLineDeployedAt": 1789247597
+  "creditLineDeployedAt": 1789309817
 }

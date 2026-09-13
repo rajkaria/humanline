@@ -11,8 +11,11 @@ Deployed contracts, CC3 testnet (chainId 102031):
 | `AttestedWorldID` (mainnet, chainKey 3) | `0x1122ef3fa4ab0693809e42a00b2476efcf4468ad` |
 | `AttestedWorldID` (Sepolia, chainKey 1) | `0x3a7c3cc67034197208923587b8dc5c4674cbcef7` |
 | `HumanRegistry` | `0x62c2fd99ea587e4b466175ad248468782bd5298d` |
-| `CreditLine` v2 (staging pool) | `0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9` |
-| `CreditLine` v2 (Orb pool) | `0x8063982df3250c2f21f2f18f1cf340ec75c1c1cb` |
+| `CreditLine` v3 (staging pool) | `0xbb97982f1138f36bfa3ba4706dad5134a10556d9` |
+| `CreditLine` v3 (Orb pool) | `0x30ca59acbf161284ed51f0412a42ecf3c9e577d7` |
+| `HumanLinks` (staging / Orb) | `0xbbf6f64c3aff6715c42711329e3292b3c967781c` / `0x78ac98d48042091c9d58ff21d29e1351cce5b327` |
+| `CreditHistory` (staging / Orb) | `0xa4833b1b667a729e80248004ac91cfa3a2ff3404` / `0x803e9fdcefb1d94331da6423b8fb2458305e3c8a` |
+| `EthRepay` (staging / Orb) | `0x231ce1ceb88edefad482fc6dfd49a8454cd1fc48` / `0x71c5839704528e20cb13b9fd08d5f23d6ac3f60a` |
 | `hUSD` | `0x4bd7f4c6648deb8f107932572ce7e85aca259640` |
 | `HumanGate` | `0xa3e021de49cec8819ea1bd37a8b5a9df005b776c` |
 | `RelayReward` | `0x9766480a872ad7df2a5cf86f9e307804a3f7afe0` |

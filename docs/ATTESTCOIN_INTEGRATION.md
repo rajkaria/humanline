@@ -11,17 +11,20 @@ inside the same Creditcoin transaction that adopts the root. There is no bridge 
 signer, no owner, no pause and no upgrade path. Remove Attestcoin and there is no root, therefore no
 verified human, therefore no credit line.
 
-Deployed on Creditcoin CC3 testnet (chainId 102031). All seven contracts are verified on Blockscout.
+Deployed on Creditcoin CC3 testnet (chainId 102031). All ten contracts below are verified on Blockscout, as is the Orb-tree deployment in `deployments/cc3-testnet.production.json`.
 
 | Contract | Address |
 |---|---|
 | `AttestedWorldID` (Ethereum mainnet, chainKey 3) | [`0x1122ef3fa4ab0693809e42a00b2476efcf4468ad`](https://creditcoin-testnet.blockscout.com/address/0x1122ef3fa4ab0693809e42a00b2476efcf4468ad) |
 | `AttestedWorldID` (Ethereum Sepolia, chainKey 1) | [`0x3a7c3cc67034197208923587b8dc5c4674cbcef7`](https://creditcoin-testnet.blockscout.com/address/0x3a7c3cc67034197208923587b8dc5c4674cbcef7) |
 | `HumanRegistry` | [`0x62c2fd99ea587e4b466175ad248468782bd5298d`](https://creditcoin-testnet.blockscout.com/address/0x62c2fd99ea587e4b466175ad248468782bd5298d) |
-| `CreditLine` v2 (exposure capped by `0x0FD4` bonds) | [`0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9`](https://creditcoin-testnet.blockscout.com/address/0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9) |
+| `CreditLine` v3 (exposure capped by `0x0FD4` bonds, boosted by proved history) | [`0xbb97982f1138f36bfa3ba4706dad5134a10556d9`](https://creditcoin-testnet.blockscout.com/address/0xbb97982f1138f36bfa3ba4706dad5134a10556d9) |
 | `hUSD` | [`0x4bd7f4c6648deb8f107932572ce7e85aca259640`](https://creditcoin-testnet.blockscout.com/address/0x4bd7f4c6648deb8f107932572ce7e85aca259640) |
 | `HumanGate` (example integration) | [`0xa3e021de49cec8819ea1bd37a8b5a9df005b776c`](https://creditcoin-testnet.blockscout.com/address/0xa3e021de49cec8819ea1bd37a8b5a9df005b776c) |
 | `RelayReward` (permissionless relayer vault) | [`0x9766480a872ad7df2a5cf86f9e307804a3f7afe0`](https://creditcoin-testnet.blockscout.com/address/0x9766480a872ad7df2a5cf86f9e307804a3f7afe0) |
+| `HumanLinks` (source-chain wallets bound to the human by proved transactions) | [`0xbbf6f64c3aff6715c42711329e3292b3c967781c`](https://creditcoin-testnet.blockscout.com/address/0xbbf6f64c3aff6715c42711329e3292b3c967781c) |
+| `CreditHistory` (Aave repayments proved through `0x0FD2`) | [`0xa4833b1b667a729e80248004ac91cfa3a2ff3404`](https://creditcoin-testnet.blockscout.com/address/0xa4833b1b667a729e80248004ac91cfa3a2ff3404) |
+| `EthRepay` (Ethereum-side repayments credited on Creditcoin) | [`0x231ce1ceb88edefad482fc6dfd49a8454cd1fc48`](https://creditcoin-testnet.blockscout.com/address/0x231ce1ceb88edefad482fc6dfd49a8454cd1fc48) |
 
 An earlier deployment of the same six contracts is recorded in `deployments/cc3-testnet.v1.json`.
 It was replaced after a code review round (source-block root dating and the pool share math changed,

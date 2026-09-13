@@ -132,11 +132,14 @@ Paste into the form's description if space allows, and into the README regardles
 | `AttestedWorldID` (Ethereum mainnet, chainKey 3) | `0x1122ef3fa4ab0693809e42a00b2476efcf4468ad` |
 | `AttestedWorldID` (Ethereum Sepolia, chainKey 1) | `0x3a7c3cc67034197208923587b8dc5c4674cbcef7` |
 | `HumanRegistry` | `0x62c2fd99ea587e4b466175ad248468782bd5298d` |
-| `CreditLine` v2 (attestor-bond exposure cap) | `0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9` |
+| `CreditLine` v3 (attestor-bond exposure cap, history boost) | `0xbb97982f1138f36bfa3ba4706dad5134a10556d9` |
 | `hUSD` | `0x4bd7f4c6648deb8f107932572ce7e85aca259640` |
 | `HumanGate` (example integration) | `0xa3e021de49cec8819ea1bd37a8b5a9df005b776c` |
 | `RelayReward` (relayer vault, shared) | `0x9766480a872ad7df2a5cf86f9e307804a3f7afe0` |
 | `HumanPoll` (one person, one vote, on `HumanGated`) | `0xd7854346fea444f6ac966d2ce764a4f029e013bc` |
+| `HumanLinks` | `0xbbf6f64c3aff6715c42711329e3292b3c967781c` |
+| `CreditHistory` | `0xa4833b1b667a729e80248004ac91cfa3a2ff3404` |
+| `EthRepay` | `0x231ce1ceb88edefad482fc6dfd49a8454cd1fc48` |
 
 The Orb-tree deployment — the same contracts verifying against World's Ethereum mainnet identity
 tree, 30-day terms, for people who actually hold an Orb-verified World ID. It shares the hUSD and
@@ -145,13 +148,16 @@ both `AttestedWorldID` instances above:
 | Contract | Address (CC3 testnet, chainId 102031) |
 |---|---|
 | `HumanRegistry` (Orb tree) | `0x53fcba2cd9296b22635c67d5e73777b4e5db96af` |
-| `CreditLine` v2 (30-day term, 7-day grace) | `0x8063982df3250c2f21f2f18f1cf340ec75c1c1cb` |
+| `CreditLine` v3 (30-day term, 7-day grace) | `0x30ca59acbf161284ed51f0412a42ecf3c9e577d7` |
 | `HumanGate` (Orb tree) | `0x544264e52a12fffa5c8640eb5a91b7f4628d5b93` |
 | `HumanPoll` (Orb tree) | `0x99d76bbee73f56b03ad32b8ffb304961c1b0e87d` |
+| `HumanLinks` (Orb tree) | `0x78ac98d48042091c9d58ff21d29e1351cce5b327` |
+| `CreditHistory` (Orb tree) | `0x803e9fdcefb1d94331da6423b8fb2458305e3c8a` |
+| `EthRepay` (Orb tree) | `0x71c5839704528e20cb13b9fd08d5f23d6ac3f60a` |
 
 Open it at `https://humanline.credit/app?profile=production`; the switch is on the page.
 
-Explorer: `https://creditcoin-testnet.blockscout.com`. All twelve contracts are verified on Blockscout,
+Explorer: `https://creditcoin-testnet.blockscout.com`. All eighteen contracts are verified on Blockscout,
 which `scripts/submission-check.ts` re-checks daily in CI along with every transaction and page this
 document cites.
 

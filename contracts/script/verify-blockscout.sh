@@ -16,6 +16,8 @@ FORGE="${FORGE:-$ROOT_DIR/.tools/forge}"
 CAST="${CAST:-$ROOT_DIR/.tools/cast}"
 VERIFIER_URL="${VERIFIER_URL:-https://creditcoin-testnet.blockscout.com/api}"
 DEPLOYMENT="${DEPLOYMENT:-$ROOT_DIR/deployments/cc3-testnet.json}"
+# Absolute, because `field` is also called after `cd "$CONTRACTS_DIR"` below.
+[[ "$DEPLOYMENT" = /* ]] || DEPLOYMENT="$PWD/$DEPLOYMENT"
 ONLY="${ONLY:-AttestedWorldIDMainnet AttestedWorldIDSepolia HUSD HumanRegistry CreditLine HumanGate HumanPoll RelayReward HumanLinks CreditHistory EthRepay}"
 
 MAINNET_CHAIN_KEY=3

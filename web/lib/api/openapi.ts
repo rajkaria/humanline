@@ -148,7 +148,7 @@ export const OPENAPI = {
                     inDefault: false,
                     decimals: 6,
                   },
-                  creditLine: "0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9",
+                  creditLine: "0xbb97982f1138f36bfa3ba4706dad5134a10556d9",
                 },
               },
             },
@@ -206,7 +206,7 @@ export const OPENAPI = {
                 example: {
                   version: "1.0.0",
                   profile: "staging",
-                  creditLine: "0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9",
+                  creditLine: "0xbb97982f1138f36bfa3ba4706dad5134a10556d9",
                   decimals: 6,
                   fromBlock: 5477098,
                   toBlock: 5479709,

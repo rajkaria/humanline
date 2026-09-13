@@ -104,7 +104,7 @@ The forgery that breaks every other credit passport costs nothing. Forging a Hum
 
 ## What we built
 
-Twelve verified contracts across two live deployments, a relay worker, a web app with nine pages and fourteen API routes, an npm package, a public API, and a second consumer app, all running unattended on Creditcoin CC3 testnet.
+Eighteen verified contracts across two live deployments, a relay worker, a web app with nine pages and fourteen API routes, an npm package, a public API, and a second consumer app, all running unattended on Creditcoin CC3 testnet.
 
 ```
 ETHEREUM MAINNET (chainKey 3)             CREDITCOIN CC3 TESTNET (chainId 102031)
@@ -134,7 +134,7 @@ ETHEREUM SEPOLIA (chainKey 1)             │  · finality (0xFD3) + quorum (0xF
 |---|---|---|---|
 | **`AttestedWorldID`** ×2 | World's own `WorldIDBridge` and `SemaphoreVerifier`, vendored unmodified, with the trusted state bridge replaced by Attestcoin proofs. One instance mirrors Ethereum mainnet's Orb tree, one mirrors Sepolia's staging tree. Exposes the same `IWorldID.verifyProof` every World ID integration already uses. | `contracts/src/AttestedWorldID.sol` | 61 roots relayed and counting, each with an Attestcoin proof in the receipt. [Live feed](https://humanline.credit/relay). |
 | **`HumanRegistry`** ×2 | Verifies a Semaphore Groth16 proof natively on Creditcoin against an Attestcoin-delivered root and binds the nullifier to a wallet. The signal is the caller, so a proof cannot be lifted from the mempool. | `contracts/src/HumanRegistry.sol` | Real World ID proofs verified on CC3, [`evidence/e2e-worldid-staging.md`](evidence/e2e-worldid-staging.md). |
-| **`CreditLine`** v2 ×2, v3 | One revolving line per nullifier from an open lender pool. 25 hUSD to start, ×1.25 per on-time term, halved when late, capped at 2,000. Total outstanding principal capped by the attestors' bonded stake from `0x0FD4`, read on every draw. v3 adds a limit boost from proven Aave history and `repayFor` for Ethereum-side repayments. | `contracts/src/CreditLine.sol` | Full borrow → repay → limit-growth loop on chain, [`evidence/e2e-credit-loop-v2.log`](evidence/e2e-credit-loop-v2.log). |
+| **`CreditLine`** v3 ×2 | One revolving line per nullifier from an open lender pool. 25 hUSD to start, ×1.25 per on-time term, halved when late, capped at 2,000. Total outstanding principal capped by the attestors' bonded stake from `0x0FD4`, read on every draw. v3 adds a limit boost from proven Aave history and `repayFor` for Ethereum-side repayments. | `contracts/src/CreditLine.sol` | Full borrow → repay → limit-growth loop on chain, [`evidence/e2e-credit-loop-v2.log`](evidence/e2e-credit-loop-v2.log). |
 | **`RelayReward`** | A permissionless vault that forwards to `executeBatch` and pays 0.002 tCTC per fresh root the call recorded. No owner, no withdrawal. | `contracts/src/RelayReward.sol` | A wallet created seconds earlier relayed a root through it and was paid, [`evidence/self-relay.jsonl`](evidence/self-relay.jsonl). |
 | **`HumanLinks`** | Binds a human's Ethereum wallets to their Creditcoin identity, by an Attestcoin-proven self-send on Ethereum or an EIP-712 signature. A wallet belongs to one human forever; a human holds at most 8. | `contracts/src/HumanLinks.sol` | Tested against real Sepolia proofs the live `0x0FD2` accepts. |
 | **`CreditHistory`** | Imports Aave V3 `Borrow` and `Repay` events from linked wallets, with anti-wash rules, and turns verified repaid dollars into a limit boost. The official Attestcoin Loan Flow pattern pointed at the largest real lending protocol. | `contracts/src/CreditHistory.sol` | A real 120 USDC Aave borrow and its 85.23 USDC repayment, proven. |
@@ -509,20 +509,26 @@ Creditcoin CC3 testnet, chainId 102031, RPC `https://rpc.cc3-testnet.creditcoin.
 | Contract | Address |
 |---|---|
 | `HumanRegistry` | [`0x62c2fd99ea587e4b466175ad248468782bd5298d`](https://creditcoin-testnet.blockscout.com/address/0x62c2fd99ea587e4b466175ad248468782bd5298d) |
-| `CreditLine` v2 (10-minute terms, attestor-bond exposure cap) | [`0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9`](https://creditcoin-testnet.blockscout.com/address/0x49d5f2ea387a4ee16eef3cf390fccfa689dda2b9) |
+| `CreditLine` v3 (10-minute terms, attestor-bond exposure cap, history boost) | [`0xbb97982f1138f36bfa3ba4706dad5134a10556d9`](https://creditcoin-testnet.blockscout.com/address/0xbb97982f1138f36bfa3ba4706dad5134a10556d9) |
 | `HumanGate` (example integration) | [`0xa3e021de49cec8819ea1bd37a8b5a9df005b776c`](https://creditcoin-testnet.blockscout.com/address/0xa3e021de49cec8819ea1bd37a8b5a9df005b776c) |
 | `HumanPoll` (one person, one vote) | [`0xd7854346fea444f6ac966d2ce764a4f029e013bc`](https://creditcoin-testnet.blockscout.com/address/0xd7854346fea444f6ac966d2ce764a4f029e013bc) |
+| `HumanLinks` | [`0xbbf6f64c3aff6715c42711329e3292b3c967781c`](https://creditcoin-testnet.blockscout.com/address/0xbbf6f64c3aff6715c42711329e3292b3c967781c) |
+| `CreditHistory` | [`0xa4833b1b667a729e80248004ac91cfa3a2ff3404`](https://creditcoin-testnet.blockscout.com/address/0xa4833b1b667a729e80248004ac91cfa3a2ff3404) |
+| `EthRepay` | [`0x231ce1ceb88edefad482fc6dfd49a8454cd1fc48`](https://creditcoin-testnet.blockscout.com/address/0x231ce1ceb88edefad482fc6dfd49a8454cd1fc48) |
 
 **Real deployment, Ethereum mainnet Orb tree** ([humanline.credit/app?profile=production](https://humanline.credit/app?profile=production))
 
 | Contract | Address |
 |---|---|
 | `HumanRegistry` | [`0x53fcba2cd9296b22635c67d5e73777b4e5db96af`](https://creditcoin-testnet.blockscout.com/address/0x53fcba2cd9296b22635c67d5e73777b4e5db96af) |
-| `CreditLine` v2 (30-day term, 7-day grace, exposure cap) | [`0x8063982df3250c2f21f2f18f1cf340ec75c1c1cb`](https://creditcoin-testnet.blockscout.com/address/0x8063982df3250c2f21f2f18f1cf340ec75c1c1cb) |
+| `CreditLine` v3 (30-day term, 7-day grace, exposure cap, history boost) | [`0x30ca59acbf161284ed51f0412a42ecf3c9e577d7`](https://creditcoin-testnet.blockscout.com/address/0x30ca59acbf161284ed51f0412a42ecf3c9e577d7) |
 | `HumanGate` | [`0x544264e52a12fffa5c8640eb5a91b7f4628d5b93`](https://creditcoin-testnet.blockscout.com/address/0x544264e52a12fffa5c8640eb5a91b7f4628d5b93) |
 | `HumanPoll` | [`0x99d76bbee73f56b03ad32b8ffb304961c1b0e87d`](https://creditcoin-testnet.blockscout.com/address/0x99d76bbee73f56b03ad32b8ffb304961c1b0e87d) |
+| `HumanLinks` | [`0x78ac98d48042091c9d58ff21d29e1351cce5b327`](https://creditcoin-testnet.blockscout.com/address/0x78ac98d48042091c9d58ff21d29e1351cce5b327) |
+| `CreditHistory` | [`0x803e9fdcefb1d94331da6423b8fb2458305e3c8a`](https://creditcoin-testnet.blockscout.com/address/0x803e9fdcefb1d94331da6423b8fb2458305e3c8a) |
+| `EthRepay` | [`0x71c5839704528e20cb13b9fd08d5f23d6ac3f60a`](https://creditcoin-testnet.blockscout.com/address/0x71c5839704528e20cb13b9fd08d5f23d6ac3f60a) |
 
-Deployed parameters: initial limit 25 hUSD, maximum 2,000 hUSD, fee 100 bps per term, limit ×1.25 on an on-time full repayment, halved when late, frozen after due date plus grace. `deployments/cc3-testnet.v1.json` records an earlier deployment of the same contracts, replaced after a review round, kept so the first rows of the relay evidence log stay attributable.
+Deployed parameters: initial limit 25 hUSD, maximum 2,000 hUSD, fee 100 bps per term, limit ×1.25 on an on-time full repayment, halved when late, frozen after due date plus grace. `deployments/cc3-testnet.v1.json` records an earlier deployment of the same contracts, replaced after a review round, kept so the first rows of the relay evidence log stay attributable. Each deployment file also keeps the superseded CreditLine v2 under `previous`; its borrow-and-repay history stays on chain.
 
 ---
 
