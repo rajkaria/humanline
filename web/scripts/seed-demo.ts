@@ -297,6 +297,93 @@ if (command === "human" && arg) {
     EVIDENCE,
     JSON.stringify({ kind: "seed-demo-link", at: new Date().toISOString(), profile: dep.profile, human: `0x${human.toString(16).padStart(64, "0")}`, creditcoinWallet: account.address, linkedWallet: ethereum.address, method: "signature", tx, linkCount: Number(count) }) + "\n",
   );
+} else if (command === "aave-repay") {
+  // Repay the linked wallet's Aave V3 Sepolia USDC debt in full, once CreditHistory's minimum gap
+  // (MIN_GAP_BLOCKS source blocks after the proven borrow) has passed. Then run `prove repay`.
+  const [, borrowBlockRaw] = process.argv.slice(2);
+  const { createPublicClient: pub, createWalletClient: wal, http: h, maxUint256 } = await import("viem");
+  const { sepolia } = await import("viem/chains");
+  const eth = walletFor("eth-2");
+  const sep = pub({ chain: sepolia, transport: h("https://ethereum-sepolia-rpc.publicnode.com") });
+  const sepWallet = wal({ account: eth, chain: sepolia, transport: h("https://ethereum-sepolia-rpc.publicnode.com") });
+  const POOL = "0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951" as const;
+  const AAVE_USDC = "0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8" as const;
+  const FAUCET = "0xC959483DBa39aa9E78757139af0e9a2EDEb3f42D" as const;
+  const minGap = BigInt(dep.config.crossChain.minGapBlocks);
+  const earliest = BigInt(borrowBlockRaw ?? "0") + minGap;
+  const head = await sep.getBlockNumber();
+  if (head < earliest) throw new Error(`too soon: Sepolia head ${head}, the repay must land at or after block ${earliest} (${Number(earliest - head) * 12}s)`);
+  const sendSep = async (label: string, request: Record<string, unknown>) => {
+    const hash = await sepWallet.writeContract({ account: eth, chain: sepolia, ...request } as never);
+    const receipt = await sep.waitForTransactionReceipt({ hash });
+    console.log(`  ${label}: ${hash} ${receipt.status} block ${receipt.blockNumber}`);
+    if (receipt.status !== "success") throw new Error(`${label} reverted`);
+    return hash;
+  };
+  const erc = parseAbi(["function approve(address,uint256) returns (bool)", "function balanceOf(address) view returns (uint256)"]);
+  // One extra USDC from Aave's public testnet faucet covers the interest accrued since the borrow.
+  await sendSep("Aave faucet: 1 USDC for interest", { address: FAUCET, abi: parseAbi(["function mint(address token, address to, uint256 amount) returns (uint256)"]), functionName: "mint", args: [AAVE_USDC, eth.address, 1_000_000n] });
+  await sendSep("approve the Aave pool", { address: AAVE_USDC, abi: erc, functionName: "approve", args: [POOL, maxUint256] });
+  const repayTx = await sendSep("Aave repay (full variable debt)", {
+    address: POOL,
+    abi: parseAbi(["function repay(address asset, uint256 amount, uint256 interestRateMode, address onBehalfOf) returns (uint256)"]),
+    functionName: "repay",
+    args: [AAVE_USDC, maxUint256, 2n, eth.address],
+  });
+  console.log(`next: bun run scripts/seed-demo.ts prove repay ${repayTx} <borrowId from the seed-demo-borrow row>`);
+} else if (command === "prove" && arg) {
+  // Cross-chain, live: an Attestcoin proof of a Sepolia transaction the linked wallet sent, verified
+  // by the Creditcoin contract that consumes it. `arg` is ethrepay | borrow | repay; then the tx hash
+  // (and the borrowId for repay). Waits until the transaction is attested and past finality.
+  const [, , txHash, borrowId] = process.argv.slice(2) as [string, string, Hex, Hex | undefined];
+  const account = walletFor("2");
+  const { PROOF_BUILDER_URL } = await import("@/lib/chains");
+  const { sourceProofFromJson, findLogIndex, TRANSFER_TOPIC, BORROW_TOPIC, REPAY_TOPIC } = await import("@/lib/crosschain/core");
+  const { ethRepayAbi, creditHistoryAbi } = await import("@/lib/abi");
+  const topic = arg === "ethrepay" ? TRANSFER_TOPIC : arg === "borrow" ? BORROW_TOPIC : REPAY_TOPIC;
+  const target =
+    arg === "ethrepay"
+      ? { address: C.EthRepay, abi: ethRepayAbi, functionName: "creditRepayment" }
+      : { address: C.CreditHistory, abi: creditHistoryAbi, functionName: arg === "borrow" ? "proveBorrow" : "proveRepay" };
+
+  for (let attempt = 0; ; attempt++) {
+    const response = await fetch(`${PROOF_BUILDER_URL}/api/v1/proof-by-tx/1/${txHash}`, { signal: AbortSignal.timeout(30_000) }).catch(() => null);
+    if (response?.ok) {
+      const proof = sourceProofFromJson(await response.json(), txHash);
+      const logIndex = findLogIndex(proof.encodedTransaction, (log) => log.topics[0]?.toLowerCase() === topic.toLowerCase());
+      if (logIndex < 0) throw new Error(`no ${arg} log in ${txHash}`);
+      const args = arg === "repay" ? [proof, BigInt(logIndex), borrowId!] : [proof, BigInt(logIndex)];
+      try {
+        await client.simulateContract({ account, ...target, args } as never);
+        const tx = await send(account, `${target.functionName} (Attestcoin proof of Sepolia ${txHash.slice(0, 10)}…, log ${logIndex})`, { ...target, args });
+        const receipt = await client.getTransactionReceipt({ hash: tx });
+        appendFileSync(
+          EVIDENCE,
+          JSON.stringify({
+            kind: `seed-demo-${arg}`,
+            at: new Date().toISOString(),
+            profile: dep.profile,
+            human: `0x${(await client.readContract({ address: C.HumanRegistry, abi: registryAbi, functionName: "humanOf", args: [account.address] })).toString(16).padStart(64, "0")}`,
+            sepoliaTx: txHash,
+            sourceBlock: Number(proof.blockHeight),
+            logIndex,
+            creditcoinTx: tx,
+            gasUsed: Number(receipt.gasUsed),
+            events: receipt.logs.filter((l) => l.address.toLowerCase() === target.address.toLowerCase()).map((l) => ({ topic0: l.topics[0], data: l.data, topics: l.topics.slice(1) })),
+          }) + "\n",
+        );
+        break;
+      } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const reason = (error as any)?.cause?.data?.errorName ?? (error instanceof Error ? error.message.split("\n")[0] : String(error));
+        if (attempt % 3 === 0) console.log(`  not yet: ${reason}`);
+        if (!/NotFinal|attest|Continuity|checkpoint/i.test(String(reason)) && attempt > 30) throw error;
+      }
+    } else if (attempt % 3 === 0) {
+      console.log(`  proof builder has no proof yet (HTTP ${response?.status ?? "timeout"})`);
+    }
+    await Bun.sleep(60_000);
+  }
 } else if (command === "poll") {
   const humans = Object.keys(wallets).sort();
   if (humans.length === 0) throw new Error("seed humans first");

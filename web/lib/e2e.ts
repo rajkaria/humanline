@@ -251,6 +251,31 @@ function parseDefault(): DefaultEvidence | null {
 
 export const DEFAULT_EVIDENCE = parseDefault();
 
+export type CrossChainProofEvidence = {
+  kind: "ethrepay" | "borrow" | "repay";
+  sepoliaTx: `0x${string}`;
+  sourceBlock: number;
+  logIndex: number;
+  creditcoinTx: `0x${string}`;
+  gasUsed: number;
+};
+
+/** Sepolia transactions from a linked wallet, proven through Attestcoin and consumed on Creditcoin. */
+export const CROSS_CHAIN_PROOFS: CrossChainProofEvidence[] = SEED.flatMap((r) => {
+  const kind = r.kind?.replace("seed-demo-", "");
+  if ((kind !== "ethrepay" && kind !== "borrow" && kind !== "repay") || typeof r.creditcoinTx !== "string") return [];
+  return [
+    {
+      kind,
+      sepoliaTx: r.sepoliaTx as `0x${string}`,
+      sourceBlock: Number(r.sourceBlock),
+      logIndex: Number(r.logIndex),
+      creditcoinTx: r.creditcoinTx as `0x${string}`,
+      gasUsed: Number(r.gasUsed),
+    },
+  ];
+});
+
 export type LinkEvidence = { human: string; creditcoinWallet: string; linkedWallet: string; tx: `0x${string}`; linkCount: number };
 
 export const LINK_EVIDENCE: LinkEvidence | null = (() => {

@@ -60,7 +60,7 @@ it on time.
 
 | Field | Meaning |
 |---|---|
-| `kind` | `seed-demo-human` (one human's register-and-borrow cycle), `seed-demo-poll` (the first `HumanPoll` poll and a vote from each seeded human), `seed-demo-default` (a human borrows, never repays, is marked in default by a stranger, then registers from a new wallet and finds the line frozen, with `borrowFromNewWallet` the decoded revert), or `seed-demo-link` (a fresh Ethereum key linked to a human through `HumanLinks.linkBySignature`) |
+| `kind` | `seed-demo-human` (one human's register-and-borrow cycle), `seed-demo-poll` (the first `HumanPoll` poll and a vote from each seeded human), `seed-demo-default` (a human borrows, never repays, is marked in default by a stranger, then registers from a new wallet and finds the line frozen, with `borrowFromNewWallet` the decoded revert), `seed-demo-link` (a fresh Ethereum key linked to a human through `HumanLinks.linkBySignature`), or `seed-demo-ethrepay` / `seed-demo-borrow` / `seed-demo-repay` (a Sepolia transaction from that linked wallet, a USDC payment to the repayment address or an Aave V3 borrow or repay, proven through Attestcoin and consumed by `EthRepay.creditRepayment` or `CreditHistory.proveBorrow` / `proveRepay`; `sepoliaTx`, `sourceBlock`, `logIndex`, `creditcoinTx`, `gasUsed` and the emitted events) |
 | `wallet`, `human` | the fresh wallet, and the nullifier bound to it |
 | `simulatorIdentity` | which World ID Simulator identity produced the proof |
 | `txs` | gas funding from the deployer, `register`, `openLine`, `borrow`, the hUSD faucet claim for the 1% fee, `approve`, `repay` |

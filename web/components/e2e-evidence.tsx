@@ -15,6 +15,7 @@ import {
 import { formatUsd, truncateUint256 } from "@/lib/format";
 import {
   CREDIT_LOOP_EVIDENCE,
+  CROSS_CHAIN_PROOFS,
   DEFAULT_EVIDENCE,
   LINK_EVIDENCE,
   WORLD_ID_EVIDENCE,
@@ -105,13 +106,38 @@ function LinkCard() {
           here, that wallet&apos;s Aave history and USDC repayments can count for this person.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col gap-3">
         <dl className="flex flex-col divide-y divide-foreground/10 text-xs">
           <StatRow label="Human (nullifier)" mono={false} value={<HashLink value={e.human as `0x${string}`} />} />
           <StatRow label="Creditcoin wallet" mono={false} value={<HashLink value={e.creditcoinWallet as `0x${string}`} scope="creditcoin" kind="address" />} />
           <StatRow label="Linked Ethereum wallet" mono={false} value={<HashLink value={e.linkedWallet as `0x${string}`} />} />
           <StatRow label="linkBySignature on Creditcoin" mono={false} value={<HashLink value={e.tx} scope="creditcoin" kind="tx" />} />
         </dl>
+        {CROSS_CHAIN_PROOFS.length > 0 ? (
+          <div className="flex flex-col gap-1">
+            <p className="text-xs text-muted-foreground">
+              Then a linked wallet acted on Sepolia, and Creditcoin consumed an Attestcoin proof of it:
+            </p>
+            <ol className="flex flex-col divide-y divide-foreground/10">
+              {CROSS_CHAIN_PROOFS.map((p) => (
+                <li key={p.creditcoinTx} className="flex flex-col gap-1 py-1.5 text-xs">
+                  <span className="font-medium">
+                    {p.kind === "ethrepay"
+                      ? "USDC sent on Sepolia, credited to the Creditcoin line (EthRepay)"
+                      : p.kind === "borrow"
+                        ? "Aave V3 borrow on Sepolia, proven into CreditHistory"
+                        : "Aave V3 repay on Sepolia, proven into CreditHistory"}
+                  </span>
+                  <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
+                    <span className="inline-flex items-center gap-1">Sepolia <HashLink value={p.sepoliaTx} scope="sepolia" kind="tx" copy={false} /></span>
+                    <span className="inline-flex items-center gap-1">Creditcoin <HashLink value={p.creditcoinTx} scope="creditcoin" kind="tx" copy={false} /></span>
+                    <span>{p.gasUsed.toLocaleString("en-US")} gas</span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );
