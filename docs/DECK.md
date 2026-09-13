@@ -37,7 +37,7 @@ visual: Two-panel map. Left panel: Ethereum, with the World ID tree and the Orb 
 
 ## 3. The 30-passport trap
 
-- This hackathon has 87 submissions. About 30 are credit passports built on the same pattern: read loan repayments on Sepolia, mint a score.
+- When we surveyed the gallery on 2026-09-12 it held 87 submissions. About 30 were credit passports built on the same pattern: read loan repayments on Sepolia, mint a score.
 - Ten are AI guardrails. Nine are escrow-on-proof. Zero touch identity. Zero use zero-knowledge proofs. Zero do proof of personhood.
 - The entire field scores an address, and an address is free.
 - Every one of those passports can be forged by generating a new wallet. Not hacked. Generated.
@@ -66,7 +66,7 @@ visual: A single nullifier hash in monospace at the center. Three wallet address
 
 visual: Left-to-right flow in five boxes. Ethereum mainnet (World ID manager) into Worker (Attestcoin proof) into AttestedWorldID on Creditcoin (0x0FD2 / 0x0FD3 / 0x0FD4 badges) into HumanRegistry (ZK badge, bn128) into CreditLine (limit meter). A dotted line drops from the user's phone into HumanRegistry labeled "Semaphore proof".
 
-## 6. Attestcoin depth: ten surfaces, all load-bearing
+## 6. Attestcoin depth: every surface load-bearing
 
 | Surface | Where it runs | Why it is load-bearing |
 |---|---|---|
@@ -77,13 +77,15 @@ visual: Left-to-right flow in five boxes. Ethereum mainnet (World ID manager) in
 | Emitter and status binding | `to == manager`, `log.address_ == manager`, `status == 1` | Rejects look-alike events and reverted transactions |
 | `calculateTxIndex` | `queryId` and `sourceTxIndex` | Replay key and ordering evidence |
 | ChainInfo (`0x0FD3`) | Finality depth guard | A root is accepted only 32 blocks behind the attested tip |
-| AttestorStash (`0x0FD4`) | Quorum floor | Refuses roots attested by a thin set |
+| AttestorStash (`0x0FD4`) | Quorum floor and credit ceiling | Refuses roots attested by a thin set; caps total credit at the attestors' bonded stake, read on every draw |
 | Two source chains | mainnet `chainKey 3`, Sepolia `chainKey 1` | Production and judge-reproducible paths |
 | Zero-knowledge on top | Semaphore over an Attestcoin-anchored root | Without Attestcoin the verifier has no trusted root |
+| Local proofs, browser verification | usc-sdk `RawProofBuilder`; Merkle path and continuity fold matched to ChainInfo | No dependence on one prover; nothing unverified is ever signed |
 
 - Remove Attestcoin and Humanline has no roots, no humans and no credit. There is no degraded mode.
+- Measured, not asserted: 93.6% line coverage, 12 invariants, a scripted mutation score, and twelve attacks refused by name against the deployed contracts (`docs/MEASUREMENTS.md`).
 
-visual: The ten rows as a vertical stack of chips on the left, each drawing a line into a single block on the right labeled "AttestedWorldID". Below the block, three dependent boxes: roots, humans, credit, each grayed out with the caption "without Attestcoin".
+visual: The rows as a vertical stack of chips on the left, each drawing a line into a single block on the right labeled "AttestedWorldID". Below the block, three dependent boxes: roots, humans, credit, each grayed out with the caption "without Attestcoin".
 
 ## 7. What is real
 
@@ -102,7 +104,8 @@ visual: Two columns, green and amber. Green column lists the four real items wit
 - `/app`: connect a Creditcoin wallet, verify with the World simulator, watch the registration confirm in one block. The wallet becomes a human.
 - Credit: open a line at 25 hUSD, borrow 20, repay, watch the limit grow to 31.25. Every action links to the explorer.
 - Re-bind: a second wallet, the same simulated identity. The line and the history follow the person. A second line is refused with `LineExists`.
-- `/judge`: run the negative-path suite live. Every attack is rejected by name.
+- `/judge`, no wallet: twelve attacks fired at the deployed contracts as the page loads, each refused by name (`ThinQuorum(7, 1000)`, `WrongSourceChain(1, 3)`, `BatchTooLarge(11)` …).
+- `/vote`: `HumanPoll`, one person one vote, built only on the SDK's `HumanGated`. A second wallet does not buy a second ballot.
 - Close on the counter: N real World ID roots relayed, M humans in the registry, zero trusted parties.
 
 visual: Six screenshot placeholders in a two-by-three grid, each captioned with the step above and the on-chain artifact it produces. Bottom-right tile is the live counter block from the landing page.
@@ -114,6 +117,7 @@ visual: Six screenshot placeholders in a two-by-three grid, each captioned with 
 - A decoy `TreeChanged` emitted by an unrelated contract is skipped, not fatal. Two genuine ones in the same transaction revert as ambiguous.
 - Out-of-order roots revert. Replayed queries revert. Proofs bound to a different wallet revert, because the signal is the caller.
 - A frozen human stays frozen across a re-bind. That test exists and it is the one that matters.
+- The same attacks run against the live deployment, not just mocks, and the answers are recorded: 12 of 12 refused.
 - No admin keys. Every constant is an immutable. Anyone can relay, and the contracts do not care who does.
 
 visual: A layered shield diagram. Inner core labeled "Attestcoin: inclusion + continuity". A ring around it split into ten labeled segments, one per check. Around the outside, four attack arrows (forged root, decoy log, replay, sybil wallet) bouncing off specific segments with the error name printed on each arrow.
@@ -131,8 +135,9 @@ visual: A limit-growth staircase chart, 25 to 31.25 to 39.06 to 48.83 to 61.04 t
 
 ## 11. Roadmap, and Periscope
 
-- Month 1: `AttestedWorldID` and `HumanRegistry` on Creditcoin mainnet, published as a public read interface. First Creditcoin lender using `isHuman` as a sybil check through Credal. Two independent relay operators.
-- Month 3: lines funded by PenguinSwap LPs. Repay-from-Ethereum, a USDC transfer proven through Attestcoin and credited on Creditcoin. BSC as a source chain when `chainKey 8` ships.
+- Built already: a public read API and loan-lifecycle feed, `@humanline/sdk` with `HumanGated.sol`, a relayer reward vault, and the cross-chain contracts (Ethereum wallet links, Aave repayment history, repay-from-Ethereum) tested against real Sepolia proofs.
+- Month 1: `AttestedWorldID` and `HumanRegistry` on Creditcoin mainnet. The cross-chain contracts deployed. First Creditcoin lender using `isHuman` as a sybil check through Credal.
+- Month 3: lines funded by PenguinSwap LPs. BSC as a source chain when `chainKey 8` ships.
 - Month 6: supervised pilot in Kenya and Argentina with a lending partner, and a published cohort loss curve for personhood-gated credit. Nobody has one.
 - **Periscope**: World ID 4.0 verification lives on World Chain, an OP-Stack rollup whose output roots are posted to Ethereum. Attestcoin already attests Ethereum. Prove the posting and you have proven the rollup.
 - Periscope is not a Humanline feature. It gives Attestcoin reach into every OP-Stack rollup through a chain it already covers. Humanline is just the first application that needs it.

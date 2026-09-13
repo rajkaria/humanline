@@ -134,7 +134,7 @@ function chip(s, x, y, w, h, label, col){
 /* ---------------- 3. The 30-passport trap ---------------- */
 {
   const s = newSlide(3, "87 submissions, read on 2026-09-12. Thirty are the same credit passport. None touch identity.");
-  title(s, "The 30-passport trap", "87 submissions in this hackathon. About 30 build the same thing.");
+  title(s, "The 30-passport trap", "87 submissions when we surveyed on 2026-09-12. About 30 built the same thing.");
   bullets(s, [
     "Read loan repayments on Sepolia, mint a score, call it a credit passport.",
     "Ten more are AI guardrails. Nine are escrow on proof.",
@@ -231,8 +231,8 @@ function chip(s, x, y, w, h, label, col){
 
 /* ---------------- 6. Attestcoin depth ---------------- */
 {
-  const s = newSlide(6, "This is the scoring criterion. Ten surfaces, and every one is load-bearing.");
-  title(s, "Attestcoin depth: ten surfaces, all load-bearing");
+  const s = newSlide(6, "This is the scoring criterion. Every surface is load-bearing, and the guards are exercised against the live deployment.");
+  title(s, "Attestcoin depth: every surface load-bearing");
   const hdr = (t)=>({text:t, options:{bold:true, color:AMBER, fontSize:10.5, fill:{color:CARD2}}});
   const rows = [
     [hdr("Surface"), hdr("Where it runs"), hdr("Why it is load-bearing")],
@@ -243,13 +243,14 @@ function chip(s, x, y, w, h, label, col){
     ["Emitter and status binding", "to, log.address_, status", "Rejects look-alike events and reverted txs"],
     ["calculateTxIndex", "queryId, sourceTxIndex", "Replay key and ordering evidence"],
     ["ChainInfo (0x0FD3)", "Finality depth guard", "Accepted only 32 blocks behind the attested tip"],
-    ["AttestorStash (0x0FD4)", "Quorum floor", "Refuses roots attested by a thin set"],
+    ["AttestorStash (0x0FD4)", "Quorum floor, credit ceiling", "Thin attestor sets refused; credit capped at bonded stake"],
     ["Two source chains", "chainKey 3 and chainKey 1", "Production and judge-reproducible paths"],
     ["Zero-knowledge on top", "Semaphore over a relayed root", "Without Attestcoin the verifier has no root"],
+    ["Local proofs, browser checks", "RawProofBuilder; fold vs ChainInfo", "No single prover; nothing unverified is signed"],
   ];
   s.addTable(rows, {
-    x:MX, y:1.6, w:W-2*MX, colW:[3.1, 3.3, 5.71], border:{type:"solid", color:STROKE, pt:0.5},
-    fontFace:B, fontSize:10.2, color:MUTED, fill:{color:CARD}, rowH:0.385, valign:"middle",
+    x:MX, y:1.55, w:W-2*MX, colW:[3.1, 3.3, 5.71], border:{type:"solid", color:STROKE, pt:0.5},
+    fontFace:B, fontSize:10, color:MUTED, fill:{color:CARD}, rowH:0.36, valign:"middle",
     margin:0.06,
   });
   s.addText("Remove Attestcoin and Humanline has no roots, so no humans, so no credit. There is no degraded mode.",
@@ -295,7 +296,7 @@ function chip(s, x, y, w, h, label, col){
     ["/app", "Connect a Creditcoin wallet, verify with the World simulator, watch registration confirm in one block. The wallet becomes a human.", "1:05"],
     ["Credit", "Open a line at 25 hUSD, borrow 20, repay, limit grows to 31.25. Every action links to Blockscout.", "1:45"],
     ["Re-bind", "A second wallet, the same identity. The line and history follow the person. A second line is refused with LineExists.", "2:25"],
-    ["/judge", "Run the negative-path suite live. Every attack rejected by a named error.", "2:40"],
+    ["/judge", "No wallet: twelve attacks fired at the deployed contracts as the page loads, each refused by name.", "2:40"],
     ["Counter", "N real roots relayed from Ethereum mainnet, M humans in the registry, zero trusted parties.", "2:52"],
   ];
   const cw=4.0, ch=2.05, gx=MX, gy=1.85, gapx=0.28, gapy=0.28;
@@ -403,8 +404,8 @@ function chip(s, x, y, w, h, label, col){
   const s = newSlide(11, "Periscope is the part that is bigger than us. Lead with the roadmap, land on Periscope.");
   title(s, "Roadmap, and Periscope", "Every step adds Attestcoin volume instead of replacing it.");
   const ms = [
-    ["Month 1", "AttestedWorldID and HumanRegistry on Creditcoin mainnet, published as a public read interface. First lender using isHuman as a sybil check through Credal. Two independent relayers.", CYAN],
-    ["Month 3", "Lines funded by PenguinSwap LPs. Repay-from-Ethereum: a USDC transfer proven through Attestcoin and credited on Creditcoin. BSC as a source chain when chainKey 8 ships.", CYAN],
+    ["Month 1", "AttestedWorldID and HumanRegistry on Creditcoin mainnet. Deploy the already-tested cross-chain contracts: Ethereum wallet links, Aave history, repay-from-Ethereum. First lender using isHuman through Credal.", CYAN],
+    ["Month 3", "Lines funded by PenguinSwap LPs. More apps on HumanGated and the public API. BSC as a source chain when chainKey 8 ships.", CYAN],
     ["Month 6", "Supervised pilot in Kenya and Argentina with a lending partner, and a published cohort loss curve for personhood-gated credit. Nobody has one.", AMBER],
   ];
   ms.forEach(([t,d,col],i)=>{

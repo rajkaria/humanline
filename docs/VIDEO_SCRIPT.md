@@ -78,9 +78,9 @@ Final URL: {{VIDEO_URL}} · Live app: https://humanline.credit · Repo: https://
 
 ### 2:40 to 2:52 · Every attack, by name
 
-**On screen.** Navigate to `/judge`. Paste the negative-path command in the terminal and run it. Test names scroll past in green: forged root, decoy `TreeChanged`, replayed query, out of order root, wrong source chain, reverted transaction, proof bound to another wallet, double registration, borrow over limit, frozen after re-bind.
+**On screen.** Navigate to `/judge` with no wallet connected and scroll to "Live refusals": twelve rows, each an attack just fired at the deployed contracts, each with its named error. Hold on `ThinQuorum(7, 1000)` and `WrongSourceChain(1, 3)`. Cut to the terminal running `bun run worker/src/cli.ts attack` ending on "12/12 refused".
 
-**Voiceover.** "Attestcoin proves inclusion and continuity. Everything else is our job. Forged roots, decoy events, replays, out of order roots, proofs bound to another wallet. Every one is rejected by a named error, and every one has a test."
+**Voiceover.** "Attestcoin proves inclusion and continuity. Everything else is our job. This page just fired twelve attacks at the live contracts: a forged proof, a decoy event, a replay, the wrong source chain, an oversize batch. Every one is refused by name, and anyone can run them."
 
 ### 2:52 to 3:00 · Close on the counter
 

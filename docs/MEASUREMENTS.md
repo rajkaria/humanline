@@ -86,10 +86,12 @@ behaviour can tell the mutant from the original):
 |---|---|
 | `HumanLinks.sol:170` `wallet > uint160.max` → `>=` | new test `test_TheHighestAddressIsAValidIntentWallet` |
 | `AttestedWorldID.sol:233` `attestors < MIN_ATTESTORS` → `<=` | new test `test_AcceptsExactlyTheAttestorFloor` |
-| `AttestedWorldID.sol:332` register calldata length, delete and flip | new test `test_AcceptsTheShortestWellFormedRegisterCalldata` |
+| `AttestedWorldID.sol:332` register calldata length, flip | new test `test_AcceptsTheShortestWellFormedRegisterCalldata` |
+| `AttestedWorldID.sol:332` register calldata length, delete | equivalent: calldata too short to hold both roots fails the root cross-check at the end of the function with the same error |
 | `AttestedWorldID.sol:339` length word inside calldata, delete and flip | new tests `test_AcceptsALengthWordEndingExactlyAtTheCalldataEnd`, `test_RevertsWhenTheLengthWordPointsPastTheCalldata` |
 | `AttestedWorldID.sol:341` identity count fits `uint32`, delete and flip | new tests `test_RevertsOnAnIdentityCountThatOverflowsUint32`, `test_AcceptsTheLargestUint32IdentityCount` |
-| `AttestedWorldID.sol:344` delete calldata length, delete and flip | new test `test_AcceptsTheShortestWellFormedDeleteCalldata` |
+| `AttestedWorldID.sol:344` delete calldata length, flip | new test `test_AcceptsTheShortestWellFormedDeleteCalldata` |
+| `AttestedWorldID.sol:344` delete calldata length, delete | equivalent: the same root cross-check refuses calldata too short to hold both roots, with the same error |
 | `CreditLine.sol:203` `owed > available` → `>=` | new test `test_BorrowingExactlyTheLimitSucceeds` |
 | `CreditHistory.sol:80` zero pool address, delete | extended `test_OnlyConfiguredChainsAndSafeParameters` |
 | `CreditHistory.sol:85` `decimals > 36` → `>=` | extended `test_OnlyConfiguredChainsAndSafeParameters` (36 accepted, 37 refused) |
