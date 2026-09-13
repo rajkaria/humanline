@@ -11,6 +11,7 @@ import { sourceProofFromJson, type SourceProofStruct } from "@/lib/crosschain/co
 import { describeError } from "@/lib/format";
 import { getPublicClient } from "@/lib/public-client";
 import type { SingleProofJson } from "@/lib/relay/proof";
+import { verifySourceProofInBrowser } from "@/lib/relay/verify-proof";
 
 export async function fetchSourceProof(chainKey: SourceChainKey, txHash: Hex): Promise<SourceProofStruct> {
   const response = await fetch(`/api/attestcoin/proof?chainKey=${chainKey}&txHash=${txHash}`, { cache: "no-store" });
@@ -21,7 +22,11 @@ export async function fetchSourceProof(chainKey: SourceChainKey, txHash: Hex): P
         `The proof builder has no proof for ${txHash} yet (HTTP ${response.status}). A transaction becomes provable once it is attested, about 15 minutes after inclusion.`,
     );
   }
-  return sourceProofFromJson(body, txHash);
+  const proof = sourceProofFromJson(body, txHash);
+  // Re-verify inclusion and continuity in the browser, against the digest Creditcoin attested.
+  const checked = await verifySourceProofInBrowser(getPublicClient(), proof, body.txIndex);
+  if (!checked.ok) throw new Error(`Your browser refused this proof: ${checked.reason}.`);
+  return proof;
 }
 
 /** `eth_call` the write first; resolves `null` when it would succeed, else the decoded reason. */

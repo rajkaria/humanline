@@ -9,6 +9,25 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Prover independence.** `bun run src/cli.ts local-proof <tx> --source sepolia` builds an
+  Attestcoin proof from any Ethereum RPC with usc-sdk's `RawProofBuilder` and `SimpleBlockProvider`,
+  behind a block cache. `proof-diff <tx…>` builds each proof locally, fetches the hosted one and
+  compares them byte for byte. Inclusion (txBytes, index, Merkle path) must be identical. A
+  continuity difference, which comes from different attestation bounds, passes only if the local
+  chain ends at a digest ChainInfo reports as attested. Results go to `evidence/proof-diff.jsonl`.
+  `proveWithFallback` tries local first and uses the hosted prover on failure or timeout.
+- **In-browser proof verification.** Before any relay, link, history import or repayment is
+  signed, the browser checks the proof itself:
+  - it recomputes every Merkle path from the transaction bytes;
+  - it checks the block root sits in the continuity chain;
+  - it folds the digest chain;
+  - it matches the result against the digest ChainInfo `0x0FD3` reports (`get_attestation_bounds`,
+    or `get_checkpoint_for_height`).
+  
+  `/judge` gains *Verify a proof in your browser*: a genuine proof is accepted, a forged receipt is
+  refused before any network call, and a truncated continuity chain is refused by the attestation
+  lookup. The tests show all five real fixtures fold to the digests CC3 reports.
+
 - **Cross-chain credit identity: one human, their Ethereum wallets, their Aave record.**
   - `HumanLinks` binds an Ethereum wallet to a human. The wallet sends itself a zero-value
     transaction on Sepolia or Ethereum whose calldata is the link intent (human, Creditcoin wallet,

@@ -333,8 +333,8 @@ See [`web/README.md`](web/README.md).
 | Suite | Count | Command |
 |---|---|---|
 | Contracts (Foundry) | 187, including 14 that run against the live CC3 node | `cd contracts && CC3_FORK=1 forge test` |
-| Worker (Bun) | 202, no network | `cd worker && bun test` |
-| Web (Bun) | 326, including the self-relay planner, real-proof encoding, relay statistics and the cross-chain link/history/repay helpers | `cd web && bun test` |
+| Worker (Bun) | 215, no network | `cd worker && bun test` |
+| Web (Bun) | 338, including in-browser proof verification, the self-relay planner, real-proof encoding, relay statistics and the cross-chain link/history/repay helpers | `cd web && bun test` |
 | Everything | contracts + worker + web, typecheck and lint | `bash scripts/verify.sh` |
 
 The 7 fork tests are the ones worth reading: they confirm that the real `0x0FD2` returns `true` for

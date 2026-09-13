@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 
+import { BrowserVerifyDemo } from "@/components/browser-verify-demo";
 import { CommandBlock } from "@/components/command-block";
 import { E2eEvidence } from "@/components/e2e-evidence";
 import { EvidenceLog } from "@/components/evidence-log";
@@ -78,6 +79,7 @@ export default async function JudgePage() {
           description="The same verification AttestedWorldID performs, as a read-only call."
         />
         <ProveItWidget />
+        <BrowserVerifyDemo />
       </section>
 
       <section className="flex flex-col gap-4">

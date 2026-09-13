@@ -75,7 +75,7 @@ onward walk through the on-chain relay surfaces in depth, as the depth checklist
 
 ### 2.0 Coverage at a glance
 
-Every Attestcoin surface Humanline calls, where, and the test that proves it. **19 load-bearing
+Every Attestcoin surface Humanline calls, where, and the test that proves it. **22 load-bearing
 surfaces** (a wrong answer from any of them changes what the chain accepts, what a user is asked to
 sign, or what a lender is exposed to) and **1 informational** one. Counted strictly: an interface we
 declared, or a getter we only read in a test, is listed separately below and is not counted.
@@ -101,6 +101,9 @@ declared, or a getter we only read in a test, is listed separately below and is 
 | 17 | Proof builder `GET /api/v1/attested-height/{ck}` | `worker/src/relay.ts:453` (`waitUntilHeightAttested`) | the worker waits instead of fetching a proof that cannot exist | worker `relay.test.ts` |
 | 18 | `EvmV1Decoder.getTransactionType` | `contracts/src/ProvenSource.sol:158` | which chunk layout carries the signed chain id (types 0-4) | `HumanLinks.t.sol::test_TxChainIdHandlesLegacyAndOtherTypedTransactions`, `test_TxChainIdRefusesUnprotectedLegacy` |
 | 19 | `EvmV1Decoder.decodeTransactionType2` | `contracts/src/ProvenSource.sol:159` | a proved Ethereum transaction was *signed for* the claimed chain (`WrongTxChainId`), so a link, borrow, repay or payment cannot be replayed from another chain | `HumanLinks.t.sol::test_RefusesATransactionSignedForAnotherChain`, `test_TxChainIdReadsBothRealFixtures` |
+| 20 | usc-sdk `RawProofBuilder` + `SimpleBlockProvider` (local proofs, hosted fallback) | `worker/src/local-proof.ts:101`, `:103`; CLI `proof-diff`, `local-proof` | the hosted prover is neither a trust nor a liveness dependency: a proof can be built from any Ethereum RPC and must match byte for byte | `worker/test/local-proof.test.ts` (Merkle arithmetic cross-checked against usc-sdk `KeccakMerkleTree`), `evidence/proof-diff.jsonl` (live, real transactions) |
+| 21 | `0x0FD3` `get_attestation_bounds` | `web/lib/relay/verify-proof.ts:132` (called before every relay, link, history import and repayment), `worker/src/cli.ts` `digestAttested` | the browser refuses a proof whose continuity chain does not end at the digest the attestors signed | `web/test/verify-proof.test.ts` (five real proofs fold to the digests CC3 reports), `/judge` *Verify a proof in your browser*, `testFork_AttestationBoundsBracketARecentHeight` |
+| 22 | `0x0FD3` `get_checkpoint_for_height` | `web/lib/relay/verify-proof.ts:141` | the same check when the upper endpoint is a checkpoint rather than the current child bound | `verify-proof.test.ts::attestation lookup` |
 | i | `0x0FD3` `get_supported_chains` (informational) | `web/lib/hooks/use-precompiles.ts` | lists tracked chains on `/relay` | `testFork_ChainInfoReportsTheSourceChains` |
 
 **Declared and live-tested, but not counted as uses.** `get_attestation_bounds`,

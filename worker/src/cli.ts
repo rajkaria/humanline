@@ -5,6 +5,8 @@
 //   bun run src/cli.ts prove 0x... --source mainnet [--dry-run]
 //   bun run src/cli.ts relay --source all [--once] [--from N] [--dry-run]
 //   bun run src/cli.ts status
+import { appendFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { Command } from "commander";
 import { formatEther, toUtf8String } from "ethers";
 import { loadAttestedWorldIdAbi } from "./abi";
@@ -14,6 +16,7 @@ import {
   CC3_EXPLORER,
   CHAIN_INFO_PRECOMPILE,
   POLL_INTERVAL_MS,
+  REPO_ROOT,
   SOURCES,
   SOURCE_NAMES,
   type SourceConfig,
@@ -46,7 +49,8 @@ import {
   readRootState,
 } from "./cc3";
 import { inspectLocally, toHex32 } from "./evmv1";
-import { fetchProof, singleToBatch, txIndexMatches } from "./proofs";
+import { fetchProof, singleToBatch, txIndexMatches, type SingleProof } from "./proofs";
+import { buildLocalProof, diffProofs, foldContinuity, verifyInclusion } from "./local-proof";
 import {
   calldataBytes,
   deriveCursor,
@@ -539,6 +543,102 @@ program
 // ---------------------------------------------------------------------------
 // status
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// local-proof, proof-diff: prover independence
+// ---------------------------------------------------------------------------
+
+/** The digest a continuity proof folds to must be one Creditcoin's attestors signed. */
+async function digestAttested(chainKey: number, proof: SingleProof): Promise<boolean> {
+  const { upperHeight, digest } = foldContinuity(proof);
+  const info = chainInfoProvider(cc3Provider());
+  const bounds = await info.getContinuityBounds(chainKey, proof.headerNumber);
+  if (bounds.isAttested && bounds.childHeight === upperHeight && bounds.childHash.toLowerCase() === digest.toLowerCase()) {
+    return true;
+  }
+  const checkpoint = await info.getCheckpointForHeight(chainKey, upperHeight);
+  return checkpoint.exists && checkpoint.hash.toLowerCase() === digest.toLowerCase();
+}
+
+program
+  .command("local-proof")
+  .argument("<txHash>", "source-chain transaction hash")
+  .requiredOption("-s, --source <source>", "mainnet or sepolia")
+  .option("--out <file>", "write the proof JSON to this file")
+  .description("build an Attestcoin proof locally (usc-sdk RawProofBuilder + SimpleBlockProvider), no hosted prover")
+  .action(async (txHash: string, opts: { source: string; out?: string }) => {
+    bootEnv();
+    const source = SOURCES[requireSingleSource(opts.source)];
+    const t0 = Date.now();
+    const proof = await buildLocalProof(source.chainKey, txHash, { sourceRpcUrl: sourceRpcUrl(source), cc3RpcUrl: cc3RpcUrl() });
+    log(`local proof ${Date.now() - t0}ms — block ${proof.headerNumber}, txIndex ${proof.txIndex}`);
+    log(`  txBytes ${calldataBytes(proof.txBytes)} bytes, siblings ${proof.merkleProof.siblings.length}, continuity roots ${proof.continuityProof.roots.length}`);
+    const inclusion = verifyInclusion(proof);
+    log(`  inclusion (recomputed)  ${inclusion.ok ? "ok" : `FAIL — ${inclusion.reason}`}`);
+    log(`  continuity digest attested on CC3  ${(await digestAttested(source.chainKey, proof)) ? "ok" : "FAIL"}`);
+    if (opts.out) {
+      await Bun.write(opts.out, `${JSON.stringify(proof, null, 2)}\n`);
+      log(`  wrote ${opts.out}`);
+    }
+  });
+
+program
+  .command("proof-diff")
+  .argument("<txHashes...>", "source-chain transaction hashes")
+  .requiredOption("-s, --source <source>", "mainnet or sepolia")
+  .option("--evidence <file>", "append one JSON line per transaction", resolve(REPO_ROOT, "evidence/proof-diff.jsonl"))
+  .option("--no-record", "do not append to the evidence file")
+  .description("build each proof locally and fetch it from the hosted prover, then compare them byte for byte")
+  .action(async (txHashes: string[], opts: { source: string; evidence: string; record: boolean }) => {
+    bootEnv();
+    const source = SOURCES[requireSingleSource(opts.source)];
+    const hosted = proofBuilder(source.chainKey);
+    let failures = 0;
+    for (const txHash of txHashes) {
+      log("");
+      log(`proof-diff ${txHash} (${source.name}, chainKey ${source.chainKey})`);
+      const t0 = Date.now();
+      const local = await buildLocalProof(source.chainKey, txHash, { sourceRpcUrl: sourceRpcUrl(source), cc3RpcUrl: cc3RpcUrl() });
+      const localMs = Date.now() - t0;
+      const t1 = Date.now();
+      const remote = await fetchProof(hosted, txHash);
+      const hostedMs = Date.now() - t1;
+      const diff = diffProofs(local, remote);
+      const localDigestAttested = await digestAttested(source.chainKey, local);
+      const hostedDigestAttested = await digestAttested(source.chainKey, remote);
+      log(`  local ${localMs}ms, hosted ${hostedMs}ms${remote.cached ? " (cached)" : ""}`);
+      log(`  inclusion (txBytes, index, Merkle path)  ${diff.inclusionIdentical ? "IDENTICAL" : "DIFFERENT"}`);
+      log(`  continuity proof                         ${diff.continuityIdentical ? "IDENTICAL" : "different bounds"}`);
+      log(`  continuity digests attested on CC3       local ${localDigestAttested}, hosted ${hostedDigestAttested}`);
+      for (const d of diff.differences) log(`    - ${d}`);
+      if (!diff.inclusionIdentical || !localDigestAttested) failures++;
+      if (opts.record) {
+        appendFileSync(
+          opts.evidence,
+          `${JSON.stringify({
+            at: new Date().toISOString(),
+            source: source.name,
+            chainKey: source.chainKey,
+            txHash,
+            headerNumber: local.headerNumber,
+            txIndex: local.txIndex,
+            txBytesLength: calldataBytes(local.txBytes),
+            siblings: local.merkleProof.siblings.length,
+            continuityRoots: { local: local.continuityProof.roots.length, hosted: remote.continuityProof.roots.length },
+            localMs,
+            hostedMs,
+            hostedCached: Boolean(remote.cached),
+            ...diff,
+            localDigestAttested,
+            hostedDigestAttested,
+          })}\n`,
+        );
+      }
+    }
+    log("");
+    log(failures === 0 ? `all ${txHashes.length} local proofs match the hosted prover` : `${failures} mismatch(es)`);
+    if (failures > 0) process.exitCode = 1;
+  });
 
 program
   .command("status")

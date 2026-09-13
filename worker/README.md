@@ -143,3 +143,21 @@ submissions.
 `check`, `relay --source all --once`, `status`, then commits `evidence/relay-log.jsonl`
 back with `[skip ci]`. Secrets: `CREDITCOIN_WALLET_PRIVATE_KEY`, `ETH_MAINNET_RPC`,
 `ETH_SEPOLIA_RPC`.
+
+## Prover independence
+
+The hosted proof builder is a convenience. Proofs can be built locally from any Ethereum RPC with
+usc-sdk's `RawProofBuilder` + `SimpleBlockProvider` (`src/local-proof.ts`, behind a block cache):
+
+```bash
+# Build a proof locally, recheck inclusion, and confirm its continuity digest is attested on CC3
+bun run src/cli.ts local-proof 0x2e34a9030ece366901a54228bed260f20cedfd6db22253d005b0aaeb27e8c7cb --source sepolia
+
+# Build locally, fetch from the hosted prover, compare byte for byte; appends evidence/proof-diff.jsonl
+bun run src/cli.ts proof-diff 0x2e34…c7cb 0xf377…67cb --source sepolia
+```
+
+Inclusion (transaction bytes, index, Merkle path) must be identical. A continuity proof can differ
+when the two were built against different attestation bounds (a hosted proof may be cached); that
+difference is accepted only if the local chain folds to a digest ChainInfo `0x0FD3` reports as
+attested or checkpointed. `proveWithFallback` builds locally and falls back to the hosted prover.

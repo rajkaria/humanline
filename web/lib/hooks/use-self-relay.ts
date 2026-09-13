@@ -13,6 +13,7 @@ import { describeError } from "@/lib/format";
 import { getPublicClient } from "@/lib/public-client";
 import { planFromJson, type RelayPlan, type RelayPlanJson } from "@/lib/relay/plan";
 import { argsFromJson, type ExecuteBatchArgsJson } from "@/lib/relay/proof";
+import { verifyBatchInBrowser } from "@/lib/relay/verify-proof";
 
 export type SelfRelayPhase =
   | "idle"
@@ -164,6 +165,15 @@ export function useSelfRelay(options: {
           throw new Error(body.message ?? `The proof builder could not prove this update (HTTP ${response.status}).`);
         }
         const args = argsFromJson(body.args);
+
+        // In-browser verification: re-derive every Merkle path and the continuity digest chain
+        // from the exact bytes about to be sent, and check the chain ends at a digest Creditcoin's
+        // attestors signed. Nothing about this proof is taken on the server's word.
+        setPhase("simulating");
+        const checked = await verifyBatchInBrowser(client, args);
+        if (!checked.ok) {
+          throw new Error(`Your browser refused this proof before sending it: ${checked.reason}.`);
+        }
 
         // Free preflight: ask the 0x0FD2 precompile itself, with a view call, whether this proof
         // is valid before anything else happens. A stale or tampered proof stops here with a
