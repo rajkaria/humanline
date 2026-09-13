@@ -41,6 +41,7 @@ const ENV_ADDRESSES: Record<ContractKey, string | undefined> = {
   creditLine: process.env.NEXT_PUBLIC_CREDIT_LINE_ADDRESS,
   husd: process.env.NEXT_PUBLIC_HUSD_ADDRESS,
   humanGate: process.env.NEXT_PUBLIC_HUMAN_GATE_ADDRESS,
+  humanPoll: process.env.NEXT_PUBLIC_HUMAN_POLL_ADDRESS,
   relayReward: process.env.NEXT_PUBLIC_RELAY_REWARD_ADDRESS,
   humanLinks: process.env.NEXT_PUBLIC_HUMAN_LINKS_ADDRESS,
   creditHistory: process.env.NEXT_PUBLIC_CREDIT_HISTORY_ADDRESS,

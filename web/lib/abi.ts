@@ -1534,3 +1534,98 @@ export const ethRepayAbi = [
   { type: "error", name: "BadParameters", inputs: [] },
   { type: "error", name: "Reentrancy", inputs: [] },
 ] as const;
+
+/** `HumanPoll` — one person, one vote, built on `HumanGated` from `@humanline/sdk`. */
+export const humanPollAbi = [
+  { type: "function", name: "HUMAN_REGISTRY", stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
+  { type: "function", name: "MAX_OPTIONS", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "pollCount", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  {
+    type: "function",
+    name: "ballotOf",
+    stateMutability: "view",
+    inputs: [
+      { name: "pollId", type: "uint256" },
+      { name: "human", type: "uint256" },
+    ],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "usedBy",
+    stateMutability: "view",
+    inputs: [
+      { name: "scope", type: "bytes32" },
+      { name: "human", type: "uint256" },
+    ],
+    outputs: [{ type: "bool" }],
+  },
+  {
+    type: "function",
+    name: "getPoll",
+    stateMutability: "view",
+    inputs: [{ name: "pollId", type: "uint256" }],
+    outputs: [
+      { name: "creator", type: "address" },
+      { name: "creatorHuman", type: "uint256" },
+      { name: "closesAt", type: "uint64" },
+      { name: "question", type: "string" },
+      { name: "options", type: "string[]" },
+      { name: "tally", type: "uint256[]" },
+      { name: "voters", type: "uint256" },
+    ],
+  },
+  {
+    type: "function",
+    name: "createPoll",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "question", type: "string" },
+      { name: "options", type: "string[]" },
+      { name: "duration", type: "uint64" },
+    ],
+    outputs: [{ name: "pollId", type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "vote",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "pollId", type: "uint256" },
+      { name: "option", type: "uint256" },
+    ],
+    outputs: [],
+  },
+  {
+    type: "event",
+    name: "PollCreated",
+    inputs: [
+      { name: "pollId", type: "uint256", indexed: true },
+      { name: "creatorHuman", type: "uint256", indexed: true },
+      { name: "creator", type: "address", indexed: false },
+      { name: "question", type: "string", indexed: false },
+      { name: "options", type: "string[]", indexed: false },
+      { name: "closesAt", type: "uint64", indexed: false },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "Voted",
+    inputs: [
+      { name: "pollId", type: "uint256", indexed: true },
+      { name: "human", type: "uint256", indexed: true },
+      { name: "wallet", type: "address", indexed: false },
+      { name: "option", type: "uint256", indexed: false },
+    ],
+    anonymous: false,
+  },
+  { type: "error", name: "NotHuman", inputs: [{ name: "wallet", type: "address" }] },
+  { type: "error", name: "AlreadyUsed", inputs: [{ name: "scope", type: "bytes32" }, { name: "human", type: "uint256" }] },
+  { type: "error", name: "ZeroRegistry", inputs: [] },
+  { type: "error", name: "BadPoll", inputs: [] },
+  { type: "error", name: "UnknownPoll", inputs: [{ name: "pollId", type: "uint256" }] },
+  { type: "error", name: "PollClosed", inputs: [{ name: "pollId", type: "uint256" }, { name: "closedAt", type: "uint64" }] },
+  { type: "error", name: "UnknownOption", inputs: [{ name: "option", type: "uint256" }, { name: "optionCount", type: "uint256" }] },
+  { type: "error", name: "AlreadyVoted", inputs: [{ name: "pollId", type: "uint256" }, { name: "human", type: "uint256" }] },
+] as const;

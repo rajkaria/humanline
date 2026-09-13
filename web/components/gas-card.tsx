@@ -12,7 +12,7 @@
  */
 
 import { FuelIcon } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { formatEther } from "viem";
 import { useAccount, useBalance } from "wagmi";
 
@@ -72,6 +72,26 @@ export function GasCard() {
   const onRightChain = chainId === creditcoinTestnet.id;
   const value = balance.data?.value;
   const needsGas = isConnected && onRightChain && value !== undefined && value < LOW_BALANCE;
+
+  // Onboarding: a brand-new wallet gets its drip the moment it connects, once per wallet per tab
+  // session, so the first thing a new user sees is not a dead end. The button stays as the retry.
+  useEffect(() => {
+    if (!needsGas || !address || state !== "idle" || error) return;
+    const key = `humanline:auto-gas:${address.toLowerCase()}`;
+    // Scheduled rather than called inline, so the drip starts after this render settles; the key is
+    // claimed only when it actually fires, so a re-render that cancels the timer cannot lose it.
+    const timer = setTimeout(() => {
+      try {
+        if (window.sessionStorage.getItem(key)) return;
+        window.sessionStorage.setItem(key, "1");
+      } catch {
+        // Storage blocked: fall back to the manual button rather than risk a request loop.
+        return;
+      }
+      void request();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [needsGas, address, state, error, request]);
 
   if (!needsGas && state !== "sent") return null;
 

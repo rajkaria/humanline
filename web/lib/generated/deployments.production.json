@@ -8,7 +8,8 @@
     "HumanRegistry": "0x53fcba2cd9296b22635c67d5e73777b4e5db96af",
     "CreditLine": "0x8063982df3250c2f21f2f18f1cf340ec75c1c1cb",
     "HumanGate": "0x544264e52a12fffa5c8640eb5a91b7f4628d5b93",
-    "RelayReward": "0x9766480a872ad7df2a5cf86f9e307804a3f7afe0"
+    "RelayReward": "0x9766480a872ad7df2a5cf86f9e307804a3f7afe0",
+    "HumanPoll": "0x99d76bbee73f56b03ad32b8ffb304961c1b0e87d"
   },
   "txHashes": {
     "AttestedWorldIDMainnet": "0x04bb7e2ed8f5be32d6f4163bb6a74e3410c895406c068b00f23454e079dd827a",
@@ -17,7 +18,8 @@
     "HumanRegistry": "0x630fa7d45a21feb9aa0afff9c1171161356fdf936da43f039e16f562f54efdb3",
     "CreditLine": "0xf01cc49fbfd3aeeb7f5f4cc2f4d1e06d356ce28e4ffa56eedc2d590470df0f82",
     "HumanGate": "0x793e5db5694203411d15d55c94733459294fd9cc487dab35e03591b08cced68f",
-    "RelayReward": "0x97daaf15b3113baf1bcb72ebc862e7d9d2677978a81cdeabd6950db2900280e3"
+    "RelayReward": "0x97daaf15b3113baf1bcb72ebc862e7d9d2677978a81cdeabd6950db2900280e3",
+    "HumanPoll": "0xf8126f353764980d30e6814eaf361020e00657010e9964253eecc0017fd49e4c"
   },
   "config": {
     "worldIdSource": "mainnet",

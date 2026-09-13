@@ -28,6 +28,7 @@ export type ContractKey =
   | "creditLine"
   | "husd"
   | "humanGate"
+  | "humanPoll"
   | "relayReward"
   | "humanLinks"
   | "creditHistory"
@@ -104,6 +105,14 @@ export const CONTRACT_META: ContractMeta[] = [
       "Twenty-line example integration: claim once per human. The pattern any Creditcoin contract can copy.",
     envVar: "NEXT_PUBLIC_HUMAN_GATE_ADDRESS",
     aliases: ["humangate", "gate", "example"],
+  },
+  {
+    key: "humanPoll",
+    name: "HumanPoll",
+    blurb:
+      "One person, one vote: a consumer app built only on the SDK's HumanGated modifier. A new wallet is not a new voter.",
+    envVar: "NEXT_PUBLIC_HUMAN_POLL_ADDRESS",
+    aliases: ["humanpoll", "poll", "vote"],
   },
   {
     key: "relayReward",

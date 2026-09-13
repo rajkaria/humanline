@@ -21,6 +21,9 @@ BUIDL CTC 2026 Fall submission, DeFi track. Live on Creditcoin CC3 testnet (chai
 | Live app | https://humanline.credit |
 | Judge page (no wallet needed) | https://humanline.credit/judge |
 | Live relay feed | https://humanline.credit/relay |
+| One person, one vote (a consumer app on the SDK) | https://humanline.credit/vote |
+| Public API and OpenAPI spec | https://humanline.credit/api |
+| Measurements, coverage, mutation score, live attacks | [`docs/MEASUREMENTS.md`](docs/MEASUREMENTS.md) |
 | Attestcoin write-up (the required technical documentation) | [`docs/ATTESTCOIN_INTEGRATION.md`](docs/ATTESTCOIN_INTEGRATION.md) |
 | Relay evidence, one line per relayed root | [`evidence/relay-log.jsonl`](evidence/relay-log.jsonl) |
 | Deployment record | [`deployments/cc3-testnet.json`](deployments/cc3-testnet.json) (staging tree) and [`deployments/cc3-testnet.production.json`](deployments/cc3-testnet.production.json) (Orb tree) |
@@ -76,9 +79,13 @@ bun run worker/src/cli.ts prove \
   0x81ece3110019bf17255ee88a9728ce4327319d7622e528645e8253cf36fdc7e3 \
   --source mainnet --dry-run
 
-# 101 contract tests (94 unit + 7 live). Needs Foundry:
+# Fire twelve named attacks (forged proof, replay, wrong chain, decoy log, oversize batch, ...) at
+# the deployed contracts as read-only calls. Each must come back refused with its named revert.
+bun run worker/src/cli.ts attack
+
+# 220 contract tests: unit, fuzz, 12 invariants, and 14 that talk to the live Creditcoin node
+# (add CC3_FORK=1 for those). Needs Foundry:
 #   curl -L https://foundry.paradigm.xyz | bash && foundryup
-# Add CC3_FORK=1 to include the 7 that talk to the live Creditcoin node.
 cd contracts && forge test
 ```
 
@@ -179,6 +186,24 @@ roots are paid per call. No owner, no withdrawal; a relayer that cannot receive 
 claims later. The verify card's self-relay goes through it, so a user who does not want to wait is
 paid for not waiting. The operator's cron relays directly and leaves the vault to everyone else.
 
+**Build on it.** Personhood is a primitive, so it ships as one:
+
+- **`@humanline/sdk`** ([`packages/sdk`](packages/sdk)): `isHuman`, `humanOf`, `lineOf` and
+  `profileOf` over any viem client, a `useHuman` React hook with no wagmi requirement, and
+  `HumanGated.sol`, whose `onlyHuman` and `oncePerHuman(scope)` modifiers make any contract one human,
+  one action. Built and tested; publishing to npm is the maintainer's step (see Known limitations).
+- **A public read API**, CORS open and described in OpenAPI 3.1 at
+  [`/api`](https://humanline.credit/api): `GET /api/v1/human/{address}`,
+  `GET /api/v1/line/{nullifier}`, and `GET /api/v1/feed`, the loan lifecycle (lines opened, loans
+  drawn and repaid, limits changed, defaults) keyed by human, for a credit bureau to ingest.
+- **A consumer app on the registry.** [`/vote`](https://humanline.credit/vote) is `HumanPoll`, one
+  person one vote, a separate contract that only inherits `HumanGated`
+  ([`0xD7854346…`](https://creditcoin-testnet.blockscout.com/address/0xD7854346FEA444f6Ac966d2Ce764A4f029e013Bc)
+  on the staging registry, [`0x99d76Bbe…`](https://creditcoin-testnet.blockscout.com/address/0x99d76Bbee73F56B03aD32b8FFb304961c1B0E87D)
+  on the Orb registry, both Blockscout-verified). A new wallet is not a new voter.
+- **A page per human**, `/h/{first 12 hex digits of the nullifier}`: registration, the wallet held
+  today, and the credit history that followed the person there.
+
 ## Built with
 
 - **[Attestcoin Protocol](docs/ATTESTCOIN_INTEGRATION.md)** is the foundation, not a checkbox. Ten
@@ -236,18 +261,21 @@ table of every value that crosses a trust boundary and what checks it, are in
 
 ```
 contracts/        Foundry project
-  src/            AttestedWorldID, HumanRegistry, CreditLine, HUSD, examples/HumanGate
-  src/interfaces/ IAttestedWorldID, IHumanRegistry, ICreditLine, IChainInfo, IAttestorStash
-  test/           101 tests, including 7 that talk to the live CC3 node
-  script/         Deploy.s.sol, DeployDemo.s.sol, deploy-cc3.sh, export-abi.sh
+  src/            AttestedWorldID, HumanRegistry, CreditLine, HUSD, RelayReward, HumanLinks,
+                  CreditHistory, EthRepay, ProvenSource, sdk/HumanGated, examples/HumanGate, examples/HumanPoll
+  src/interfaces/ IAttestedWorldID, IHumanRegistry, ICreditLine, IChainInfo, IAttestorStash, ...
+  test/           unit, fuzz, fork and invariant/ suites (240+ tests)
+  script/         Deploy.s.sol, deploy-*.sh, verify-blockscout.sh, export-abi.sh, GasProbe.sol
   vendor/worldid/ World's WorldIDBridge and SemaphoreVerifier, unmodified (MIT)
   abi/            exported ABIs, consumed by the worker and the web app
-worker/           Bun relay CLI: check, bootstrap, prove, relay, status
-web/              Next.js app: /, /app, /relay, /judge, /docs
-deployments/      cc3-testnet.json (current) and cc3-testnet.v1.json (superseded)
-evidence/         relay-log.jsonl, one line per relayed root
-docs/             SPEC, ARCHITECTURE, SECURITY, ATTESTCOIN_INTEGRATION, VISION, DECK, SUBMISSION
-.github/          relay.yml, the relayer that runs in CI every 15 minutes
+worker/           Bun CLI: check, bootstrap, prove, relay, local-proof, proof-diff, attack, measure, status
+web/              Next.js app: /, /app, /relay, /vote, /judge, /docs, /api, /h/{id}, and /api/v1
+packages/sdk/     @humanline/sdk: viem reads, useHuman, HumanGated.sol
+deployments/      cc3-testnet.json (staging tree), cc3-testnet.production.json (Orb tree), v1 (superseded)
+evidence/         relay log, self-relay, proof-diff, attacks, measurements, coverage, mutation, slither
+docs/             MEASUREMENTS, ARCHITECTURE, SECURITY, ATTESTCOIN_INTEGRATION, SUBMISSION, VIDEO_SCRIPT, DECK
+scripts/          verify.sh, coverage.sh, mutation.ts, submission-check.ts
+.github/          contracts, web, worker, codeql, gitleaks, submission-check, live-attacks and relay workflows
 ```
 
 ## Getting started
@@ -332,19 +360,24 @@ See [`web/README.md`](web/README.md).
 
 | Suite | Count | Command |
 |---|---|---|
-| Contracts (Foundry) | 187, including 14 that run against the live CC3 node | `cd contracts && CC3_FORK=1 forge test` |
-| Worker (Bun) | 215, no network | `cd worker && bun test` |
-| Web (Bun) | 338, including in-browser proof verification, the self-relay planner, real-proof encoding, relay statistics and the cross-chain link/history/repay helpers | `cd web && bun test` |
+| Contracts (Foundry) | 220: unit, fuzz, 12 invariants, and 14 that run against the live CC3 node | `cd contracts && CC3_FORK=1 forge test` |
+| Worker (Bun) | 216, no network | `cd worker && bun test` |
+| Web (Bun) | 380, including in-browser proof verification, the self-relay planner, real-proof encoding, relay statistics, the cross-chain helpers, and the attack and measurement builders | `cd web && bun test` |
 | Everything | contracts + worker + web, typecheck and lint | `bash scripts/verify.sh` |
 | Invariants | 12 stateful invariants with anti-vacuity guards: pool accounting, frozen stays frozen, one line per human, exposure cap, roots advance only along the chain, no replay across `execute`/`executeBatch`, orphan roots refused, wallet-link uniqueness | `cd contracts && forge test --match-contract Invariant` |
-| Mutation | every one-line guard deleted or its relation flipped, scored against the unit and fuzz suites | `bun run scripts/mutation.ts` → `evidence/mutation.json` |
+| Coverage | 93.6% of lines and 93.5% of branches in `contracts/src` | `bash scripts/coverage.sh` → `evidence/coverage.txt` |
+| Mutation | every one-line guard deleted or its relation flipped, scored against the unit and fuzz suites | `bun run scripts/mutation.ts --jobs 4` → `evidence/mutation.json` |
+| Slither | 99 findings, every High and Medium triaged in [`docs/MEASUREMENTS.md`](docs/MEASUREMENTS.md) | `cd contracts && uvx --from slither-analyzer slither . --config-file slither.config.json` |
+| Live attacks | 12 of 12 refused with the named revert, against the deployed contracts | `bun run worker/src/cli.ts attack` → `evidence/attacks.json` |
+| Measurements | gas per batch size with regression, the 10/11 cap, attestation vs checkpoint, latency, proof size, share of `0x0FD2` traffic | `bun run worker/src/cli.ts measure` → [`docs/MEASUREMENTS.md`](docs/MEASUREMENTS.md) |
 | Submission | every cited address, transaction and humanline.credit URL resolves; contracts Blockscout-verified | `bun run scripts/submission-check.ts` |
 
 CI runs on every push to `main`:
 [contracts](.github/workflows/contracts.yml) (build, CI-profile fuzz and invariants, live fork tests, coverage, Slither),
 [worker](.github/workflows/worker.yml), [web](.github/workflows/web.yml) (typecheck, lint, tests, production build, Lighthouse),
-[CodeQL](.github/workflows/codeql.yml), [gitleaks](.github/workflows/gitleaks.yml) and
-[submission-check](.github/workflows/submission-check.yml).
+[CodeQL](.github/workflows/codeql.yml), [gitleaks](.github/workflows/gitleaks.yml),
+[submission-check](.github/workflows/submission-check.yml), and every six hours
+[live-attacks](.github/workflows/attacks.yml), which re-fires the twelve attacks at CC3 testnet.
 
 The 7 fork tests are the ones worth reading: they confirm that the real `0x0FD2` returns `true` for
 both proof fixtures and agrees the mainnet transaction index is 173, that the real `0x0FD3` tracks
@@ -407,6 +440,10 @@ Stated up front rather than discovered later. The full list, with reasoning, is 
 - **Testnet economics.** `hUSD` is a test stablecoin we mint, lender deposits are testnet funds, and
   no economic claim here has been tested with real money.
 - **Cross-chain history has edges.**
+  - `HumanLinks`, `CreditHistory`, `EthRepay` and CreditLine v3 are built and tested against real
+    Sepolia proofs that the live `0x0FD2` accepts, but are not deployed to CC3 yet:
+    `contracts/script/deploy-cross-chain.sh` (which also migrates v2 liquidity) is waiting on the
+    maintainer. The live app runs CreditLine v2.
   - Links prove an externally owned account; smart-contract wallets cannot sign the self-send or
     the EIP-712 message.
   - On Sepolia, Aave reserves are faucet tokens, so testnet history demonstrates the rules rather
@@ -415,6 +452,9 @@ Stated up front rather than discovered later. The full list, with reasoning, is 
     interest for a boost capped at 500 hUSD.
   - `EthRepay` pays the pool from a treasury-funded float. A proved payment can never be credited
     twice, but it waits if the float is empty.
+- **`@humanline/sdk` is not on npm yet.** The package in `packages/sdk` builds, passes its tests and
+  packs to 8 files, and the `@humanline` npm scope is ours; the publish itself is a maintainer action
+  that was not run from this environment. Until then, install from the repository path.
 - **A freeze is permanent and there is nobody to appeal to.** There is no owner, including us. That
   is the design, and it is also a real product limitation a production version would address with a
   lender-controlled cure path written into the contract from the start.

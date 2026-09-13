@@ -16,7 +16,7 @@ FORGE="${FORGE:-$ROOT_DIR/.tools/forge}"
 CAST="${CAST:-$ROOT_DIR/.tools/cast}"
 VERIFIER_URL="${VERIFIER_URL:-https://creditcoin-testnet.blockscout.com/api}"
 DEPLOYMENT="${DEPLOYMENT:-$ROOT_DIR/deployments/cc3-testnet.json}"
-ONLY="${ONLY:-AttestedWorldIDMainnet AttestedWorldIDSepolia HUSD HumanRegistry CreditLine HumanGate RelayReward HumanLinks CreditHistory EthRepay}"
+ONLY="${ONLY:-AttestedWorldIDMainnet AttestedWorldIDSepolia HUSD HumanRegistry CreditLine HumanGate HumanPoll RelayReward HumanLinks CreditHistory EthRepay}"
 
 MAINNET_CHAIN_KEY=3
 MAINNET_IDENTITY_MANAGER=0xf7134CE138832c1456F2a91D64621eE90c2bddEa
@@ -99,6 +99,7 @@ else
   echo "  CreditLine — v1 deployment (no exposure cap); its source is in git history, skipping"
 fi
 verify HumanGate src/examples/HumanGate.sol:HumanGate "constructor(address)" "$REGISTRY_ADDR"
+verify HumanPoll src/examples/HumanPoll.sol:HumanPoll "constructor(address)" "$REGISTRY_ADDR"
 
 # RelayReward is shared by both profiles and recorded by script/deploy-relay-reward.sh; its
 # constructor arguments come from the same file, so a missing entry simply skips it.

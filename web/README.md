@@ -39,8 +39,15 @@ bun test           # unit tests for lib/worldid.ts and lib/format.ts
 | `/` | Landing page. The positioning, the "wallet passports vs Humanline" comparison, the architecture diagram as inline SVG, and four live counters read from CC3. |
 | `/app` | Connect → status card → World ID verification → credit line (borrow, repay, faucet, history) → lender pool (deposit, withdraw, utilisation). |
 | `/relay` | Live `RootRelayed` feed across both `AttestedWorldID` instances, header cards per instance, and the 0x0FD3 / 0x0FD4 precompile guard values. Refreshes every 15s. |
-| `/judge` | Addresses, copy-paste verification commands, the negative-path table, a live "prove any Ethereum transaction" widget, and the relay evidence log. Works with no wallet. |
+| `/judge` | Addresses, copy-paste verification commands, the negative-path table, twelve attacks fired live at CC3 on page load, headline measurements, a live "prove any Ethereum transaction" widget, and the relay evidence log. Works with no wallet. |
 | `/docs` | Lender integration guide, the Attestcoin integration write-up, the security model, and the known limitations. |
+| `/vote` | `HumanPoll`: verified humans open polls and cast one ballot each, whatever wallet they use. Reads need no wallet. |
+| `/h/{id}` | A public page per human (`id` = first 12 hex digits of the nullifier): wallet today and credit history, read on render. |
+| `/api` | Human-readable API reference generated from the OpenAPI document. |
+| `/api/openapi.json` | OpenAPI 3.1 description of `/api/v1`. |
+| `/api/v1/human/{address}` | Is this wallet a verified human, its nullifier, registration date and credit line. `?profile=staging\|production`. CORS open. |
+| `/api/v1/line/{nullifier}` | A human's credit line and the wallet they hold today. CORS open. |
+| `/api/v1/feed` | Loan lifecycle feed (`line.opened`, `loan.drawn`, `loan.repaid`, `limit.changed`, `loan.defaulted`), newest first, `?human=` filter. CORS open. |
 | `/api/world/rp-context` | Signs an IDKit 4.x proof request server-side. |
 | `/api/attestcoin/proof` | Proxies the CC3 proof builder (it sends no CORS headers). |
 | `/api/attestcoin/attested-height` | Proxies the proof builder's attested-height endpoint. |

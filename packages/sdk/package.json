@@ -1,0 +1,54 @@
+{
+  "name": "@humanline/sdk",
+  "version": "0.1.0",
+  "description": "Sybil resistance on Creditcoin: check whether a wallet belongs to a verified World ID human, read their credit line, and gate contracts one-human-one-action.",
+  "keywords": ["creditcoin", "attestcoin", "world-id", "proof-of-personhood", "sybil-resistance", "viem", "credit"],
+  "license": "MIT",
+  "author": "Humanline",
+  "homepage": "https://humanline.credit/docs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rajkaria/humanline.git",
+    "directory": "packages/sdk"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js"
+    },
+    "./contracts/HumanGated.sol": "./contracts/HumanGated.sol",
+    "./contracts/IHumanRegistry.sol": "./contracts/IHumanRegistry.sol",
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "contracts", "README.md"],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "prepublishOnly": "bun test && bun run build"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "viem": "^2.21.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/react": "^19.0.0",
+    "react": "^19.1.0",
+    "typescript": "^5.6.0",
+    "viem": "^2.56.3"
+  }
+}
