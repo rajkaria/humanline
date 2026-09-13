@@ -82,7 +82,7 @@ For the long-form description field, if the form offers one. It names no other p
 | Economic security from `0x0FD4` | Total credit is capped by the attestors' bonded stake, read live on every draw. |
 | Relay nobody has to trust or wait for | Self-relay from the user's wallet, a vault that pays third-party relayers, and a 5-minute cron with a watchdog. |
 | Prover independence | Proofs built locally match the hosted prover byte for byte; the browser re-verifies before sending. |
-| Refusals you can watch | Twelve attacks fired at the deployed contracts on page load, re-run in CI every six hours. |
+| Refusals you can watch | Twelve attacks fired at the deployed contracts on page load, re-run every six hours by Vercel Cron. |
 | A primitive for others | `HumanGated.sol`, `@humanline/sdk`, a public API with a loan-lifecycle feed, and `HumanPoll` built on them. |
 
 Word count check: run `wc -w` on the block before pasting. The form's limit is 400.
@@ -229,7 +229,7 @@ Confirm each before submitting. These are the organizers' stated conditions, and
 
 - [x] Contracts deployed and verified on Blockscout (eighteen, across both deployments); every address above is live, checked by `submission-check`.
 - [x] Relay running every 5 minutes from Vercel Cron with GitHub Actions as backup, independent of any laptop; any user can self-relay, and `RelayReward` pays third parties. `/relay` shows the track record.
-- [x] Twelve attacks refused by name against the deployed contracts (`bun run worker/src/cli.ts attack`), re-run every six hours in CI and live on `/judge`.
+- [x] Twelve attacks refused by name against the deployed contracts (`bun run worker/src/cli.ts attack`), re-run every six hours by Vercel Cron (`/api/cron/attacks`) and live on `/judge`.
 - [x] `docs/MEASUREMENTS.md` generated from the live chains; coverage 93.6% lines, mutation score and Slither triage published.
 - [x] Web app live at `https://humanline.credit` with no build errors and no "not deployed yet" banner.
 - [x] README present at repo root with the one-liner, addresses and known limitations.

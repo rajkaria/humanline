@@ -985,7 +985,7 @@ function names in `contracts/test/`; worker test names are the test strings in `
 The tests run against mocks. The same attacks also run against the **deployed** contracts and the real
 precompiles: `bun run worker/src/cli.ts attack` fires twelve of them as read-only `eth_call`s with real
 Sepolia transactions and real Attestcoin proofs, and all twelve come back refused with their named
-revert. `/judge` repeats them on page load with no wallet, and a workflow repeats them every six hours.
+revert. `/judge` repeats them on page load with no wallet, and Vercel Cron repeats them every six hours (`/api/cron/attacks`), alerting if any is not refused.
 The list and the recorded answers are in [`docs/MEASUREMENTS.md`](MEASUREMENTS.md) section 2.
 
 ### Relay (`AttestedWorldID`)

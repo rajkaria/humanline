@@ -134,7 +134,7 @@ High, 5 Medium, 28 Low, 64 Informational. Every High and Medium is triaged here;
 `bun run worker/src/cli.ts attack` sends each attack to CC3 testnet as a read-only `eth_call`, with real
 Sepolia transactions and real Attestcoin proofs as inputs (`evidence/attack-inputs.json`), and records
 what the chain answered. `/judge` fires the same calls while the page loads, with no wallet, and
-`.github/workflows/attacks.yml` repeats them every six hours. From `evidence/attacks.json`:
+Vercel Cron repeats them every six hours through `/api/cron/attacks`, which alerts when any is not refused; `.github/workflows/attacks.yml` re-runs them on changes to the attack code. From `evidence/attacks.json`:
 
 | Attack | Refused with |
 |---|---|
