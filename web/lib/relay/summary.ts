@@ -20,6 +20,12 @@ import {
 
 export const RELAY_SLO_SEC = 600;
 export const RELAY_STALL_SEC = 3_600;
+/**
+ * When the 5-minute relay went live (commit 1ffa5aa). Roots before it were carried by
+ * hand, hours late; the "always on" block measures only the relay as it runs today,
+ * while the all-time numbers stay published next to it.
+ */
+export const ALWAYS_ON_SINCE = Date.parse("2026-09-12T20:51:52Z") / 1000;
 const DAY = 86_400;
 
 export type TrackInput = {
@@ -41,11 +47,20 @@ export type ChainReport = {
   uptime7d: Uptime;
 };
 
+/** The relay as it runs today: everything since `ALWAYS_ON_SINCE`, across both chains. */
+export type AlwaysOn = {
+  since: number;
+  endToEnd: Distribution;
+  relayDelay: Distribution;
+  uptime: Uptime;
+};
+
 export type RelayReport = {
   generatedAt: number;
   sloSec: number;
   health: Health;
   chains: ChainReport[];
+  alwaysOn: AlwaysOn;
   /** Across both chains. */
   endToEndAll: Distribution;
   relayDelayAll: Distribution;
@@ -63,7 +78,12 @@ function lastRelay(samples: readonly RelaySample[]): number | null {
   return samples.length === 0 ? null : Math.max(...samples.map((s) => s.relayedAt));
 }
 
-export function buildReport(tracks: readonly TrackInput[], operators: readonly string[], now: number): RelayReport {
+export function buildReport(
+  tracks: readonly TrackInput[],
+  operators: readonly string[],
+  now: number,
+  alwaysOnSince: number = ALWAYS_ON_SINCE,
+): RelayReport {
   const chains: ChainReport[] = tracks.map((t) => {
     const timing = timingFor(t.finalityDepth);
     const e2e = (s: RelaySample) => s.relayedAt - s.sourceTimestamp;
@@ -101,15 +121,28 @@ export function buildReport(tracks: readonly TrackInput[], operators: readonly s
     { now, windowSec: DAY, sloSec: RELAY_SLO_SEC, timing: timingFor(depth) },
   );
 
+  const since = Math.min(alwaysOnSince, now);
+  const live = allSamples.filter((x) => x.s.relayedAt >= since);
+  const delayOf = (x: { s: RelaySample; depth: number }) =>
+    Math.max(0, x.s.relayedAt - relayableAt(x.s.sourceTimestamp, timingFor(x.depth)));
+
   return {
     generatedAt: now,
     sloSec: RELAY_SLO_SEC,
     health,
     chains,
+    alwaysOn: {
+      since,
+      endToEnd: distribution(live.map((x) => x.s.relayedAt - x.s.sourceTimestamp)),
+      relayDelay: distribution(live.map(delayOf)),
+      uptime: uptime(
+        allSamples.map((x) => x.s),
+        allPending,
+        { now, windowSec: now - since, sloSec: RELAY_SLO_SEC, timing: timingFor(depth) },
+      ),
+    },
     endToEndAll: distribution(allSamples.map((x) => x.s.relayedAt - x.s.sourceTimestamp)),
-    relayDelayAll: distribution(
-      allSamples.map((x) => Math.max(0, x.s.relayedAt - relayableAt(x.s.sourceTimestamp, timingFor(x.depth)))),
-    ),
+    relayDelayAll: distribution(allSamples.map(delayOf)),
     uptime24h: combined,
     relayers: relayerShares(allSamples.map((x) => x.s), operators),
     recent: allSamples

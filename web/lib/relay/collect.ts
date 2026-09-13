@@ -17,6 +17,7 @@ import { attestedWorldIdAbi } from "@/lib/abi";
 import type { SourceChainKey } from "@/lib/chains";
 import { CONTRACTS, WORLD_ID_INSTANCES } from "@/lib/contracts";
 import rawDeployments from "@/lib/generated/deployments.json";
+import selfRelayers from "@/lib/generated/self-relayers.json";
 import { scanLogs } from "@/lib/logs";
 import { readRootState, scanChanges, sourceClient } from "@/lib/relay/source";
 import type { PendingRoot, RelaySample } from "@/lib/relay/stats";
@@ -49,15 +50,17 @@ async function sourceTimestamp(chainKey: SourceChainKey, block: number): Promise
 }
 
 /**
- * Addresses that belong to the Humanline operator: `RELAY_OPERATOR_ADDRESSES`,
- * `RELAYER_ADDRESS`, the address behind `RELAYER_PRIVATE_KEY`, and the recorded
- * deployer. Everyone else who relayed is, by definition, not us.
+ * Addresses that belong to Humanline: `RELAY_OPERATOR_ADDRESSES`, `RELAYER_ADDRESS`,
+ * the address behind `RELAYER_PRIVATE_KEY`, the recorded deployer, and the throwaway
+ * wallets our own self-relay script generated (`evidence/self-relay.jsonl`). Everyone
+ * else who relayed is, by definition, not us.
  */
 export function operatorAddresses(): string[] {
   const listed = [process.env.RELAY_OPERATOR_ADDRESSES ?? "", process.env.RELAYER_ADDRESS ?? ""]
     .join(",")
     .split(",")
-    .map((a) => a.trim());
+    .map((a) => a.trim())
+    .concat(selfRelayers as string[]);
   const key = process.env.RELAYER_PRIVATE_KEY;
   if (key && /^0x[0-9a-fA-F]{64}$/.test(key)) listed.push(privateKeyToAccount(key as Hex).address);
   const deployer = (rawDeployments as { deployer?: string }).deployer;

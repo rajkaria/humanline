@@ -58,6 +58,8 @@ export function RelayHealth() {
   const h = r.health;
   const tone = h.status === "ok" ? "success" : h.status === "late" ? "warning" : "destructive";
   const Icon = h.status === "ok" ? CheckCircle2Icon : h.status === "late" ? AlertTriangleIcon : SirenIcon;
+  const a = r.alwaysOn;
+  const liveSince = new Date(a.since * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric" });
   const others = r.relayers.filter((x) => !x.operator);
   const maxE2e = Math.max(1, ...r.recent.map((x) => x.endToEndSec));
 
@@ -107,14 +109,21 @@ export function RelayHealth() {
               <ActivityIcon className="size-3.5 text-brand" />
               End to end
             </CardTitle>
-            <CardDescription>Ethereum block → root usable on Creditcoin, {r.endToEndAll.count} roots</CardDescription>
+            <CardDescription>
+              Ethereum block → root usable on Creditcoin, {a.endToEnd.count} roots since the 5-minute relay went
+              live {liveSince}
+            </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex flex-col gap-2">
             <dl className="grid grid-cols-3 gap-3">
-              <Stat label="p50" value={dur(r.endToEndAll.p50)} emphasis />
-              <Stat label="p95" value={dur(r.endToEndAll.p95)} />
-              <Stat label="max" value={dur(r.endToEndAll.max)} />
+              <Stat label="p50" value={dur(a.endToEnd.p50)} emphasis />
+              <Stat label="p95" value={dur(a.endToEnd.p95)} />
+              <Stat label="max" value={dur(a.endToEnd.max)} />
             </dl>
+            <p className="text-[11px] text-muted-foreground">
+              All {r.endToEndAll.count} roots, including the hand-relayed ones before it: p50{" "}
+              {dur(r.endToEndAll.p50)}, p95 {dur(r.endToEndAll.p95)}.
+            </p>
           </CardContent>
         </Card>
 
@@ -125,12 +134,15 @@ export function RelayHealth() {
               After the 32-block finality depth allowed it. The part the relayer controls.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex flex-col gap-2">
             <dl className="grid grid-cols-3 gap-3">
-              <Stat label="p50" value={dur(r.relayDelayAll.p50)} emphasis />
-              <Stat label="p95" value={dur(r.relayDelayAll.p95)} />
-              <Stat label="max" value={dur(r.relayDelayAll.max)} />
+              <Stat label="p50" value={dur(a.relayDelay.p50)} emphasis />
+              <Stat label="p95" value={dur(a.relayDelay.p95)} />
+              <Stat label="max" value={dur(a.relayDelay.max)} />
             </dl>
+            <p className="text-[11px] text-muted-foreground">
+              All-time: p50 {dur(r.relayDelayAll.p50)}, p95 {dur(r.relayDelayAll.p95)}.
+            </p>
           </CardContent>
         </Card>
 
@@ -140,8 +152,9 @@ export function RelayHealth() {
             <CardDescription>Share of time no relayable root waited past the target</CardDescription>
           </CardHeader>
           <CardContent>
-            <dl className="grid grid-cols-3 gap-3">
-              <Stat label="24 h" value={pct(r.uptime24h.ratio)} emphasis />
+            <dl className="grid grid-cols-2 gap-3">
+              <Stat label={`since ${liveSince}`} value={pct(a.uptime.ratio)} emphasis />
+              <Stat label="24 h" value={pct(r.uptime24h.ratio)} />
               {r.chains.map((c) => (
                 <Stat
                   key={c.chainKey}
@@ -191,7 +204,7 @@ export function RelayHealth() {
           <span key={x.relayer} className="inline-flex items-center gap-1.5">
             <HashLink value={x.relayer as `0x${string}`} scope="creditcoin" kind="address" copy={false} />
             <Badge variant={x.operator ? "secondary" : "default"}>
-              {x.operator ? "operator" : "independent"} · {x.roots}
+              {x.operator ? "Humanline" : "independent"} · {x.roots}
             </Badge>
           </span>
         ))}

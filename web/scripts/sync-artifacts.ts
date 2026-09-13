@@ -176,6 +176,30 @@ if (existsSync(evidencePath)) {
   console.log("[sync-artifacts] evidence     — not found, using empty snapshot");
 }
 
+// ------------------------------------------------------------- self-relay wallets
+// `web/scripts/self-relay.ts --fresh` relays from wallets it generates on the spot. They
+// are Humanline's own test wallets, not strangers, so `/relay` must not count their roots
+// as carried by "wallets that are not Humanline's".
+const selfRelayPath = join(repoRoot, "evidence", "self-relay.jsonl");
+const selfRelayers = existsSync(selfRelayPath)
+  ? [
+      ...new Set(
+        readFileSync(selfRelayPath, "utf8")
+          .split("\n")
+          .flatMap((line) => {
+            try {
+              const relayer = (JSON.parse(line) as { relayer?: unknown }).relayer;
+              return typeof relayer === "string" && /^0x[0-9a-fA-F]{40}$/.test(relayer) ? [relayer.toLowerCase()] : [];
+            } catch {
+              return [];
+            }
+          }),
+      ),
+    ].sort()
+  : [];
+write("self-relayers.json", selfRelayers);
+console.log(`[sync-artifacts] self-relay   ← ${selfRelayPath} (${selfRelayers.length} wallets)`);
+
 // ---------------------------------------------------------------- live attacks
 // `/judge` re-fires the recorded attacks on page load; it needs the inputs (real proofs) and shows
 // the last recorded run as the fallback when CC3 is unreachable.

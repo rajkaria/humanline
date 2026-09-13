@@ -61,6 +61,36 @@ describe("buildReport", () => {
     expect(report.chains[0]!.pending).toBe(1);
   });
 
+  test("the always-on block counts only relays since the cron went live, all-time keeps the rest", () => {
+    const since = NOW - 10 * 3_600;
+    const report = buildReport(
+      [
+        {
+          chainKey: 3,
+          // Hand-relayed two hours late before the cron, then prompt after it.
+          samples: [s(3, 20 * 3_600, 7_200 + GAP), s(3, 5 * 3_600, GAP + 60), s(3, 3_600, GAP + 120)],
+          pending: [],
+          finalityDepth: 32,
+        },
+      ],
+      ["0xop"],
+      NOW,
+      since,
+    );
+    expect(report.alwaysOn.since).toBe(since);
+    expect(report.alwaysOn.endToEnd.count).toBe(2);
+    expect(report.alwaysOn.relayDelay.max).toBe(120);
+    expect(report.alwaysOn.uptime.windowSec).toBe(10 * 3_600);
+    expect(report.alwaysOn.uptime.ratio).toBe(1);
+    expect(report.relayDelayAll.max).toBe(7_200);
+  });
+
+  test("an always-on start in the future collapses to an empty window, not a negative one", () => {
+    const report = buildReport([{ chainKey: 1, samples: [], pending: [], finalityDepth: 32 }], [], NOW, NOW + 60);
+    expect(report.alwaysOn.since).toBe(NOW);
+    expect(report.alwaysOn.uptime.ratio).toBe(1);
+  });
+
   test("no samples at all is an empty but valid report", () => {
     const report = buildReport([{ chainKey: 1, samples: [], pending: [], finalityDepth: 32 }], [], NOW);
     expect(report.endToEndAll.count).toBe(0);

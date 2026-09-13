@@ -465,10 +465,7 @@ Stated up front rather than discovered later. The full list, with reasoning, is 
 |---|---|
 | Name | Raj Karia |
 | Role | Sole builder: contracts, relay worker, web app, documentation |
-| Email | {{TEAM_1_EMAIL}} |
-| Telegram | {{TEAM_1_TELEGRAM}} |
-| X | {{TEAM_1_X}} |
-| LinkedIn | {{TEAM_1_LINKEDIN}} |
+| GitHub | [@rajkaria](https://github.com/rajkaria) |
 
 ## License
 
