@@ -79,6 +79,54 @@ library TxBytes {
         return abi.encode(txType, chunks);
     }
 
+    /// @notice Replace sender, callee and calldata; nonce, gas, value, signature chunk and receipt stay real.
+    function withCommon(bytes memory encodedTx, address from, address to, bytes memory data)
+        internal
+        pure
+        returns (bytes memory)
+    {
+        (uint8 txType, bytes[] memory chunks) = split(encodedTx);
+        (uint64 nonce, uint64 gasLimit,,,, uint256 value,) = common(encodedTx);
+        chunks[0] = abi.encode(nonce, gasLimit, from, false, to, value, data);
+        return abi.encode(txType, chunks);
+    }
+
+    /// @notice Rewrite the chain id inside a type-2 transaction's type-specific chunk.
+    function withType2ChainId(bytes memory encodedTx, uint64 chainId) internal pure returns (bytes memory) {
+        (uint8 txType, bytes[] memory chunks) = split(encodedTx);
+        require(txType == 2, "TxBytes: not type 2");
+        (
+            ,
+            uint128 maxPriorityFeePerGas,
+            uint128 maxFeePerGas,
+            EvmV1Decoder.AccessListEntryBytes32[] memory accessList,
+            uint8 yParity,
+            bytes32 r,
+            bytes32 s
+        ) = abi.decode(
+            chunks[1], (uint64, uint128, uint128, EvmV1Decoder.AccessListEntryBytes32[], uint8, bytes32, bytes32)
+        );
+        chunks[1] = abi.encode(chainId, maxPriorityFeePerGas, maxFeePerGas, accessList, yParity, r, s);
+        return abi.encode(txType, chunks);
+    }
+
+    /// @notice Replace one log of the receipt.
+    function withLogAt(bytes memory encodedTx, uint256 index, EvmV1Decoder.LogEntryTuple memory log)
+        internal
+        pure
+        returns (bytes memory)
+    {
+        (,, EvmV1Decoder.LogEntryTuple[] memory logs,) = receipt(encodedTx);
+        logs[index] = log;
+        return withLogs(encodedTx, logs);
+    }
+
+    /// @notice A copy of one receipt log.
+    function logAt(bytes memory encodedTx, uint256 index) internal pure returns (EvmV1Decoder.LogEntryTuple memory) {
+        (,, EvmV1Decoder.LogEntryTuple[] memory logs,) = receipt(encodedTx);
+        return logs[index];
+    }
+
     /// @notice Rewrite a `registerIdentities` call in place: new pre/post root and commitment count,
     ///         everything else (the eight proof words, the start index) untouched.
     function retargetRegister(bytes memory data, uint256 preRoot, uint256 postRoot, uint32 humansAdded)

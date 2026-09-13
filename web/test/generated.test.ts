@@ -46,7 +46,12 @@ describe("lib/generated/deployments.json", () => {
     );
     expect(live.size).toBeGreaterThan(0);
 
+    // Contracts shipped by a later deploy script (`deploy-cross-chain.sh`) resolve to nothing until
+    // that script records them; everything the file does record must resolve.
+    const LATER = new Set(["humanLinks", "creditHistory", "ethRepay"]);
+    const recorded = new Set(Object.keys(source.contracts ?? {}).map((k) => k.toLowerCase()));
     for (const contract of CONTRACT_LIST) {
+      if (!contract.address && LATER.has(contract.key) && !recorded.has(contract.name.toLowerCase())) continue;
       expect(contract.address, `${contract.name} did not resolve`).toBeDefined();
       expect(
         live.has(contract.address!.toLowerCase()),

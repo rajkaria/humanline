@@ -9,6 +9,36 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Cross-chain credit identity: one human, their Ethereum wallets, their Aave record.**
+  - `HumanLinks` binds an Ethereum wallet to a human. The wallet sends itself a zero-value
+    transaction on Sepolia or Ethereum whose calldata is the link intent (human, Creditcoin wallet,
+    Creditcoin chain id, contract). The human's registered Creditcoin wallet submits its Attestcoin
+    proof. `linkBySignature` is a gasless EIP-712 alternative, recorded as such. A wallet belongs to
+    one human forever, and a human holds at most 8.
+  - `CreditHistory` proves Aave V3 `Borrow` and `Repay` events from linked wallets. A repayment
+    counts only if all of these hold:
+    - it matches an earlier proved borrow by the same wallet in the same reserve;
+    - it lands at least 7,200 source blocks after that borrow;
+    - it was paid by the borrower, not with aTokens, in USDC, USDT or DAI;
+    - it stays within the borrow's amount, and each log counts once.
+    
+    Verified repaid dollars raise the limit by 25%, capped at 500 hUSD.
+  - `EthRepay` repays a Creditcoin line from a proved USDC `Transfer` to the repayment address on
+    Ethereum. The repayment settles through the new `CreditLine.repayFor`.
+  - **CreditLine v3** adds `HISTORY`, `limitOf` (line limit plus boost, capped) and `repayFor`.
+  - `ProvenSource` is the shared base. It checks `0x0FD2` `verifyAndEmit`, finality, the attestor
+    quorum and receipt status, and it checks that the transaction was signed for the claimed chain.
+    The chain id comes from `EvmV1Decoder.decodeTransactionType2`, EIP-155 `v`, or the typed chunk,
+    and unprotected legacy transactions are refused.
+  - Tested against real Sepolia proofs (a 120 USDC Aave borrow, its 85.23 USDC repayment and a
+    Circle USDC transfer) that the live `0x0FD2` verifies. That is 54 new unit and fuzz tests plus
+    3 fork tests.
+  - `/app` gets an *Ethereum history* card with three flows: link, import Aave history, and repay
+    from Ethereum. Each is dry-run before signing. `/api/crosschain/{history,transfers}` return
+    receipt-local log indexes.
+  - Deploy with `contracts/script/deploy-cross-chain.sh`, which also migrates liquidity and seeds
+    the settlement float.
+
 - **Self-relay from the verify card.** When a proof's root has not reached Creditcoin, the Sync
   step now offers *Relay it now from your wallet* instead of only a wait. `GET /api/relay/plan`
   finds the World ID update carrying the proof's root by its indexed `postRoot`, links every

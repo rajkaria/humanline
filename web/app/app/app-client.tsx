@@ -6,6 +6,7 @@ import { useAccount } from "wagmi";
 
 import { ConnectButton } from "@/components/connect-button";
 import { CreditPanel } from "@/components/credit-panel";
+import { CrossChainPanel } from "@/components/cross-chain-panel";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { EventHistory } from "@/components/event-history";
 import { GasCard } from "@/components/gas-card";
@@ -141,6 +142,13 @@ export function AppClient() {
                       faucetAvailableAt={credit.faucetAvailableAt}
                       faucetAmount={credit.faucetAmount}
                       loading={credit.isLoading}
+                      onChanged={refreshAll}
+                    />
+                  </ErrorBoundary>
+                  <ErrorBoundary title="Ethereum history">
+                    <CrossChainPanel
+                      human={human.nullifierHash}
+                      owed={credit.line.principal}
                       onChanged={refreshAll}
                     />
                   </ErrorBoundary>

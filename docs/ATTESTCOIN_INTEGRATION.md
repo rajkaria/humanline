@@ -75,7 +75,7 @@ onward walk through the on-chain relay surfaces in depth, as the depth checklist
 
 ### 2.0 Coverage at a glance
 
-Every Attestcoin surface Humanline calls, where, and the test that proves it. **17 load-bearing
+Every Attestcoin surface Humanline calls, where, and the test that proves it. **19 load-bearing
 surfaces** (a wrong answer from any of them changes what the chain accepts, what a user is asked to
 sign, or what a lender is exposed to) and **1 informational** one. Counted strictly: an interface we
 declared, or a getter we only read in a test, is listed separately below and is not counted.
@@ -99,6 +99,8 @@ declared, or a getter we only read in a test, is listed separately below and is 
 | 15 | Proof builder `GET /api/v1/proof-by-tx/{ck}/{hash}` | `web/lib/relay/prover.ts:53`, `worker/src/proofs.ts` | the single proof a relay sends | `web/test/relay-proof.test.ts` (real fixtures), live self-relay |
 | 16 | Proof builder `POST /api/v1/proof-batch-by-tx/{ck}` | `web/lib/relay/prover.ts:62`, `worker/src/proofs.ts:216` | one continuity proof for a catch-up batch | `relay-proof.test.ts::normalizeBatch`, worker `proofs.test.ts` |
 | 17 | Proof builder `GET /api/v1/attested-height/{ck}` | `worker/src/relay.ts:453` (`waitUntilHeightAttested`) | the worker waits instead of fetching a proof that cannot exist | worker `relay.test.ts` |
+| 18 | `EvmV1Decoder.getTransactionType` | `contracts/src/ProvenSource.sol:158` | which chunk layout carries the signed chain id (types 0-4) | `HumanLinks.t.sol::test_TxChainIdHandlesLegacyAndOtherTypedTransactions`, `test_TxChainIdRefusesUnprotectedLegacy` |
+| 19 | `EvmV1Decoder.decodeTransactionType2` | `contracts/src/ProvenSource.sol:159` | a proved Ethereum transaction was *signed for* the claimed chain (`WrongTxChainId`), so a link, borrow, repay or payment cannot be replayed from another chain | `HumanLinks.t.sol::test_RefusesATransactionSignedForAnotherChain`, `test_TxChainIdReadsBothRealFixtures` |
 | i | `0x0FD3` `get_supported_chains` (informational) | `web/lib/hooks/use-precompiles.ts` | lists tracked chains on `/relay` | `testFork_ChainInfoReportsTheSourceChains` |
 
 **Declared and live-tested, but not counted as uses.** `get_attestation_bounds`,

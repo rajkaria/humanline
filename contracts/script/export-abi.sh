@@ -20,6 +20,9 @@ CONTRACTS=(
   HUSD
   HumanGate
   RelayReward
+  HumanLinks
+  CreditHistory
+  EthRepay
   IAttestedWorldID
 )
 

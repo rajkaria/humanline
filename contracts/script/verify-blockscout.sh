@@ -16,7 +16,7 @@ FORGE="${FORGE:-$ROOT_DIR/.tools/forge}"
 CAST="${CAST:-$ROOT_DIR/.tools/cast}"
 VERIFIER_URL="${VERIFIER_URL:-https://creditcoin-testnet.blockscout.com/api}"
 DEPLOYMENT="${DEPLOYMENT:-$ROOT_DIR/deployments/cc3-testnet.json}"
-ONLY="${ONLY:-AttestedWorldIDMainnet AttestedWorldIDSepolia HUSD HumanRegistry CreditLine HumanGate RelayReward}"
+ONLY="${ONLY:-AttestedWorldIDMainnet AttestedWorldIDSepolia HUSD HumanRegistry CreditLine HumanGate RelayReward HumanLinks CreditHistory EthRepay}"
 
 MAINNET_CHAIN_KEY=3
 MAINNET_IDENTITY_MANAGER=0xf7134CE138832c1456F2a91D64621eE90c2bddEa
@@ -75,7 +75,22 @@ verify AttestedWorldIDSepolia src/AttestedWorldID.sol:AttestedWorldID "construct
 verify HUSD src/HUSD.sol:HUSD ""
 verify HumanRegistry src/HumanRegistry.sol:HumanRegistry "constructor(address,string,string)" \
   "$WORLD_ID_ADDRESS" "$APP_ID" "$ACTION"
-if EXPOSURE="$(field config.exposurePerBondedCtc 2>/dev/null)"; then
+if HISTORY_ADDR="$(field contracts.CreditHistory 2>/dev/null)"; then
+  # CreditLine v3: v2's security budget plus the CreditHistory boost and repayFor.
+  verify CreditLine src/CreditLine.sol:CreditLine "constructor(address,address,uint256,uint256,uint256,uint64,uint64,uint64,uint64,uint256,address)" \
+    "$HUSD_ADDR" "$REGISTRY_ADDR" "$INITIAL_LIMIT" "$MAX_LIMIT" "$FEE_BPS" "$TERM_SECONDS" "$GRACE_SECONDS" \
+    "$(field config.securityChainKey)" "$(field config.sourceChainId)" "$(field config.exposurePerBondedCtc)" "$HISTORY_ADDR"
+  LINKS_ADDR="$(field contracts.HumanLinks)"
+  verify HumanLinks src/HumanLinks.sol:HumanLinks "constructor(address,uint64[],uint64[],uint64,uint32)" \
+    "$REGISTRY_ADDR" "[1,3]" "[11155111,1]" "$FINALITY_DEPTH" "$MIN_ATTESTORS"
+  verify CreditHistory src/CreditHistory.sol:CreditHistory \
+    "constructor(address,(uint64,uint64,address)[],(uint64,address,uint8)[],uint64,uint32,uint64,uint256,uint256)" \
+    "$LINKS_ADDR" "$(field config.crossChain.aavePools)" "$(field config.crossChain.reserves)" "$FINALITY_DEPTH" "$MIN_ATTESTORS" \
+    "$(field config.crossChain.minGapBlocks)" "$(field config.crossChain.boostBps)" "$(field config.crossChain.maxBoost)"
+  verify EthRepay src/EthRepay.sol:EthRepay "constructor(address,address,address,(uint64,uint64,address,uint8)[],uint64,uint32,uint8)" \
+    "$LINKS_ADDR" "$(field contracts.CreditLine)" "$(field config.crossChain.repayAddress)" "$(field config.crossChain.stablecoins)" \
+    "$FINALITY_DEPTH" "$MIN_ATTESTORS" 6
+elif EXPOSURE="$(field config.exposurePerBondedCtc 2>/dev/null)"; then
   # CreditLine v2: security budget bound to the World ID source chain's attestor bonds.
   verify CreditLine src/CreditLine.sol:CreditLine "constructor(address,address,uint256,uint256,uint256,uint64,uint64,uint64,uint64,uint256)" \
     "$HUSD_ADDR" "$REGISTRY_ADDR" "$INITIAL_LIMIT" "$MAX_LIMIT" "$FEE_BPS" "$TERM_SECONDS" "$GRACE_SECONDS" \

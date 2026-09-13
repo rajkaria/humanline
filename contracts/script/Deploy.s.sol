@@ -109,7 +109,8 @@ contract Deploy is Script {
             grace,
             useMainnet ? MAINNET_CHAIN_KEY : SEPOLIA_CHAIN_KEY,
             useMainnet ? uint64(1) : uint64(11_155_111),
-            EXPOSURE_PER_BONDED_CTC
+            EXPOSURE_PER_BONDED_CTC,
+            address(0) // CreditHistory: wired by script/DeployCrossChain.s.sol, which redeploys the line
         );
         HumanGate gate = new HumanGate(address(registry));
 

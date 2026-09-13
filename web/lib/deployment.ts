@@ -28,7 +28,10 @@ export type ContractKey =
   | "creditLine"
   | "husd"
   | "humanGate"
-  | "relayReward";
+  | "relayReward"
+  | "humanLinks"
+  | "creditHistory"
+  | "ethRepay";
 
 export type ContractMeta = {
   key: ContractKey;
@@ -109,6 +112,30 @@ export const CONTRACT_META: ContractMeta[] = [
       "Permissionless relayer vault: pays tCTC per fresh World ID root carried through it, so root liveness never depends on one operator.",
     envVar: "NEXT_PUBLIC_RELAY_REWARD_ADDRESS",
     aliases: ["relayreward", "relay_reward", "rewardvault", "relayvault"],
+  },
+  {
+    key: "humanLinks",
+    name: "HumanLinks",
+    blurb:
+      "Links Ethereum wallets to a human, by an Attestcoin-proved self-send carrying the link intent or by an EIP-712 signature. A wallet belongs to one human, forever.",
+    envVar: "NEXT_PUBLIC_HUMAN_LINKS_ADDRESS",
+    aliases: ["humanlinks", "human_links", "walletlinks"],
+  },
+  {
+    key: "creditHistory",
+    name: "CreditHistory",
+    blurb:
+      "Proves Aave V3 Borrow and Repay events from linked wallets through Attestcoin. Verified repaid dollars raise the limit, under anti-wash rules.",
+    envVar: "NEXT_PUBLIC_CREDIT_HISTORY_ADDRESS",
+    aliases: ["credithistory", "credit_history", "aavehistory"],
+  },
+  {
+    key: "ethRepay",
+    name: "EthRepay",
+    blurb:
+      "Repay a Creditcoin line from Ethereum: a proved USDC transfer to the repayment address settles the line through repayFor.",
+    envVar: "NEXT_PUBLIC_ETH_REPAY_ADDRESS",
+    aliases: ["ethrepay", "eth_repay", "repayfromethereum"],
   },
 ];
 

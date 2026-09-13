@@ -20,7 +20,10 @@ import { join } from "node:path";
 
 import {
   attestedWorldIdAbi,
+  creditHistoryAbi,
   creditLineAbi,
+  ethRepayAbi,
+  humanLinksAbi,
   humanGateAbi,
   humanRegistryAbi,
   husdAbi,
@@ -63,6 +66,9 @@ const PAIRS: Array<{ artifact: string; ours: readonly unknown[] }> = [
   { artifact: "CreditLine", ours: creditLineAbi },
   { artifact: "HUSD", ours: husdAbi },
   { artifact: "HumanGate", ours: humanGateAbi },
+  { artifact: "HumanLinks", ours: humanLinksAbi },
+  { artifact: "CreditHistory", ours: creditHistoryAbi },
+  { artifact: "EthRepay", ours: ethRepayAbi },
 ];
 
 describe("hand-written ABIs match the compiled artifacts", () => {

@@ -51,6 +51,11 @@
         "name": "exposurePerBondedCtc",
         "type": "uint256",
         "internalType": "uint256"
+      },
+      {
+        "name": "history",
+        "type": "address",
+        "internalType": "address"
       }
     ],
     "stateMutability": "nonpayable"
@@ -103,6 +108,19 @@
         "name": "",
         "type": "uint64",
         "internalType": "uint64"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "HISTORY",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
       }
     ],
     "stateMutability": "view"
@@ -206,6 +224,25 @@
   },
   {
     "type": "function",
+    "name": "boostOf",
+    "inputs": [
+      {
+        "name": "human",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "borrow",
     "inputs": [
       {
@@ -264,6 +301,25 @@
         "name": "",
         "type": "bool",
         "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "limitOf",
+    "inputs": [
+      {
+        "name": "human",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "stateMutability": "view"
@@ -423,6 +479,24 @@
     "type": "function",
     "name": "repay",
     "inputs": [
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "repayFor",
+    "inputs": [
+      {
+        "name": "human",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
       {
         "name": "amount",
         "type": "uint256",

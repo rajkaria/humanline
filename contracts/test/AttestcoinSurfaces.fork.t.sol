@@ -84,11 +84,11 @@ contract AttestcoinSurfacesForkTest is Fixtures {
         vm.etch(CHAIN_INFO, hex"00");
         vm.mockCall(CHAIN_INFO, abi.encodeWithSignature("get_chain_by_key(uint64)", uint64(1)), real);
 
-        CreditLine ok = new CreditLine(address(1), address(2), 1, 2, 100, 1, 1, 1, 11_155_111, 10e6);
+        CreditLine ok = new CreditLine(address(1), address(2), 1, 2, 100, 1, 1, 1, 11_155_111, 10e6, address(0));
         assertEq(ok.SOURCE_CHAIN_ID(), 11_155_111);
 
         vm.expectRevert();
-        new CreditLine(address(1), address(2), 1, 2, 100, 1, 1, 1, 1, 10e6);
+        new CreditLine(address(1), address(2), 1, 2, 100, 1, 1, 1, 1, 10e6, address(0));
     }
 
     function _chain(uint64 key) internal returns (ChainInfoResult memory) {

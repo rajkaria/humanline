@@ -15,17 +15,22 @@
 // not resolve and break `next build`. Humanline only ever needs the injected
 // provider, so this import is both smaller and the one that compiles.
 import { createConfig, http, injected } from "wagmi";
+import { mainnet, sepolia } from "wagmi/chains";
 
 import { creditcoinTestnet } from "@/lib/chains";
 
+// Sepolia and Ethereum are here for exactly two Ethereum-side writes a user makes to use their
+// Ethereum history: the link self-send and a USDC repayment. Everything else is still Creditcoin.
 export const wagmiConfig = createConfig({
-  chains: [creditcoinTestnet],
+  chains: [creditcoinTestnet, sepolia, mainnet],
   connectors: [injected({ shimDisconnect: true })],
   transports: {
     [creditcoinTestnet.id]: http(creditcoinTestnet.rpcUrls.default.http[0], {
       batch: true,
       retryCount: 2,
     }),
+    [sepolia.id]: http("https://ethereum-sepolia-rpc.publicnode.com", { retryCount: 1 }),
+    [mainnet.id]: http("https://ethereum-rpc.publicnode.com", { retryCount: 1 }),
   },
   ssr: true,
 });

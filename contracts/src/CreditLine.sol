@@ -8,6 +8,7 @@ import {ICreditLine} from "./interfaces/ICreditLine.sol";
 import {IHumanRegistry} from "./interfaces/IHumanRegistry.sol";
 import {AttestorStashLib} from "./interfaces/IAttestorStash.sol";
 import {ChainInfoLib, ChainInfoResult} from "./interfaces/IChainInfo.sol";
+import {ICreditHistory} from "./interfaces/ICreditHistory.sol";
 
 /// @title CreditLine
 /// @notice Unsecured revolving credit, one line per human, funded by an open lender pool.
@@ -46,6 +47,13 @@ import {ChainInfoLib, ChainInfoResult} from "./interfaces/IChainInfo.sol";
 ///      deployer claims (chainKey 3 → Ethereum chainId 1, chainKey 1 → Sepolia 11155111), so the
 ///      budget can never be read from the wrong chain by a copy-paste mistake.
 ///
+///      Cross-chain history (v3). When `HISTORY` is set, a human's limit is their line limit plus the
+///      boost `CreditHistory` computes from Aave V3 repayments proved from their linked Ethereum
+///      wallets, never above `MAX_LIMIT`. The boost only ever grows, so it can never push a line
+///      under its outstanding balance. `repayFor` lets anyone pay down a human's line, which is how a
+///      repayment proved on Ethereum (`EthRepay`) settles here; it cannot change who owes or who is
+///      credited, only how much is outstanding.
+///
 ///      No owner, no pause, no upgrade. Every parameter is an immutable constructor argument.
 contract CreditLine is ICreditLine {
     using SafeERC20 for IERC20;
@@ -76,6 +84,8 @@ contract CreditLine is ICreditLine {
     uint64 public immutable override SOURCE_CHAIN_ID;
     /// @inheritdoc ICreditLine
     uint256 public immutable override EXPOSURE_PER_BONDED_CTC;
+    /// @inheritdoc ICreditLine
+    address public immutable override HISTORY;
 
     /// @notice Ex-fee principal still out on loan across every line. This, not the borrowers'
     ///         fee-inclusive balances, is what the pool counts as an asset.
@@ -99,7 +109,8 @@ contract CreditLine is ICreditLine {
         uint64 grace,
         uint64 securityChainKey,
         uint64 sourceChainId,
-        uint256 exposurePerBondedCtc
+        uint256 exposurePerBondedCtc,
+        address history
     ) {
         if (exposurePerBondedCtc == 0) revert ZeroAmount();
         (bool exists, uint64 chainId) = _chainIdOf(securityChainKey);
@@ -115,6 +126,7 @@ contract CreditLine is ICreditLine {
         SECURITY_CHAIN_KEY = securityChainKey;
         SOURCE_CHAIN_ID = sourceChainId;
         EXPOSURE_PER_BONDED_CTC = exposurePerBondedCtc;
+        HISTORY = history;
     }
 
     // ---------------------------------------------------------------------------------------
@@ -187,7 +199,7 @@ contract CreditLine is ICreditLine {
         uint256 fee = (amount * FEE_BPS) / BPS;
         uint256 owed = amount + fee;
 
-        uint256 available = line.limit - line.principal;
+        uint256 available = _available(human, line);
         if (owed > available) revert OverLimit(owed, available);
 
         uint256 idle = IERC20(ASSET).balanceOf(address(this));
@@ -209,9 +221,18 @@ contract CreditLine is ICreditLine {
     /// @dev Overpayment is capped at the outstanding balance rather than rejected, so a borrower
     ///      racing a repayment against accrued state can always clear the line in one call.
     function repay(uint256 amount) external override {
+        _repay(_humanOf(msg.sender), amount);
+    }
+
+    /// @inheritdoc ICreditLine
+    /// @dev Same accounting as `repay`; the payer is the caller, the debtor is `human`.
+    function repayFor(uint256 human, uint256 amount) external override {
+        _repay(human, amount);
+    }
+
+    function _repay(uint256 human, uint256 amount) private {
         if (amount == 0) revert ZeroAmount();
 
-        uint256 human = _humanOf(msg.sender);
         Line storage line = _lines[human];
         if (line.openedAt == 0) revert NoLine(human);
 
@@ -275,7 +296,20 @@ contract CreditLine is ICreditLine {
     function availableCredit(uint256 human) external view override returns (uint256) {
         Line storage line = _lines[human];
         if (line.openedAt == 0 || line.frozen) return 0;
-        return line.limit - line.principal;
+        return _available(human, line);
+    }
+
+    /// @inheritdoc ICreditLine
+    function limitOf(uint256 human) public view override returns (uint256) {
+        Line storage line = _lines[human];
+        if (line.openedAt == 0) return 0;
+        return _limitOf(human, line);
+    }
+
+    /// @inheritdoc ICreditLine
+    function boostOf(uint256 human) public view override returns (uint256) {
+        if (HISTORY == address(0)) return 0;
+        return ICreditHistory(HISTORY).boostOf(human);
     }
 
     /// @inheritdoc ICreditLine
@@ -321,6 +355,18 @@ contract CreditLine is ICreditLine {
     // ---------------------------------------------------------------------------------------
     //                                        INTERNALS
     // ---------------------------------------------------------------------------------------
+
+    /// @dev Line limit plus proved-history boost, capped at `MAX_LIMIT` (but never below the line's own
+    ///      limit, which `_settle` already keeps at or under `MAX_LIMIT`).
+    function _limitOf(uint256 human, Line storage line) private view returns (uint256 limit) {
+        limit = line.limit + boostOf(human);
+        if (limit > MAX_LIMIT) limit = line.limit > MAX_LIMIT ? line.limit : MAX_LIMIT;
+    }
+
+    function _available(uint256 human, Line storage line) private view returns (uint256) {
+        uint256 limit = _limitOf(human, line);
+        return limit > line.principal ? limit - line.principal : 0;
+    }
 
     /// @dev A cleared balance re-prices the limit: paid on time and it grows by a quarter, capped;
     ///      paid late and it halves, floored at half the starting limit so a late payer keeps a

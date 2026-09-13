@@ -584,6 +584,34 @@ export const creditLineAbi = [
     inputs: [{ name: "human", type: "uint256" }],
     outputs: [{ type: "bool" }],
   },
+  /** v3: the CreditHistory whose proved Aave repayments boost limits (zero on v2 lines). */
+  { type: "function", name: "HISTORY", stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
+  /** v3: anyone may pay down a human's line; `EthRepay` settles Ethereum-side payments this way. */
+  {
+    type: "function",
+    name: "repayFor",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "human", type: "uint256" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [],
+  },
+  /** v3: line limit plus proved-history boost, capped at MAX_LIMIT. */
+  {
+    type: "function",
+    name: "limitOf",
+    stateMutability: "view",
+    inputs: [{ name: "human", type: "uint256" }],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "boostOf",
+    stateMutability: "view",
+    inputs: [{ name: "human", type: "uint256" }],
+    outputs: [{ type: "uint256" }],
+  },
 ] as const;
 
 /** `hUSD` — the demo stablecoin, ERC-20 with a rate-limited faucet. */
@@ -1002,4 +1030,507 @@ export const erc20Abi = [
     ],
     outputs: [{ type: "bool" }],
   },
+] as const;
+
+// ------------------------------------------------------------------------------------------
+//                       Cross-chain credit identity (HumanLinks, CreditHistory, EthRepay)
+// ------------------------------------------------------------------------------------------
+
+/** `SourceProof`: one proof-builder proof of one Ethereum transaction, as a Solidity struct. */
+const sourceProofParam = {
+  name: "proof",
+  type: "tuple",
+  components: [
+    { name: "chainKey", type: "uint64" },
+    { name: "blockHeight", type: "uint64" },
+    { name: "encodedTransaction", type: "bytes" },
+    {
+      name: "merkleProof",
+      type: "tuple",
+      components: [
+        { name: "root", type: "bytes32" },
+        {
+          name: "siblings",
+          type: "tuple[]",
+          components: [
+            { name: "hash", type: "bytes32" },
+            { name: "isLeft", type: "bool" },
+          ],
+        },
+      ],
+    },
+    {
+      name: "continuityProof",
+      type: "tuple",
+      components: [
+        { name: "lowerEndpointDigest", type: "bytes32" },
+        { name: "roots", type: "bytes32[]" },
+      ],
+    },
+  ],
+} as const;
+
+/** Reverts every `ProvenSource` consumer can raise before it reads the transaction's meaning. */
+const provenSourceAbi = [
+  { type: "function", name: "FINALITY_DEPTH", stateMutability: "view", inputs: [], outputs: [{ type: "uint64" }] },
+  { type: "function", name: "MIN_ATTESTORS", stateMutability: "view", inputs: [], outputs: [{ type: "uint32" }] },
+  {
+    type: "function",
+    name: "chainIdOf",
+    stateMutability: "view",
+    inputs: [{ name: "chainKey", type: "uint64" }],
+    outputs: [{ type: "uint64" }],
+  },
+  {
+    type: "function",
+    name: "consumed",
+    stateMutability: "view",
+    inputs: [{ name: "id", type: "bytes32" }],
+    outputs: [{ type: "bool" }],
+  },
+  {
+    type: "function",
+    name: "logIdOf",
+    stateMutability: "pure",
+    inputs: [
+      { name: "queryId", type: "bytes32" },
+      { name: "logIndex", type: "uint256" },
+    ],
+    outputs: [{ type: "bytes32" }],
+  },
+  { type: "error", name: "BadSourceConfig", inputs: [] },
+  {
+    type: "error",
+    name: "WrongSourceChain",
+    inputs: [
+      { name: "chainKey", type: "uint64" },
+      { name: "recordedChainId", type: "uint64" },
+      { name: "claimedChainId", type: "uint64" },
+    ],
+  },
+  { type: "error", name: "UnsupportedSourceChain", inputs: [{ name: "chainKey", type: "uint64" }] },
+  { type: "error", name: "ProofRejected", inputs: [] },
+  {
+    type: "error",
+    name: "NotFinal",
+    inputs: [
+      { name: "attestedTip", type: "uint64" },
+      { name: "blockHeight", type: "uint64" },
+    ],
+  },
+  {
+    type: "error",
+    name: "ThinQuorum",
+    inputs: [
+      { name: "attestors", type: "uint32" },
+      { name: "required", type: "uint32" },
+    ],
+  },
+  { type: "error", name: "SourceTxReverted", inputs: [] },
+  {
+    type: "error",
+    name: "WrongTxChainId",
+    inputs: [
+      { name: "signedFor", type: "uint64" },
+      { name: "expected", type: "uint64" },
+    ],
+  },
+  { type: "error", name: "UnprotectedLegacyTx", inputs: [] },
+  { type: "error", name: "UnsupportedTxType", inputs: [{ name: "txType", type: "uint8" }] },
+  {
+    type: "error",
+    name: "LogIndexOutOfRange",
+    inputs: [
+      { name: "logIndex", type: "uint256" },
+      { name: "logCount", type: "uint256" },
+    ],
+  },
+  { type: "error", name: "AlreadyConsumed", inputs: [{ name: "id", type: "bytes32" }] },
+] as const;
+
+/** `HumanLinks` — one human, many Ethereum wallets; each wallet belongs to one human forever. */
+export const humanLinksAbi = [
+  ...provenSourceAbi,
+  { type: "function", name: "linkBySourceTx", stateMutability: "nonpayable", inputs: [sourceProofParam], outputs: [] },
+  {
+    type: "function",
+    name: "linkBySignature",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "wallet", type: "address" },
+      { name: "deadline", type: "uint256" },
+      { name: "signature", type: "bytes" },
+    ],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "humanOfWallet",
+    stateMutability: "view",
+    inputs: [{ name: "wallet", type: "address" }],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "linkOf",
+    stateMutability: "view",
+    inputs: [{ name: "wallet", type: "address" }],
+    outputs: [
+      {
+        type: "tuple",
+        components: [
+          { name: "human", type: "uint256" },
+          { name: "chainKey", type: "uint64" },
+          { name: "blockHeight", type: "uint64" },
+          { name: "linkedAt", type: "uint64" },
+          { name: "method", type: "uint8" },
+        ],
+      },
+    ],
+  },
+  {
+    type: "function",
+    name: "linksOf",
+    stateMutability: "view",
+    inputs: [{ name: "human", type: "uint256" }],
+    outputs: [{ type: "address[]" }],
+  },
+  {
+    type: "function",
+    name: "linkCount",
+    stateMutability: "view",
+    inputs: [{ name: "human", type: "uint256" }],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "linkIntent",
+    stateMutability: "view",
+    inputs: [
+      { name: "human", type: "uint256" },
+      { name: "creditcoinWallet", type: "address" },
+    ],
+    outputs: [{ type: "bytes" }],
+  },
+  {
+    type: "function",
+    name: "linkDigest",
+    stateMutability: "view",
+    inputs: [
+      { name: "human", type: "uint256" },
+      { name: "creditcoinWallet", type: "address" },
+      { name: "wallet", type: "address" },
+      { name: "deadline", type: "uint256" },
+    ],
+    outputs: [{ type: "bytes32" }],
+  },
+  {
+    type: "function",
+    name: "txChainId",
+    stateMutability: "pure",
+    inputs: [{ name: "encodedTx", type: "bytes" }],
+    outputs: [{ type: "uint64" }],
+  },
+  { type: "function", name: "MAX_LINKS", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "LINK_MARKER", stateMutability: "view", inputs: [], outputs: [{ type: "bytes4" }] },
+  { type: "function", name: "REGISTRY", stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
+  {
+    type: "event",
+    name: "WalletLinked",
+    inputs: [
+      { name: "human", type: "uint256", indexed: true },
+      { name: "wallet", type: "address", indexed: true },
+      { name: "method", type: "uint8", indexed: false },
+      { name: "chainKey", type: "uint64", indexed: false },
+      { name: "blockHeight", type: "uint64", indexed: false },
+      { name: "queryId", type: "bytes32", indexed: false },
+    ],
+    anonymous: false,
+  },
+  { type: "error", name: "NotHuman", inputs: [{ name: "caller", type: "address" }] },
+  {
+    type: "error",
+    name: "NotSelfSend",
+    inputs: [
+      { name: "from", type: "address" },
+      { name: "to", type: "address" },
+    ],
+  },
+  { type: "error", name: "NotALinkIntent", inputs: [] },
+  {
+    type: "error",
+    name: "WrongLinkTarget",
+    inputs: [
+      { name: "chainId", type: "uint256" },
+      { name: "target", type: "address" },
+    ],
+  },
+  {
+    type: "error",
+    name: "IntentForAnotherHuman",
+    inputs: [
+      { name: "intended", type: "uint256" },
+      { name: "caller", type: "uint256" },
+    ],
+  },
+  {
+    type: "error",
+    name: "IntentForAnotherWallet",
+    inputs: [
+      { name: "intended", type: "address" },
+      { name: "caller", type: "address" },
+    ],
+  },
+  {
+    type: "error",
+    name: "WalletAlreadyLinked",
+    inputs: [
+      { name: "wallet", type: "address" },
+      { name: "human", type: "uint256" },
+    ],
+  },
+  { type: "error", name: "TooManyLinks", inputs: [{ name: "human", type: "uint256" }] },
+  { type: "error", name: "SignatureExpired", inputs: [{ name: "deadline", type: "uint256" }] },
+  {
+    type: "error",
+    name: "BadSignature",
+    inputs: [
+      { name: "recovered", type: "address" },
+      { name: "wallet", type: "address" },
+    ],
+  },
+  { type: "error", name: "ZeroWallet", inputs: [] },
+] as const;
+
+/** `CreditHistory` — Aave V3 Borrow/Repay proofs from linked wallets, turned into a bounded limit boost. */
+export const creditHistoryAbi = [
+  ...provenSourceAbi,
+  {
+    type: "function",
+    name: "proveBorrow",
+    stateMutability: "nonpayable",
+    inputs: [sourceProofParam, { name: "logIndex", type: "uint256" }],
+    outputs: [{ name: "borrowId", type: "bytes32" }],
+  },
+  {
+    type: "function",
+    name: "proveRepay",
+    stateMutability: "nonpayable",
+    inputs: [sourceProofParam, { name: "logIndex", type: "uint256" }, { name: "borrowId", type: "bytes32" }],
+    outputs: [{ name: "creditedUsd", type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "boostOf",
+    stateMutability: "view",
+    inputs: [{ name: "human", type: "uint256" }],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "repaidUsdOf",
+    stateMutability: "view",
+    inputs: [{ name: "human", type: "uint256" }],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "repaymentsOf",
+    stateMutability: "view",
+    inputs: [{ name: "human", type: "uint256" }],
+    outputs: [{ type: "uint32" }],
+  },
+  {
+    type: "function",
+    name: "borrowOf",
+    stateMutability: "view",
+    inputs: [{ name: "borrowId", type: "bytes32" }],
+    outputs: [
+      {
+        type: "tuple",
+        components: [
+          { name: "human", type: "uint256" },
+          { name: "wallet", type: "address" },
+          { name: "reserve", type: "address" },
+          { name: "chainKey", type: "uint64" },
+          { name: "blockHeight", type: "uint64" },
+          { name: "amount", type: "uint256" },
+          { name: "remaining", type: "uint256" },
+        ],
+      },
+    ],
+  },
+  {
+    type: "function",
+    name: "poolOf",
+    stateMutability: "view",
+    inputs: [{ name: "chainKey", type: "uint64" }],
+    outputs: [{ type: "address" }],
+  },
+  {
+    type: "function",
+    name: "reserveDecimals",
+    stateMutability: "view",
+    inputs: [
+      { name: "chainKey", type: "uint64" },
+      { name: "token", type: "address" },
+    ],
+    outputs: [{ type: "uint8" }],
+  },
+  { type: "function", name: "LINKS", stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
+  { type: "function", name: "MIN_GAP_BLOCKS", stateMutability: "view", inputs: [], outputs: [{ type: "uint64" }] },
+  { type: "function", name: "BOOST_BPS", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "MAX_BOOST", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  {
+    type: "event",
+    name: "BorrowProven",
+    inputs: [
+      { name: "human", type: "uint256", indexed: true },
+      { name: "wallet", type: "address", indexed: true },
+      { name: "borrowId", type: "bytes32", indexed: true },
+      { name: "chainKey", type: "uint64", indexed: false },
+      { name: "blockHeight", type: "uint64", indexed: false },
+      { name: "reserve", type: "address", indexed: false },
+      { name: "amount", type: "uint256", indexed: false },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "RepaymentProven",
+    inputs: [
+      { name: "human", type: "uint256", indexed: true },
+      { name: "wallet", type: "address", indexed: true },
+      { name: "borrowId", type: "bytes32", indexed: true },
+      { name: "repayId", type: "bytes32", indexed: false },
+      { name: "amount", type: "uint256", indexed: false },
+      { name: "creditedUsd", type: "uint256", indexed: false },
+      { name: "totalRepaidUsd", type: "uint256", indexed: false },
+      { name: "boost", type: "uint256", indexed: false },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "error",
+    name: "UnsupportedPool",
+    inputs: [
+      { name: "chainKey", type: "uint64" },
+      { name: "emitter", type: "address" },
+    ],
+  },
+  { type: "error", name: "NotABorrowLog", inputs: [] },
+  { type: "error", name: "NotARepayLog", inputs: [] },
+  {
+    type: "error",
+    name: "UnsupportedReserve",
+    inputs: [
+      { name: "chainKey", type: "uint64" },
+      { name: "reserve", type: "address" },
+    ],
+  },
+  {
+    type: "error",
+    name: "BorrowedForSomeoneElse",
+    inputs: [
+      { name: "user", type: "address" },
+      { name: "onBehalfOf", type: "address" },
+    ],
+  },
+  {
+    type: "error",
+    name: "RepaidBySomeoneElse",
+    inputs: [
+      { name: "user", type: "address" },
+      { name: "repayer", type: "address" },
+    ],
+  },
+  { type: "error", name: "RepaidWithATokens", inputs: [] },
+  { type: "error", name: "WalletNotLinked", inputs: [{ name: "wallet", type: "address" }] },
+  { type: "error", name: "UnknownBorrow", inputs: [{ name: "borrowId", type: "bytes32" }] },
+  { type: "error", name: "BorrowMismatch", inputs: [{ name: "borrowId", type: "bytes32" }] },
+  {
+    type: "error",
+    name: "TooSoon",
+    inputs: [
+      { name: "repayHeight", type: "uint64" },
+      { name: "earliest", type: "uint64" },
+    ],
+  },
+  { type: "error", name: "BorrowFullyRepaid", inputs: [{ name: "borrowId", type: "bytes32" }] },
+  { type: "error", name: "BadParameters", inputs: [] },
+] as const;
+
+/** `EthRepay` — a proved stablecoin transfer on Ethereum repays a Creditcoin line. */
+export const ethRepayAbi = [
+  ...provenSourceAbi,
+  {
+    type: "function",
+    name: "creditRepayment",
+    stateMutability: "nonpayable",
+    inputs: [sourceProofParam, { name: "logIndex", type: "uint256" }],
+    outputs: [{ name: "applied", type: "uint256" }],
+  },
+  { type: "function", name: "reserve", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  {
+    type: "function",
+    name: "overpaidOf",
+    stateMutability: "view",
+    inputs: [{ name: "human", type: "uint256" }],
+    outputs: [{ type: "uint256" }],
+  },
+  { type: "function", name: "totalApplied", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "REPAY_ADDRESS", stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
+  { type: "function", name: "LINKS", stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
+  { type: "function", name: "CREDIT_LINE", stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
+  { type: "function", name: "ASSET", stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
+  {
+    type: "function",
+    name: "stablecoinOf",
+    stateMutability: "view",
+    inputs: [{ name: "chainKey", type: "uint64" }],
+    outputs: [{ type: "address" }],
+  },
+  {
+    type: "function",
+    name: "stablecoinDecimalsOf",
+    stateMutability: "view",
+    inputs: [{ name: "chainKey", type: "uint64" }],
+    outputs: [{ type: "uint8" }],
+  },
+  {
+    type: "event",
+    name: "RepaymentCredited",
+    inputs: [
+      { name: "human", type: "uint256", indexed: true },
+      { name: "wallet", type: "address", indexed: true },
+      { name: "paymentId", type: "bytes32", indexed: true },
+      { name: "chainKey", type: "uint64", indexed: false },
+      { name: "blockHeight", type: "uint64", indexed: false },
+      { name: "sourceAmount", type: "uint256", indexed: false },
+      { name: "applied", type: "uint256", indexed: false },
+      { name: "overpaid", type: "uint256", indexed: false },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "error",
+    name: "NotAStablecoinTransfer",
+    inputs: [
+      { name: "chainKey", type: "uint64" },
+      { name: "emitter", type: "address" },
+    ],
+  },
+  { type: "error", name: "NotToRepayAddress", inputs: [{ name: "to", type: "address" }] },
+  { type: "error", name: "WalletNotLinked", inputs: [{ name: "wallet", type: "address" }] },
+  {
+    type: "error",
+    name: "ReserveShort",
+    inputs: [
+      { name: "needed", type: "uint256" },
+      { name: "available", type: "uint256" },
+    ],
+  },
+  { type: "error", name: "ZeroTransfer", inputs: [] },
+  { type: "error", name: "BadParameters", inputs: [] },
+  { type: "error", name: "Reentrancy", inputs: [] },
 ] as const;

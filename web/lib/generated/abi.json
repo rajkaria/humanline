@@ -468,6 +468,11 @@
           "name": "exposurePerBondedCtc",
           "type": "uint256",
           "internalType": "uint256"
+        },
+        {
+          "name": "history",
+          "type": "address",
+          "internalType": "address"
         }
       ],
       "stateMutability": "nonpayable"
@@ -520,6 +525,19 @@
           "name": "",
           "type": "uint64",
           "internalType": "uint64"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "HISTORY",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "address"
         }
       ],
       "stateMutability": "view"
@@ -623,6 +641,25 @@
     },
     {
       "type": "function",
+      "name": "boostOf",
+      "inputs": [
+        {
+          "name": "human",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
       "name": "borrow",
       "inputs": [
         {
@@ -681,6 +718,25 @@
           "name": "",
           "type": "bool",
           "internalType": "bool"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "limitOf",
+      "inputs": [
+        {
+          "name": "human",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
         }
       ],
       "stateMutability": "view"
@@ -840,6 +896,24 @@
       "type": "function",
       "name": "repay",
       "inputs": [
+        {
+          "name": "amount",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "repayFor",
+      "inputs": [
+        {
+          "name": "human",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
         {
           "name": "amount",
           "type": "uint256",
@@ -1339,6 +1413,728 @@
       "inputs": []
     }
   ],
+  "EthRepay": [
+    {
+      "type": "constructor",
+      "inputs": [
+        {
+          "name": "links",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "creditLine",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "repayAddress",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "stablecoins",
+          "type": "tuple[]",
+          "internalType": "struct EthRepay.Stablecoin[]",
+          "components": [
+            {
+              "name": "chainKey",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "chainId",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "token",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "decimals",
+              "type": "uint8",
+              "internalType": "uint8"
+            }
+          ]
+        },
+        {
+          "name": "finalityDepth",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "minAttestors",
+          "type": "uint32",
+          "internalType": "uint32"
+        },
+        {
+          "name": "assetDecimals",
+          "type": "uint8",
+          "internalType": "uint8"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "ASSET",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "ASSET_DECIMALS",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8",
+          "internalType": "uint8"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "CREDIT_LINE",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "FINALITY_DEPTH",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "LINKS",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "MIN_ATTESTORS",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32",
+          "internalType": "uint32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "REPAY_ADDRESS",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "VERIFIER",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "contract INativeQueryVerifier"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "chainIdOf",
+      "inputs": [
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "chainId",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "consumed",
+      "inputs": [
+        {
+          "name": "id",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "creditRepayment",
+      "inputs": [
+        {
+          "name": "proof",
+          "type": "tuple",
+          "internalType": "struct SourceProof",
+          "components": [
+            {
+              "name": "chainKey",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "blockHeight",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "encodedTransaction",
+              "type": "bytes",
+              "internalType": "bytes"
+            },
+            {
+              "name": "merkleProof",
+              "type": "tuple",
+              "internalType": "struct INativeQueryVerifier.MerkleProof",
+              "components": [
+                {
+                  "name": "root",
+                  "type": "bytes32",
+                  "internalType": "bytes32"
+                },
+                {
+                  "name": "siblings",
+                  "type": "tuple[]",
+                  "internalType": "struct INativeQueryVerifier.MerkleProofEntry[]",
+                  "components": [
+                    {
+                      "name": "hash",
+                      "type": "bytes32",
+                      "internalType": "bytes32"
+                    },
+                    {
+                      "name": "isLeft",
+                      "type": "bool",
+                      "internalType": "bool"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "continuityProof",
+              "type": "tuple",
+              "internalType": "struct INativeQueryVerifier.ContinuityProof",
+              "components": [
+                {
+                  "name": "lowerEndpointDigest",
+                  "type": "bytes32",
+                  "internalType": "bytes32"
+                },
+                {
+                  "name": "roots",
+                  "type": "bytes32[]",
+                  "internalType": "bytes32[]"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "logIndex",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "applied",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "logIdOf",
+      "inputs": [
+        {
+          "name": "queryId",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "logIndex",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "pure"
+    },
+    {
+      "type": "function",
+      "name": "overpaidOf",
+      "inputs": [
+        {
+          "name": "human",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "queryIdOf",
+      "inputs": [
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "blockHeight",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "txIndex",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "id",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "pure"
+    },
+    {
+      "type": "function",
+      "name": "reserve",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "stablecoinDecimalsOf",
+      "inputs": [
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8",
+          "internalType": "uint8"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "stablecoinOf",
+      "inputs": [
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "token",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "totalApplied",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "txChainId",
+      "inputs": [
+        {
+          "name": "encodedTx",
+          "type": "bytes",
+          "internalType": "bytes"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ],
+      "stateMutability": "pure"
+    },
+    {
+      "type": "event",
+      "name": "RepaymentCredited",
+      "inputs": [
+        {
+          "name": "human",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "wallet",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "paymentId",
+          "type": "bytes32",
+          "indexed": true,
+          "internalType": "bytes32"
+        },
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "indexed": false,
+          "internalType": "uint64"
+        },
+        {
+          "name": "blockHeight",
+          "type": "uint64",
+          "indexed": false,
+          "internalType": "uint64"
+        },
+        {
+          "name": "sourceAmount",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        },
+        {
+          "name": "applied",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        },
+        {
+          "name": "overpaid",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "error",
+      "name": "AlreadyConsumed",
+      "inputs": [
+        {
+          "name": "id",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "BadParameters",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "BadSourceConfig",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "LogIndexOutOfRange",
+      "inputs": [
+        {
+          "name": "logIndex",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "logCount",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "NotAStablecoinTransfer",
+      "inputs": [
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "emitter",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "NotFinal",
+      "inputs": [
+        {
+          "name": "attestedTip",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "blockHeight",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "NotToRepayAddress",
+      "inputs": [
+        {
+          "name": "to",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ProofRejected",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "Reentrancy",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ReserveShort",
+      "inputs": [
+        {
+          "name": "needed",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "available",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "SafeERC20FailedOperation",
+      "inputs": [
+        {
+          "name": "token",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "SourceTxReverted",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ThinQuorum",
+      "inputs": [
+        {
+          "name": "attestors",
+          "type": "uint32",
+          "internalType": "uint32"
+        },
+        {
+          "name": "required",
+          "type": "uint32",
+          "internalType": "uint32"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "UnprotectedLegacyTx",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "UnsupportedSourceChain",
+      "inputs": [
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "UnsupportedTxType",
+      "inputs": [
+        {
+          "name": "txType",
+          "type": "uint8",
+          "internalType": "uint8"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "WalletNotLinked",
+      "inputs": [
+        {
+          "name": "wallet",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "WrongSourceChain",
+      "inputs": [
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "recordedChainId",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "claimedChainId",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "WrongTxChainId",
+      "inputs": [
+        {
+          "name": "signedFor",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "expected",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ZeroTransfer",
+      "inputs": []
+    }
+  ],
   "HumanRegistry": [
     {
       "type": "constructor",
@@ -1618,6 +2414,899 @@
     {
       "type": "error",
       "name": "ZeroNullifier",
+      "inputs": []
+    }
+  ],
+  "HumanLinks": [
+    {
+      "type": "constructor",
+      "inputs": [
+        {
+          "name": "registry",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "chainKeys",
+          "type": "uint64[]",
+          "internalType": "uint64[]"
+        },
+        {
+          "name": "chainIds",
+          "type": "uint64[]",
+          "internalType": "uint64[]"
+        },
+        {
+          "name": "finalityDepth",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "minAttestors",
+          "type": "uint32",
+          "internalType": "uint32"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "FINALITY_DEPTH",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "LINK_MARKER",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes4",
+          "internalType": "bytes4"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "MAX_LINKS",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "MIN_ATTESTORS",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32",
+          "internalType": "uint32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "REGISTRY",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "VERIFIER",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "contract INativeQueryVerifier"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "chainIdOf",
+      "inputs": [
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "chainId",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "consumed",
+      "inputs": [
+        {
+          "name": "id",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "eip712Domain",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "fields",
+          "type": "bytes1",
+          "internalType": "bytes1"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "version",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "chainId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "verifyingContract",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "salt",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "extensions",
+          "type": "uint256[]",
+          "internalType": "uint256[]"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "humanOfWallet",
+      "inputs": [
+        {
+          "name": "wallet",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "linkBySignature",
+      "inputs": [
+        {
+          "name": "wallet",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "deadline",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "signature",
+          "type": "bytes",
+          "internalType": "bytes"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "linkBySourceTx",
+      "inputs": [
+        {
+          "name": "proof",
+          "type": "tuple",
+          "internalType": "struct SourceProof",
+          "components": [
+            {
+              "name": "chainKey",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "blockHeight",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "encodedTransaction",
+              "type": "bytes",
+              "internalType": "bytes"
+            },
+            {
+              "name": "merkleProof",
+              "type": "tuple",
+              "internalType": "struct INativeQueryVerifier.MerkleProof",
+              "components": [
+                {
+                  "name": "root",
+                  "type": "bytes32",
+                  "internalType": "bytes32"
+                },
+                {
+                  "name": "siblings",
+                  "type": "tuple[]",
+                  "internalType": "struct INativeQueryVerifier.MerkleProofEntry[]",
+                  "components": [
+                    {
+                      "name": "hash",
+                      "type": "bytes32",
+                      "internalType": "bytes32"
+                    },
+                    {
+                      "name": "isLeft",
+                      "type": "bool",
+                      "internalType": "bool"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "continuityProof",
+              "type": "tuple",
+              "internalType": "struct INativeQueryVerifier.ContinuityProof",
+              "components": [
+                {
+                  "name": "lowerEndpointDigest",
+                  "type": "bytes32",
+                  "internalType": "bytes32"
+                },
+                {
+                  "name": "roots",
+                  "type": "bytes32[]",
+                  "internalType": "bytes32[]"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "linkCount",
+      "inputs": [
+        {
+          "name": "human",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "linkDigest",
+      "inputs": [
+        {
+          "name": "human",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "creditcoinWallet",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "wallet",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "deadline",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "linkIntent",
+      "inputs": [
+        {
+          "name": "human",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "creditcoinWallet",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes",
+          "internalType": "bytes"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "linkOf",
+      "inputs": [
+        {
+          "name": "wallet",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "tuple",
+          "internalType": "struct IHumanLinks.Link",
+          "components": [
+            {
+              "name": "human",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "chainKey",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "blockHeight",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "linkedAt",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "method",
+              "type": "uint8",
+              "internalType": "enum IHumanLinks.Method"
+            }
+          ]
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "linksOf",
+      "inputs": [
+        {
+          "name": "human",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address[]",
+          "internalType": "address[]"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "logIdOf",
+      "inputs": [
+        {
+          "name": "queryId",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "logIndex",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "pure"
+    },
+    {
+      "type": "function",
+      "name": "queryIdOf",
+      "inputs": [
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "blockHeight",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "txIndex",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "id",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "pure"
+    },
+    {
+      "type": "function",
+      "name": "txChainId",
+      "inputs": [
+        {
+          "name": "encodedTx",
+          "type": "bytes",
+          "internalType": "bytes"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ],
+      "stateMutability": "pure"
+    },
+    {
+      "type": "event",
+      "name": "EIP712DomainChanged",
+      "inputs": [],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "WalletLinked",
+      "inputs": [
+        {
+          "name": "human",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "wallet",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "method",
+          "type": "uint8",
+          "indexed": false,
+          "internalType": "enum IHumanLinks.Method"
+        },
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "indexed": false,
+          "internalType": "uint64"
+        },
+        {
+          "name": "blockHeight",
+          "type": "uint64",
+          "indexed": false,
+          "internalType": "uint64"
+        },
+        {
+          "name": "queryId",
+          "type": "bytes32",
+          "indexed": false,
+          "internalType": "bytes32"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "error",
+      "name": "AlreadyConsumed",
+      "inputs": [
+        {
+          "name": "id",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "BadSignature",
+      "inputs": [
+        {
+          "name": "recovered",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "wallet",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "BadSourceConfig",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ECDSAInvalidSignature",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ECDSAInvalidSignatureLength",
+      "inputs": [
+        {
+          "name": "length",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ECDSAInvalidSignatureS",
+      "inputs": [
+        {
+          "name": "s",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "IntentForAnotherHuman",
+      "inputs": [
+        {
+          "name": "intended",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "caller",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "IntentForAnotherWallet",
+      "inputs": [
+        {
+          "name": "intended",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "caller",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "InvalidShortString",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "LogIndexOutOfRange",
+      "inputs": [
+        {
+          "name": "logIndex",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "logCount",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "NotALinkIntent",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "NotFinal",
+      "inputs": [
+        {
+          "name": "attestedTip",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "blockHeight",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "NotHuman",
+      "inputs": [
+        {
+          "name": "caller",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "NotSelfSend",
+      "inputs": [
+        {
+          "name": "from",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "to",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ProofRejected",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "SignatureExpired",
+      "inputs": [
+        {
+          "name": "deadline",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "SourceTxReverted",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "StringTooLong",
+      "inputs": [
+        {
+          "name": "str",
+          "type": "string",
+          "internalType": "string"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ThinQuorum",
+      "inputs": [
+        {
+          "name": "attestors",
+          "type": "uint32",
+          "internalType": "uint32"
+        },
+        {
+          "name": "required",
+          "type": "uint32",
+          "internalType": "uint32"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "TooManyLinks",
+      "inputs": [
+        {
+          "name": "human",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "UnprotectedLegacyTx",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "UnsupportedSourceChain",
+      "inputs": [
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "UnsupportedTxType",
+      "inputs": [
+        {
+          "name": "txType",
+          "type": "uint8",
+          "internalType": "uint8"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "WalletAlreadyLinked",
+      "inputs": [
+        {
+          "name": "wallet",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "human",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "WrongLinkTarget",
+      "inputs": [
+        {
+          "name": "chainId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "target",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "WrongSourceChain",
+      "inputs": [
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "recordedChainId",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "claimedChainId",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "WrongTxChainId",
+      "inputs": [
+        {
+          "name": "signedFor",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "expected",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ZeroWallet",
       "inputs": []
     }
   ],
@@ -3249,6 +4938,1010 @@
           "name": "wallet",
           "type": "address",
           "internalType": "address"
+        }
+      ]
+    }
+  ],
+  "CreditHistory": [
+    {
+      "type": "constructor",
+      "inputs": [
+        {
+          "name": "links",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "pools",
+          "type": "tuple[]",
+          "internalType": "struct ICreditHistory.AavePool[]",
+          "components": [
+            {
+              "name": "chainKey",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "chainId",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "pool",
+              "type": "address",
+              "internalType": "address"
+            }
+          ]
+        },
+        {
+          "name": "reserves",
+          "type": "tuple[]",
+          "internalType": "struct ICreditHistory.Reserve[]",
+          "components": [
+            {
+              "name": "chainKey",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "token",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "decimals",
+              "type": "uint8",
+              "internalType": "uint8"
+            }
+          ]
+        },
+        {
+          "name": "finalityDepth",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "minAttestors",
+          "type": "uint32",
+          "internalType": "uint32"
+        },
+        {
+          "name": "minGapBlocks",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "boostBps",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "maxBoost",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "BOOST_BPS",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "FINALITY_DEPTH",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "LINKS",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "MAX_BOOST",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "MIN_ATTESTORS",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32",
+          "internalType": "uint32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "MIN_GAP_BLOCKS",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "VERIFIER",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "contract INativeQueryVerifier"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "boostOf",
+      "inputs": [
+        {
+          "name": "human",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "borrowOf",
+      "inputs": [
+        {
+          "name": "borrowId",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "tuple",
+          "internalType": "struct ICreditHistory.BorrowRecord",
+          "components": [
+            {
+              "name": "human",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "wallet",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "reserve",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "chainKey",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "blockHeight",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "remaining",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ]
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "chainIdOf",
+      "inputs": [
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "chainId",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "consumed",
+      "inputs": [
+        {
+          "name": "id",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "logIdOf",
+      "inputs": [
+        {
+          "name": "queryId",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "logIndex",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "pure"
+    },
+    {
+      "type": "function",
+      "name": "poolOf",
+      "inputs": [
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "pool",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "proveBorrow",
+      "inputs": [
+        {
+          "name": "proof",
+          "type": "tuple",
+          "internalType": "struct SourceProof",
+          "components": [
+            {
+              "name": "chainKey",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "blockHeight",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "encodedTransaction",
+              "type": "bytes",
+              "internalType": "bytes"
+            },
+            {
+              "name": "merkleProof",
+              "type": "tuple",
+              "internalType": "struct INativeQueryVerifier.MerkleProof",
+              "components": [
+                {
+                  "name": "root",
+                  "type": "bytes32",
+                  "internalType": "bytes32"
+                },
+                {
+                  "name": "siblings",
+                  "type": "tuple[]",
+                  "internalType": "struct INativeQueryVerifier.MerkleProofEntry[]",
+                  "components": [
+                    {
+                      "name": "hash",
+                      "type": "bytes32",
+                      "internalType": "bytes32"
+                    },
+                    {
+                      "name": "isLeft",
+                      "type": "bool",
+                      "internalType": "bool"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "continuityProof",
+              "type": "tuple",
+              "internalType": "struct INativeQueryVerifier.ContinuityProof",
+              "components": [
+                {
+                  "name": "lowerEndpointDigest",
+                  "type": "bytes32",
+                  "internalType": "bytes32"
+                },
+                {
+                  "name": "roots",
+                  "type": "bytes32[]",
+                  "internalType": "bytes32[]"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "logIndex",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "borrowId",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "proveRepay",
+      "inputs": [
+        {
+          "name": "proof",
+          "type": "tuple",
+          "internalType": "struct SourceProof",
+          "components": [
+            {
+              "name": "chainKey",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "blockHeight",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "encodedTransaction",
+              "type": "bytes",
+              "internalType": "bytes"
+            },
+            {
+              "name": "merkleProof",
+              "type": "tuple",
+              "internalType": "struct INativeQueryVerifier.MerkleProof",
+              "components": [
+                {
+                  "name": "root",
+                  "type": "bytes32",
+                  "internalType": "bytes32"
+                },
+                {
+                  "name": "siblings",
+                  "type": "tuple[]",
+                  "internalType": "struct INativeQueryVerifier.MerkleProofEntry[]",
+                  "components": [
+                    {
+                      "name": "hash",
+                      "type": "bytes32",
+                      "internalType": "bytes32"
+                    },
+                    {
+                      "name": "isLeft",
+                      "type": "bool",
+                      "internalType": "bool"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "continuityProof",
+              "type": "tuple",
+              "internalType": "struct INativeQueryVerifier.ContinuityProof",
+              "components": [
+                {
+                  "name": "lowerEndpointDigest",
+                  "type": "bytes32",
+                  "internalType": "bytes32"
+                },
+                {
+                  "name": "roots",
+                  "type": "bytes32[]",
+                  "internalType": "bytes32[]"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "logIndex",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "borrowId",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "creditedUsd",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "queryIdOf",
+      "inputs": [
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "blockHeight",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "txIndex",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "id",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "pure"
+    },
+    {
+      "type": "function",
+      "name": "repaidUsdOf",
+      "inputs": [
+        {
+          "name": "human",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "repaymentsOf",
+      "inputs": [
+        {
+          "name": "human",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32",
+          "internalType": "uint32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "reserveDecimals",
+      "inputs": [
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "token",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8",
+          "internalType": "uint8"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "txChainId",
+      "inputs": [
+        {
+          "name": "encodedTx",
+          "type": "bytes",
+          "internalType": "bytes"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ],
+      "stateMutability": "pure"
+    },
+    {
+      "type": "event",
+      "name": "BorrowProven",
+      "inputs": [
+        {
+          "name": "human",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "wallet",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "borrowId",
+          "type": "bytes32",
+          "indexed": true,
+          "internalType": "bytes32"
+        },
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "indexed": false,
+          "internalType": "uint64"
+        },
+        {
+          "name": "blockHeight",
+          "type": "uint64",
+          "indexed": false,
+          "internalType": "uint64"
+        },
+        {
+          "name": "reserve",
+          "type": "address",
+          "indexed": false,
+          "internalType": "address"
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "RepaymentProven",
+      "inputs": [
+        {
+          "name": "human",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "wallet",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "borrowId",
+          "type": "bytes32",
+          "indexed": true,
+          "internalType": "bytes32"
+        },
+        {
+          "name": "repayId",
+          "type": "bytes32",
+          "indexed": false,
+          "internalType": "bytes32"
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        },
+        {
+          "name": "creditedUsd",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        },
+        {
+          "name": "totalRepaidUsd",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        },
+        {
+          "name": "boost",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "error",
+      "name": "AlreadyConsumed",
+      "inputs": [
+        {
+          "name": "id",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "BadParameters",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "BadSourceConfig",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "BorrowFullyRepaid",
+      "inputs": [
+        {
+          "name": "borrowId",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "BorrowMismatch",
+      "inputs": [
+        {
+          "name": "borrowId",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "BorrowedForSomeoneElse",
+      "inputs": [
+        {
+          "name": "user",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "onBehalfOf",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "LogIndexOutOfRange",
+      "inputs": [
+        {
+          "name": "logIndex",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "logCount",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "NotABorrowLog",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "NotARepayLog",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "NotFinal",
+      "inputs": [
+        {
+          "name": "attestedTip",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "blockHeight",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ProofRejected",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "RepaidBySomeoneElse",
+      "inputs": [
+        {
+          "name": "user",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "repayer",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "RepaidWithATokens",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "SourceTxReverted",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ThinQuorum",
+      "inputs": [
+        {
+          "name": "attestors",
+          "type": "uint32",
+          "internalType": "uint32"
+        },
+        {
+          "name": "required",
+          "type": "uint32",
+          "internalType": "uint32"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "TooSoon",
+      "inputs": [
+        {
+          "name": "repayHeight",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "earliest",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "UnknownBorrow",
+      "inputs": [
+        {
+          "name": "borrowId",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "UnprotectedLegacyTx",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "UnsupportedPool",
+      "inputs": [
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "emitter",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "UnsupportedReserve",
+      "inputs": [
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "reserve",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "UnsupportedSourceChain",
+      "inputs": [
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "UnsupportedTxType",
+      "inputs": [
+        {
+          "name": "txType",
+          "type": "uint8",
+          "internalType": "uint8"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "WalletNotLinked",
+      "inputs": [
+        {
+          "name": "wallet",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "WrongSourceChain",
+      "inputs": [
+        {
+          "name": "chainKey",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "recordedChainId",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "claimedChainId",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "WrongTxChainId",
+      "inputs": [
+        {
+          "name": "signedFor",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "expected",
+          "type": "uint64",
+          "internalType": "uint64"
         }
       ]
     }

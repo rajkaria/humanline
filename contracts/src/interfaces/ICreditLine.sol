@@ -63,16 +63,24 @@ interface ICreditLine {
     function SOURCE_CHAIN_ID() external view returns (uint64);
     /// @notice Asset base units of outstanding principal allowed per 1 CTC of bonded attestor capital.
     function EXPOSURE_PER_BONDED_CTC() external view returns (uint256);
+    /// @notice `CreditHistory` whose proved Aave repayments boost limits; zero for none.
+    function HISTORY() external view returns (address);
 
     function deposit(uint256 assets) external returns (uint256 shares);
     function withdraw(uint256 shares) external returns (uint256 assets);
     function openLine() external;
     function borrow(uint256 amount) external;
     function repay(uint256 amount) external;
+    /// @notice Repay `human`'s line from the caller's funds (used by `EthRepay`; open to anyone).
+    function repayFor(uint256 human, uint256 amount) external;
     function markDefault(uint256 human) external;
 
     function lineOf(uint256 human) external view returns (Line memory);
     function availableCredit(uint256 human) external view returns (uint256);
+    /// @notice The limit a human can draw against now: line limit plus history boost, capped.
+    function limitOf(uint256 human) external view returns (uint256);
+    /// @notice The proved-history boost included in `limitOf`.
+    function boostOf(uint256 human) external view returns (uint256);
     function totalAssets() external view returns (uint256);
     function totalBorrowed() external view returns (uint256);
     function totalShares() external view returns (uint256);

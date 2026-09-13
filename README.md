@@ -332,9 +332,9 @@ See [`web/README.md`](web/README.md).
 
 | Suite | Count | Command |
 |---|---|---|
-| Contracts (Foundry) | 101, including 7 that run against the live CC3 node | `cd contracts && CC3_FORK=1 forge test` |
+| Contracts (Foundry) | 187, including 14 that run against the live CC3 node | `cd contracts && CC3_FORK=1 forge test` |
 | Worker (Bun) | 202, no network | `cd worker && bun test` |
-| Web (Bun) | 292, including the self-relay planner, real-proof encoding and relay statistics | `cd web && bun test` |
+| Web (Bun) | 326, including the self-relay planner, real-proof encoding, relay statistics and the cross-chain link/history/repay helpers | `cd web && bun test` |
 | Everything | contracts + worker + web, typecheck and lint | `bash scripts/verify.sh` |
 
 The 7 fork tests are the ones worth reading: they confirm that the real `0x0FD2` returns `true` for
@@ -397,6 +397,15 @@ Stated up front rather than discovered later. The full list, with reasoning, is 
   in the verify card, the worker is public, and nothing is lost while nobody relays.
 - **Testnet economics.** `hUSD` is a test stablecoin we mint, lender deposits are testnet funds, and
   no economic claim here has been tested with real money.
+- **Cross-chain history has edges.**
+  - Links prove an externally owned account; smart-contract wallets cannot sign the self-send or
+    the EIP-712 message.
+  - On Sepolia, Aave reserves are faucet tokens, so testnet history demonstrates the rules rather
+    than signalling creditworthiness.
+  - Someone with capital can still borrow, wait a day and repay to build a record. That costs real
+    interest for a boost capped at 500 hUSD.
+  - `EthRepay` pays the pool from a treasury-funded float. A proved payment can never be credited
+    twice, but it waits if the float is empty.
 - **A freeze is permanent and there is nobody to appeal to.** There is no owner, including us. That
   is the design, and it is also a real product limitation a production version would address with a
   lender-controlled cure path written into the contract from the start.

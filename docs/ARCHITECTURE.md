@@ -209,6 +209,40 @@ sequenceDiagram
 
 Nothing in the plan is trusted. It decides what the wallet is asked to send, and the contract then checks that exactly as it checks the worker. A wrong plan costs a failed dry run, and a malicious one cannot produce a proof the precompile accepts.
 
+### 2b. Cross-chain credit identity: link, history, repay
+
+World ID roots are one payload. The same Attestcoin door carries three more, all through `ProvenSource`. It checks `0x0FD2` inclusion, 32 attested blocks of finality, at least 3 bonded attestors on `0x0FD4` and a successful receipt. It also checks that the transaction was signed for the chain id ChainInfo `0x0FD3` recorded for its chain key.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant W as Ethereum wallet W
+    participant H as Human's Creditcoin wallet
+    participant APP as /app Ethereum history
+    participant PRV as Attestcoin proof builder
+    participant HL as HumanLinks
+    participant CH as CreditHistory
+    participant CL as CreditLine v3
+    participant ER as EthRepay
+
+    W->>W: send self, 0 value, calldata = LINK_MARKER ‖ (human, H, 102031, HumanLinks)
+    APP->>PRV: proof-by-tx (after attestation + 32 blocks)
+    H->>HL: linkBySourceTx(proof) — to == from, intent names H and H's human
+    HL-->>H: WalletLinked(human, W, SourceTx)
+
+    APP->>APP: /api/crosschain/history: W's Aave Borrow/Repay with receipt-local log indexes
+    H->>CH: proveBorrow(proof, logIndex) — pool emitter, onBehalfOf == user, stable reserve, W linked
+    H->>CH: proveRepay(proof, logIndex, borrowId) — ≥ 7,200 blocks later, repayer == user, no aTokens
+    CH-->>CL: boostOf(human) = min(25% × verified repaid $, 500)
+    CL-->>H: limitOf(human) = min(limit + boost, MAX_LIMIT)
+
+    W->>W: USDC.transfer(REPAY_ADDRESS, amount) on Ethereum or Sepolia
+    H->>ER: creditRepayment(proof, logIndex) — USDC emitter, to == REPAY_ADDRESS, W linked
+    ER->>CL: repayFor(human, min(amount, owed)) from the settlement float
+```
+
+Consent is two-sided at every step. The wallet's key produced the Ethereum transaction (or the EIP-712 signature), and the human's registered Creditcoin wallet is the caller. A wallet links to one human, permanently, so one history counts once.
+
 ---
 
 ## 3. Sequence: register and borrow

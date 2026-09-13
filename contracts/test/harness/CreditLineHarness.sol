@@ -34,7 +34,8 @@ contract CreditLineHarness is CreditLine {
             grace,
             securityChainKey,
             sourceChainId,
-            exposurePerBondedCtc
+            exposurePerBondedCtc,
+            address(0)
         )
     {}
 
@@ -50,6 +51,22 @@ contract CreditLineHarness is CreditLine {
     /// @dev ChainInfo's real table on CC3 testnet: chainKey 3 is Ethereum (1), 1 is Sepolia (11155111).
     function _chainIdOf(uint64 chainKey) internal pure override returns (bool, uint64) {
         if (chainKey == 3) return (true, 1);
+        if (chainKey == 1) return (true, 11_155_111);
+        return (false, 0);
+    }
+}
+
+/// @notice `CreditLine` v3 wired to a `CreditHistory` (or any `boostOf` source), precompiles stubbed.
+contract BoostedCreditLineHarness is CreditLine {
+    constructor(address asset, address registry, uint256 initialLimit, uint256 maxLimit, address history)
+        CreditLine(asset, registry, initialLimit, maxLimit, 100, 30 days, 7 days, 1, 11_155_111, 10e6, history)
+    {}
+
+    function _bond() internal pure override returns (uint32, uint128) {
+        return (1_000_000, 100e18);
+    }
+
+    function _chainIdOf(uint64 chainKey) internal pure override returns (bool, uint64) {
         if (chainKey == 1) return (true, 11_155_111);
         return (false, 0);
     }
