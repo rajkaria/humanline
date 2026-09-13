@@ -31,6 +31,7 @@ const DURATIONS = [
 ];
 
 function remaining(closesAt: number, now: number): string {
+  if (now === 0) return "";
   const s = closesAt - now;
   if (s <= 0) return "closed";
   if (s < 3_600) return `${Math.ceil(s / 60)} min left`;
@@ -48,7 +49,8 @@ export function VotePanel() {
   const { profile } = useProfile();
   const pollAddress = profile.deployment.contracts.humanPoll.address;
   const human = useHuman();
-  const now = Math.floor(useNow(15_000) / 1000);
+  // useNow already returns unix seconds (0 before hydration).
+  const now = useNow(15_000);
 
   const polls = useQuery({
     queryKey: ["polls", pollAddress],

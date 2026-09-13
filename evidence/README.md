@@ -49,6 +49,23 @@ proof and `executeBatch` code as the verify card's *Relay it now from your walle
 | `vault`, `rewardedRoots`, `rewardPaidWei`, `netBalanceChangeWei` | when sent through `RelayReward`: the vault, roots it paid for, the reward, and the relayer's balance change net of gas |
 | `chainKey`, `contract`, `at` | source chain, receiving `AttestedWorldID`, and when |
 
+## `seed-demo.jsonl`
+
+Demo activity on the reproducible (staging-tree) deployment, written by
+[`web/scripts/seed-demo.ts`](../web/scripts/seed-demo.ts). These are Humanline's own wallets, not
+users. Each one went through the real product path: a World ID Simulator identity proved itself
+against a Sepolia root relayed through Attestcoin, `HumanRegistry.register` verified the Groth16
+proof on Creditcoin, and the new human opened a CreditLine v3 line, borrowed 20 hUSD, and repaid
+it on time.
+
+| Field | Meaning |
+|---|---|
+| `kind` | `seed-demo-human` (one human's register-and-borrow cycle) or `seed-demo-poll` (the first `HumanPoll` poll and a vote from each seeded human) |
+| `wallet`, `human` | the fresh wallet, and the nullifier bound to it |
+| `simulatorIdentity` | which World ID Simulator identity produced the proof |
+| `txs` | gas funding from the deployer, `register`, `openLine`, `borrow`, the hUSD faucet claim for the 1% fee, `approve`, `repay` |
+| `pollId`, `createTx`, `votes` | the poll and one vote per seeded human |
+
 ## The rest
 
 | File | What it is |
