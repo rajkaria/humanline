@@ -1,135 +1,136 @@
 # Humanline: Demo Video Script
 
-Target length 3:00. Delivery is calm and flat, about 150 words per minute. Total voiceover below is roughly 440 words, which leaves room to breathe on the transaction confirmations. Record the screen at 1920x1080, browser at 100 percent zoom, dark theme, no browser chrome except the URL bar.
+Target length **2:40**, hard ceiling 3:00. About 400 words of voiceover at a calm 150 words per minute, which leaves room for pauses on the explorer tabs. Record at 1920x1080 with the browser at 100 percent zoom and the dark theme. Hide bookmarks and extensions so only the URL bar shows. No music. Hard cuts only.
 
-Follow SPEC §11. Every claim on screen must be a real transaction, and every transaction must be clicked through to an explorer at least once.
+The rule for the whole video: **every claim on screen is a real transaction, and the viewer sees at least one of them open in a block explorer.** Anything too slow to film live (Attestcoin attestation takes about 15 minutes, and a default needs a term to expire) is shown as a receipt on `/judge`, with its hash opened. Never fake it, and never speed up a confirmation.
 
 Final URL: {{VIDEO_URL}} · Live app: https://humanline.credit · Repo: https://github.com/rajkaria/humanline
 
 ---
 
-## Pre-roll checklist
+## Before you record
 
-- Relay worker running, with at least one mainnet root relayed in the last hour so `/relay` has a fresh row at the top.
-- Two Creditcoin CC3 wallets funded with tCTC, both with hUSD from the faucet. Wallet A is unregistered. Wallet B is unregistered.
-- World simulator open in a second tab, staging environment, ready to approve.
-- `CreditLine` deployed with demo terms (`TERM` 600 seconds, `GRACE` 300 seconds) so a full borrow and repay cycle fits inside the video.
-- Lender pool already funded, so `openLine` and `borrow` do not fail on liquidity.
-- Terminal open at the repo root with the negative-path command copied, ready to paste.
-- Browser tabs pre-opened in order: `/relay`, `/app`, Etherscan, Blockscout, `/judge`.
+**Chain state**
+- The Aave repay proof has landed (`seed-demo-repay` row in `evidence/seed-demo.jsonl`) and `CreditHistory.boostOf(human 2) > 0`. If it has not, cut the words "and repaid" from beat 6.
+- `/relay` has a mainnet root from the last hour at the top.
+- `/judge` → *Live refusals* reads **12/12 refused** when it loads. Reload once before recording so it is warm.
 
----
+**Wallets**
+- **Wallet A**: a fresh CC3 wallet with tCTC, not yet a human. This is the one you verify live.
+- **Wallet B**: the seeded demo human with an open line and hUSD, for the borrow beat.
+- World ID simulator open in its own tab on the staging environment. If Raj's Orb test has passed, use the World App on your phone for beat 4 instead and say "Orb-verified". Otherwise say "staging tree".
 
-## 3:00 cut
+**Tabs, left to right**
+1. `https://humanline.credit` (landing)
+2. `https://humanline.credit/relay`
+3. `https://humanline.credit/app`
+4. World ID simulator
+5. `https://humanline.credit/judge`
+6. Blank tab for Etherscan and Blockscout clicks
 
-### 0:00 to 0:12 · Hook
-
-**On screen.** Cold open on the landing page hero. The one-liner is visible. Slow cursor move to the live counter block: roots relayed, humans registered, credit extended.
-
-**Voiceover.** "Creditcoin exists to give credit history to people the banking system cannot see. But every credit score on this chain scores a wallet. A wallet is free. One person can hold ten of them."
-
-### 0:12 to 0:28 · The problem
-
-**On screen.** Scroll to the comparison block on the landing page: wallet passports on the left, Humanline on the right. Hold on the line "every other passport can be forged by generating a new wallet".
-
-**Voiceover.** "So a borrower repays himself ten times, mints ten perfect histories, and defaults on the eleventh loan at full size. Proof of personhood fixes that, but World ID lives on Ethereum. Creditcoin cannot see it, and a bridge or an oracle means trusting someone."
-
-### 0:28 to 0:45 · Real roots landing on Creditcoin
-
-**On screen.** Navigate to `/relay`. The table is already populated. Point at the top row: source Ethereum mainnet, Ethereum transaction hash, Creditcoin transaction hash, pre root to post root, humans added, attestation lag.
-
-**Voiceover.** "This is the World ID root feed. World's sequencer updates the identity tree on Ethereum mainnet about once an hour. Each update is a real transaction, and each one arrives here as an Attestcoin proof."
-
-### 0:45 to 1:05 · Click through both sides
-
-**On screen.** Click the Ethereum transaction hash. Etherscan opens, showing `registerIdentities` on the World ID identity manager and the `TreeChanged` event. Back. Click the Creditcoin transaction hash. Blockscout opens, showing the `execute` call and the `RootRelayed` event with the same post root.
-
-**Voiceover.** "Left side, World's own transaction on Ethereum. Right side, the same root on Creditcoin, verified by the BlockProver precompile inside this transaction. No bridge, no oracle, no operator. The finality depth and the attestor quorum are checked on chain against the ChainInfo and AttestorStash precompiles."
-
-### 1:05 to 1:25 · Become a human
-
-**On screen.** Navigate to `/app`. Connect wallet A. Status card reads "Not verified". Click "Verify you're human". The IDKit widget opens. Switch to the World simulator tab and approve.
-
-**Voiceover.** "Now the other direction. I connect a Creditcoin wallet. It is not a human yet. I prove personhood with World ID. This is the staging tree and the World simulator, so you can reproduce it without an Orb. The production path is identical."
-
-### 1:25 to 1:45 · The proof verifies on Creditcoin
-
-**On screen.** The registration transaction is submitted. One block later it confirms. The status card flips to "Human" with a shortened nullifier. Click the transaction link to Blockscout, show `HumanRegistered`.
-
-**Voiceover.** "That is a Semaphore zero-knowledge proof, verified on Creditcoin itself, on the bn128 precompiles, against a root that Attestcoin put there. The wallet is now bound to a nullifier. The nullifier is the human."
-
-### 1:45 to 2:05 · Open a line and borrow
-
-**On screen.** Click "Open line". Limit shows 25 hUSD. Borrow 20. Balance updates. Countdown to the due date starts.
-
-**Voiceover.** "One human, one credit line. It opens at twenty five dollars, uncollateralized. I borrow twenty. Nothing was locked, nothing was staked. The only thing backing this is that there is exactly one of me."
-
-### 2:05 to 2:25 · Repay and grow
-
-**On screen.** Approve hUSD, repay the full balance. `Repaid` and `LimitChanged` events appear in the history table. Limit ticks up to 31.25 hUSD.
-
-**Voiceover.** "Repay on time and the limit grows by a quarter. Repay late and it halves. Miss the grace window entirely and the line freezes, permanently, on the nullifier."
-
-### 2:25 to 2:40 · The line follows the person
-
-**On screen.** Disconnect. Connect wallet B. Verify with the same simulated identity. The registration re-binds. The credit panel loads with the same limit, the same history, the same nullifier. Attempt "Open line" and show the `LineExists` revert in the toast.
-
-**Voiceover.** "New wallet, same person. The identity re-binds and the whole history follows. A second line is refused. This is the part no other credit passport can do, and it is the part that makes a default mean something."
-
-### 2:40 to 2:52 · Every attack, by name
-
-**On screen.** Navigate to `/judge` with no wallet connected and scroll to "Live refusals": twelve rows, each an attack just fired at the deployed contracts, each with its named error. Hold on `ThinQuorum(7, 1000)` and `WrongSourceChain(1, 3)`. Cut to the terminal running `bun run worker/src/cli.ts attack` ending on "12/12 refused".
-
-**Voiceover.** "Attestcoin proves inclusion and continuity. Everything else is our job. This page just fired twelve attacks at the live contracts: a forged proof, a decoy event, a replay, the wrong source chain, an oversize batch. Every one is refused by name, and anyone can run them."
-
-### 2:52 to 3:00 · Close on the counter
-
-**On screen.** Cut back to the landing page counter block. The three numbers are live and reading from chain. Hold. Fade to the repo URL and the contract addresses.
-
-**Voiceover.** "Right now: N real World ID roots relayed from Ethereum mainnet, M humans in the registry, and zero trusted parties anywhere in the path. One human, one credit line."
+**Read these off the live pages at record time, never from this file:** roots relayed, humans registered, attestor count, and the security budget figure.
 
 ---
 
-## 60 second cut
+## The 2:40 cut
 
-Same footage, tighter. Roughly 150 words of voiceover.
+### 1 · 0:00 to 0:15 · Hook
 
-### 0:00 to 0:10 · Hook
+**Show.** Landing hero, holding still for two seconds. Scroll slowly to the section titled *"A wallet is not a person."*
 
-**On screen.** Landing hero, then the comparison block.
+**Say.**
+> "Creditcoin exists to give credit history to people banks can't see. But every credit score on this chain scores a wallet, and a wallet is free. Open ten, repay yourself ten times, then default on the eleventh at full size."
 
-**Voiceover.** "Every credit score on Creditcoin scores a wallet. A wallet is free. One person can hold ten, repay themselves ten times, and default on the eleventh."
+### 2 · 0:15 to 0:30 · The idea
 
-### 0:10 to 0:25 · Real roots
+**Show.** Keep scrolling to the *Wallet passports vs Humanline* table. Hover over the rows "Cost to reset the score" and "A default".
 
-**On screen.** `/relay` top row, then a fast cut between the Etherscan tab and the Blockscout tab showing the same post root.
+**Say.**
+> "Humanline scores the person. You prove you're human once with World ID. Your credit line, your history, and your defaults all attach to that proof, not to a key. Resetting your score doesn't take a new wallet. It takes a second iris."
 
-**Voiceover.** "Humanline brings World ID's identity tree from Ethereum to Creditcoin through the Attestcoin Protocol. World's real transaction on the left. The same root on Creditcoin on the right, verified by the BlockProver precompile. No bridge, no oracle."
+### 3 · 0:30 to 0:55 · Attestcoin carries World ID across
 
-### 0:25 to 0:40 · Become a human, get credit
+**Show.** Open `/relay` and point at the top row: Ethereum tx, Creditcoin tx, pre root to post root, lag. Click the **Ethereum hash**, and Etherscan shows `registerIdentities` on World's identity manager. Go back. Click the **Creditcoin hash**, and Blockscout shows the relay call with the same post root. Keep the root on screen for a full second.
 
-**On screen.** `/app`, verify with the simulator, registration confirms, status flips to Human. Cut straight to open line, borrow 20, repay, limit grows to 31.25.
+**Say.**
+> "The problem is that World ID lives on Ethereum, and Creditcoin can't see it. So every identity-tree update World makes arrives here as an Attestcoin proof. On the left is World's own transaction on Ethereum. On the right is the same root on Creditcoin, checked by the BlockProver precompile in the transaction that adopts it. There's no bridge, no oracle, and no admin key."
 
-**Voiceover.** "A Semaphore zero-knowledge proof, verified on Creditcoin itself. The wallet is now bound to a nullifier. One human, one line. Twenty five dollars uncollateralized, growing a quarter every time it is repaid on time."
+### 4 · 0:55 to 1:20 · Become a human, live
 
-### 0:40 to 0:52 · The line follows the person
+**Show.** Open `/app` and connect **Wallet A**. The status card reads not verified. Click verify. The IDKit widget opens. Switch to the simulator tab, hold there for one second, and approve. Back in the app, the registration transaction confirms and the card flips to **Human** with a short nullifier. Click the transaction link, and Blockscout shows `HumanRegistered`.
 
-**On screen.** Second wallet, same identity, history follows, `LineExists` revert on the second open attempt.
+**Say.**
+> "Now I become a human. That's a zero-knowledge proof, and it's verified on Creditcoin itself, on the bn128 precompiles, against a root Attestcoin delivered. This wallet is now bound to a nullifier, and the nullifier is the person."
 
-**Voiceover.** "New wallet, same person. The history follows, and so does a default. That is what no other credit passport can do."
+*(While the confirmation runs, let it breathe. If it takes more than 20 seconds, cut straight to the Blockscout tab.)*
 
-### 0:52 to 1:00 · Close on the counter
+### 5 · 1:20 to 1:40 · One human, one credit line
 
-**On screen.** Landing counter block, live. Fade to repo URL.
+**Show.** Switch to **Wallet B**. On the credit panel, show the starting limit, the ceiling, and the fee. Borrow 20. The balance updates and the *Due in* countdown starts. Scroll down to the *Lender pool* security budget bar.
 
-**Voiceover.** "N real World ID roots relayed from Ethereum mainnet, M humans in the registry, zero trusted parties. One human, one credit line."
+**Say.**
+> "One human gets one credit line, with no collateral. I borrow twenty. Repay on time and the limit grows. Default and it freezes. And the pool can never lend more than the Attestcoin attestors have bonded, a number this contract reads live from the chain on every draw."
+
+### 6 · 1:40 to 2:05 · Credit history from Ethereum
+
+**Show.** On `/app`, scroll to the *Ethereum history* panel. Show *Linked wallets* and *Verified Aave repayments*. Then go to `/judge` → *What has already happened* and show the HumanLinks row plus the Sepolia and Creditcoin hash pairs for the Aave borrow and repay. Open one Sepolia hash on Etherscan so the Aave Pool `Repay` event is visible.
+
+**Say.**
+> "Your history isn't stuck on one chain either. Link an Ethereum wallet with a signature, and a real Aave loan you borrowed and repaid on Ethereum gets proven to Creditcoin through Attestcoin and raises your limit here. You can even repay a Creditcoin loan by paying on Ethereum. Nobody vouches for any of it. The proof does."
+
+### 7 · 2:05 to 2:20 · A default follows the person
+
+**Show.** Stay in *What has already happened* and scroll to the default block: *Wallet that defaulted* → *New wallet, same human* → *Borrow from the new wallet*, which reads **refused**. Open the default transaction's hash on Blockscout so the frozen line is visible.
+
+**Say.**
+> "Here's what no wallet-based score can do. This human defaulted, moved to a brand new wallet, and tried to borrow again. The chain refused, because the default is attached to the person, and the person came along."
+
+### 8 · 2:20 to 2:32 · Twelve attacks, refused by name
+
+**Show.** Scroll to *Live refusals*. Twelve rows, each with a named error. Hold on `ThinQuorum` and `WrongSourceChain`.
+
+**Say.**
+> "And don't take our word for any of this. This page just fired twelve attacks at the live contracts: a forged proof, a decoy event, a replay, the wrong chain. Every one is refused by name, and a cron job re-runs them every six hours."
+
+### 9 · 2:32 to 2:40 · Close
+
+**Show.** Cut back to the landing page's *Live protocol readout*. Hold for three seconds. Then show an end card with `humanline.credit`, `github.com/rajkaria/humanline`, and `npm i @humanline/sdk`.
+
+**Say.**
+> "Eighteen contracts, no owner, no pause, and nobody to trust, including us. One human, one credit line."
+
+---
+
+## Optional 20-second insert (use it if you're under 2:40)
+
+Place it between beats 8 and 9.
+
+**Show.** `/vote` shows the HumanPoll results. Then the `packages/sdk` README on GitHub, showing the `HumanGated` modifier.
+
+**Say.**
+> "Personhood is a primitive, so we shipped it as one: an SDK, a public API, and a Solidity modifier. The first app built on it is a one person, one vote poll."
+
+---
+
+## 60-second cut (for X and the DoraHacks thumbnail)
+
+Same footage, beats 1, 3, 4, 7 and 9.
+
+| Time | Show | Say |
+|---|---|---|
+| 0:00–0:10 | Landing hero, then *A wallet is not a person* | "Every credit score on Creditcoin scores a wallet. A wallet is free. Open ten, and default on the eleventh." |
+| 0:10–0:25 | `/relay` row, Etherscan then Blockscout | "Humanline brings World ID from Ethereum to Creditcoin through Attestcoin. There's no bridge and no oracle, just a proof the chain verifies itself." |
+| 0:25–0:40 | Verify in `/app`, card flips to Human | "Prove you're human once, and one person gets one uncollateralized credit line." |
+| 0:40–0:52 | `/judge` default block, refused borrow | "Default, switch wallets, and try again. The chain refuses, because the default follows the person." |
+| 0:52–1:00 | Live readout, end card | "Nobody to trust, including us. One human, one credit line." |
 
 ---
 
 ## Capture notes
 
-- Replace N and M in the closing line with the live counter values at record time. Read them off the page rather than from a script, and do not round up.
-- Do not speed up any transaction confirmation. Creditcoin blocks are about fifteen seconds. If a confirmation runs long, cut on the block explorer instead of on the app.
-- The attestation lag column on `/relay` should be visible at least once. It is the honest number and it makes the rest of the claims credible.
-- Keep the World simulator tab visible for a full second before approving, so a judge can see it is the staging environment and not a mock we wrote.
-- No music. No transitions except hard cuts.
+- **Pronouns and wording.** Say "yourself", "the borrower", and "this human". Don't gender the borrower.
+- **Numbers.** Say only what's on screen. Don't round anything up. If the counter says 41 roots, say 41 or say nothing.
+- **"Orb" versus "staging".** Say "Orb-verified" only if the live verify in beat 4 used a real Orb identity. The simulator is the staging tree, so say so.
+- **Aave beat.** It needs both the borrow and repay rows to be live. If you record before the repay proof lands, say "a real Aave borrow on Ethereum, proven to Creditcoin" and drop "and repaid".
+- **Failed takes.** If a transaction fails on camera, keep rolling and redo the beat. Splice at the tab switch.
+- **Upload.** Use YouTube, unlisted is fine, then replace `{{VIDEO_URL}}` here and in `docs/SUBMISSION.md`.
