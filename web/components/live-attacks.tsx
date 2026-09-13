@@ -91,7 +91,7 @@ export async function LiveAttacks() {
                   )}
                 </TableCell>
                 <TableCell className="hidden font-mono text-xs md:table-cell">
-                  {r.target ? <HashLink value={r.target} scope="creditcoin" kind="address" /> : "—"}
+                  {r.target ? <HashLink value={r.target} scope="creditcoin" kind="address" /> : "–"}
                 </TableCell>
               </TableRow>
             ))}

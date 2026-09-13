@@ -28,9 +28,9 @@ const spaceGrotesk = Space_Grotesk({
   display: "swap",
 });
 
-const title = "Humanline — one human, one credit line";
+const title = "Humanline: one human, one credit line";
 const description =
-  "World ID proof of personhood reaches Creditcoin through the Attestcoin Protocol. A zero-knowledge proof is verified on Creditcoin itself, and a verified human gets an uncollateralised credit line that follows the person, not the wallet.";
+  "Prove you're a person once with World ID. Attestcoin carries the proof to Creditcoin, the chain verifies it for itself, and you get an uncollateralised credit line that follows you, not your wallet.";
 
 /**
  * Absolute base for `og:image` and canonical links. Set
@@ -41,7 +41,7 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://humanline.credit";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: { default: title, template: "%s — Humanline" },
+  title: { default: title, template: "%s · Humanline" },
   description,
   applicationName: "Humanline",
   keywords: [

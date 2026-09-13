@@ -48,7 +48,7 @@ export function RelayClient() {
       <section className="flex flex-col gap-4">
         <SectionHeading
           title="Relay liveness"
-          description="Measured from chain, not reported: every number below is recomputed from RootRelayed events and block timestamps on both chains."
+          description="Measured from the chain, not reported by us. Every number below is recomputed from RootRelayed events and block timestamps on both chains."
         />
         <ErrorBoundary title="Relay liveness">
           <RelayHealth />
@@ -75,7 +75,7 @@ export function RelayClient() {
       <section className="flex flex-col gap-4">
         <SectionHeading
           title="Roots relayed"
-          description="Newest first, both source chains, refreshed every 15 seconds."
+          description="Newest first, both source chains, refreshed every 15 seconds. Leave it open and watch them land."
         />
         <ErrorBoundary title="Relay feed">
           <RelayTable />
@@ -183,14 +183,14 @@ function InstanceHeaders() {
               <dl className="grid grid-cols-2 gap-3">
                 <Stat
                   label="Roots relayed"
-                  value={instance.rootCount === undefined ? "—" : formatCount(instance.rootCount)}
+                  value={instance.rootCount === undefined ? "–" : formatCount(instance.rootCount)}
                   emphasis
                 />
                 <Stat
                   label="Identities carried"
                   value={
                     instance.humansAddedTotal === undefined
-                      ? "—"
+                      ? "–"
                       : formatCount(instance.humansAddedTotal)
                   }
                 />
@@ -213,11 +213,11 @@ function InstanceHeaders() {
                   <span className="text-muted-foreground">Guards</span>
                   <span className="font-mono">
                     {instance.finalityDepth === undefined
-                      ? "—"
+                      ? "–"
                       : `${instance.finalityDepth} blocks`}{" "}
                     ·{" "}
                     {instance.minAttestors === undefined
-                      ? "—"
+                      ? "–"
                       : `≥${instance.minAttestors} attestors`}
                   </span>
                 </div>
@@ -277,26 +277,26 @@ function PrecompileCards() {
                 <dl className="grid grid-cols-2 gap-3">
                   <Stat
                     label="Attested tip"
-                    value={chain.attestedTip === undefined ? "—" : formatCount(chain.attestedTip)}
+                    value={chain.attestedTip === undefined ? "–" : formatCount(chain.attestedTip)}
                     hint="0x0FD3 · every 10 blocks"
                   />
                   <Stat
                     label="Checkpoint"
-                    value={chain.checkpointTip === undefined ? "—" : formatCount(chain.checkpointTip)}
+                    value={chain.checkpointTip === undefined ? "–" : formatCount(chain.checkpointTip)}
                     hint="0x0FD3 · every 100 blocks"
                   />
                   <Stat
                     label="Attestors × min bond"
                     value={
                       chain.attestors === undefined || chain.minBond === undefined
-                        ? "—"
+                        ? "–"
                         : `${formatCount(chain.attestors)} × ${formatCtc(chain.minBond)}`
                     }
                     hint="0x0FD4 AttestorStash · CTC"
                   />
                   <Stat
                     label="Bonded capital"
-                    value={chain.bondedCapital === undefined ? "—" : `${formatCtc(chain.bondedCapital)} CTC`}
+                    value={chain.bondedCapital === undefined ? "–" : `${formatCtc(chain.bondedCapital)} CTC`}
                     hint="caps credit exposure"
                   />
                 </dl>

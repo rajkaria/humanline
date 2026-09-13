@@ -124,7 +124,7 @@ export function describeSwitchError(error: unknown): string {
     return "The network switch was declined in your wallet. Humanline only works on Creditcoin CC3 testnet.";
   }
   if (isRequestPending(error)) {
-    return "Your wallet already has a request open — open the wallet extension to approve it.";
+    return "Your wallet already has a request open. Open the wallet extension to approve it.";
   }
   return describeError(error);
 }

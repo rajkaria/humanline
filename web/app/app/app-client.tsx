@@ -67,7 +67,7 @@ export function AppClient() {
           <CardContent className="flex flex-col items-start gap-3 py-2">
             <p className="text-sm text-muted-foreground">
               Connect a wallet on Creditcoin CC3 testnet (chainId {creditcoinTestnet.id}) to
-              begin. Everything on this page is readable without one — see{" "}
+              begin. Prefer to look before you leap? Everything here is readable without one on{" "}
               <a href="/judge" className="text-brand underline-offset-4 hover:underline">
                 /judge
               </a>
@@ -85,8 +85,8 @@ export function AppClient() {
               Your wallet is on{" "}
               <span className="font-medium text-foreground">{network.currentNetwork}</span>.
               Humanline runs on Creditcoin CC3 testnet (chainId {creditcoinTestnet.id}). Approve
-              the switch in your wallet — if it has never seen CC3, it asks to add the network
-              first.
+              the switch in your wallet. If it has never seen CC3 before, it will ask to add the
+              network first.
             </p>
             <ConnectButton />
             {network.error ? (
@@ -159,9 +159,9 @@ export function AppClient() {
               ) : (
                 <Card>
                   <CardContent className="py-6 text-sm text-muted-foreground">
-                    Verify with World ID first. A credit line is opened against a human, not
-                    against an address, so there is nothing to open until this wallet is
-                    bound to a nullifier.
+                    Verify with World ID first. A credit line is opened for a human, not for an
+                    address, so there is nothing to open until this wallet is bound to a
+                    nullifier. It takes one proof and one transaction.
                   </CardContent>
                 </Card>
               )}

@@ -150,7 +150,7 @@ export const NEGATIVE_PATHS: NegativePath[] = [
   },
   {
     threat: "A query replayed inside a batch",
-    defence: "Batching does not launder a replay — the same guard applies per entry.",
+    defence: "Batching does not launder a replay. The same guard applies to every entry.",
     error: "QueryAlreadyProcessed(bytes32)",
     test: "test_BatchRejectsARepeatedQueryInsideOneBatch",
     suite: "AttestedWorldID",

@@ -32,7 +32,7 @@ export default function GlobalError({
           <h1 style={{ fontSize: 22, fontWeight: 600, margin: 0 }}>Humanline failed to start</h1>
           <p style={{ margin: 0, fontSize: 14, color: "#a8a8b6", lineHeight: 1.6 }}>
             Something went wrong before the page could render. Everything Humanline claims is
-            checkable from a terminal — see the commands on /judge.
+            still checkable from a terminal. The commands are on /judge.
           </p>
           <code style={{ fontSize: 12, color: "#a8a8b6", wordBreak: "break-word" }}>
             {error.message}

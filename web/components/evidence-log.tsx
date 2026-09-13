@@ -110,7 +110,7 @@ export function EvidenceLog() {
                     ) : (
                       <span className="font-mono text-xs text-muted-foreground">
                         {entry.sourceBlock === undefined
-                          ? "—"
+                          ? "–"
                           : `block ${entry.sourceBlock} · #${entry.sourceTxIndex ?? "?"}`}
                       </span>
                     )}
@@ -124,17 +124,17 @@ export function EvidenceLog() {
                         copy={false}
                       />
                     ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
+                      <span className="text-xs text-muted-foreground">–</span>
                     )}
                   </TableCell>
                   <TableCell className="font-mono text-xs">
-                    {entry.postRoot === undefined ? "—" : truncateUint256(entry.postRoot)}
+                    {entry.postRoot === undefined ? "–" : truncateUint256(entry.postRoot)}
                   </TableCell>
                   <TableCell className="text-right font-mono tabular-nums">
-                    {entry.humansAdded ? formatCount(entry.humansAdded) : "—"}
+                    {entry.humansAdded ? formatCount(entry.humansAdded) : "–"}
                   </TableCell>
                   <TableCell className="hidden text-xs whitespace-nowrap text-muted-foreground md:table-cell">
-                    {entry.timestamp ? formatTimestamp(entry.timestamp) : "—"}
+                    {entry.timestamp ? formatTimestamp(entry.timestamp) : "–"}
                   </TableCell>
                 </TableRow>
               );

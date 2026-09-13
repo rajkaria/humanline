@@ -73,7 +73,7 @@ export function HashLink({
       href={href}
       target="_blank"
       rel="noreferrer noopener"
-      title={`${raw} — open on ${explorerName(scope!)}`}
+      title={`${raw} · open on ${explorerName(scope!)}`}
       className={cn(
         "group/hash inline-flex items-center gap-1 font-mono text-xs text-foreground/90 underline-offset-4",
         "decoration-foreground/25 hover:text-brand hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",

@@ -53,7 +53,7 @@ export default function DocsPage() {
       <PageHeader
         eyebrow="For integrators"
         title="Docs"
-        description="Humanline is a read-only dependency. A lender adds two view calls and gets a sybil-resistant answer with no API key, no oracle and no relationship with us."
+        description="Humanline is a read-only dependency. Add two view calls and you get a sybil-resistant answer with no API key, no oracle and no account with us. You never have to talk to us, though we'd enjoy it."
       />
 
       <nav className="flex flex-wrap gap-2 border-b border-foreground/10 py-4" aria-label="On this page">
@@ -88,7 +88,7 @@ const READS = [
   },
   {
     signature: "humanOf(address wallet) → uint256",
-    what: "The nullifier behind the wallet, or 0. This is the account identifier — stable across re-binds.",
+    what: "The nullifier behind the wallet, or 0. This is the account identifier, and it stays put across re-binds.",
     who: "Anything that needs to key state by person rather than by address.",
   },
   {
@@ -129,7 +129,7 @@ function IntegrationGuide() {
           </CardTitle>
           <CardDescription>
             Copy this into your contract. There is no registration step, no allowlist, and
-            nothing to pay.
+            nothing to pay. That is the entire onboarding.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
@@ -175,7 +175,7 @@ contract OnePerHuman {
           <p className="text-sm text-muted-foreground">
             Key by <code className="font-mono text-xs">humanOf(msg.sender)</code>, never by{" "}
             <code className="font-mono text-xs">msg.sender</code>. That single choice is what
-            makes the guarantee survive a user moving to a new wallet — and what makes a sybil
+            makes the guarantee survive a user moving to a new wallet, and what makes a sybil
             farm&rsquo;s tenth wallet return the same human as its first.
           </p>
         </CardContent>
@@ -222,12 +222,12 @@ contract OnePerHuman {
             command={`HUMAN=$(.tools/cast call ${CONTRACTS.humanRegistry.address ?? "<HumanRegistry>"} \\\n  "humanOf(address)(uint256)" 0xBorrower --rpc-url ${RPC})\n\n.tools/cast call ${CONTRACTS.creditLine.address ?? "<CreditLine>"} \\\n  "lineOf(uint256)((uint256,uint256,uint64,uint64,uint32,uint32,bool))" "$HUMAN" \\\n  --rpc-url ${RPC}`}
           />
           <p className="text-xs text-muted-foreground">
-            Events mirror a standard loan lifecycle —{" "}
+            Events mirror a standard loan lifecycle:{" "}
             <code className="font-mono">LineOpened</code>,{" "}
             <code className="font-mono">Borrowed</code>,{" "}
             <code className="font-mono">Repaid</code>,{" "}
             <code className="font-mono">LimitChanged</code>,{" "}
-            <code className="font-mono">Defaulted</code> — all indexed by{" "}
+            <code className="font-mono">Defaulted</code>, all indexed by{" "}
             <code className="font-mono">human</code>, so an indexer can build a per-person
             history without touching wallet addresses.
           </p>
@@ -348,7 +348,7 @@ function AttestcoinSection({ doc }: { doc?: string }) {
             <p className="text-sm text-muted-foreground">
               The write-up has not landed in the repository yet. When{" "}
               <code className="font-mono text-xs">docs/ATTESTCOIN_INTEGRATION.md</code> exists
-              at build time it is rendered here in full — the table above is the summary it
+              at build time it is rendered here in full. The table above is the summary it
               expands on.
             </p>
           )}
@@ -383,7 +383,7 @@ function AttestcoinSection({ doc }: { doc?: string }) {
 /* ------------------------------------------------------------------- security */
 
 const GUARDS = [
-  "Receipt status must be 1 — a reverted registerIdentities proves nothing.",
+  "Receipt status must be 1. A reverted registerIdentities proves nothing.",
   "The transaction target and the log emitter must both be World's identity manager.",
   "The function selector must be registerIdentities or deleteIdentities.",
   "The postRoot decoded from calldata must equal the postRoot in the TreeChanged log.",
@@ -436,14 +436,14 @@ function SecurityModel() {
               Blockscout.
             </p>
             <p>
-              Anyone can relay a root — the relayer address in{" "}
+              Anyone can relay a root. The relayer address in{" "}
               <code className="font-mono text-xs">RootRelayed</code> is whoever paid the gas,
               and it carries no privilege. A worker that stops does not stop the protocol; a
               worker that lies cannot get a lie past the precompile.
             </p>
             <p>
               Nothing about a user leaves their device. Creditcoin sees a nullifier and a
-              Groth16 proof — not an identity, not a biometric, not a country.
+              Groth16 proof. Not an identity, not a biometric, not a country.
             </p>
             <p>
               Every failure path reverts with a named custom error, and every one of them has
@@ -473,7 +473,7 @@ const LIMITATIONS: Array<{ title: string; body: string }> = [
   },
   {
     title: "Attestcoin cannot prove a payment did not happen",
-    body: "Defaults are declared by a deadline passing with principal still outstanding on Creditcoin — native state, not a cross-chain absence claim. We do not claim otherwise.",
+    body: "Defaults are declared by a deadline passing with principal still outstanding on Creditcoin. That is native state, not a cross-chain absence claim, and we don't pretend otherwise.",
   },
   {
     title: "Personhood is only as strong as World ID",
@@ -489,11 +489,11 @@ const LIMITATIONS: Array<{ title: string; body: string }> = [
   },
   {
     title: "Root history expires after a week",
-    body: "A proof built against a root older than the expiry window will be rejected. That is intentional — it bounds how stale an accepted identity set can be — but it does mean an offline user must re-prove.",
+    body: "A proof built against a root older than the expiry window will be rejected. That is intentional, since it bounds how stale an accepted identity set can be, but it does mean an offline user must re-prove.",
   },
   {
     title: "Testnet RPC and explorer availability",
-    body: "This site reads CC3 over a public RPC endpoint. When that endpoint is slow, tables show skeletons and counters show an em dash rather than a fabricated zero.",
+    body: "This site reads CC3 over a public RPC endpoint. When that endpoint is slow, tables show skeletons and counters show a dash rather than a fabricated zero.",
   },
 ];
 
@@ -502,7 +502,7 @@ function Limitations() {
     <section id="limitations" className="flex flex-col gap-6 scroll-mt-20">
       <SectionHeading
         title="Known limitations"
-        description="Written down because a system you cannot criticise is a system you cannot trust."
+        description="Written down because a system you can't criticise is a system you can't trust."
       />
       <div className="grid gap-3 sm:grid-cols-2">
         {LIMITATIONS.map((limitation) => (

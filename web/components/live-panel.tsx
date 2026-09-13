@@ -9,7 +9,7 @@ import { formatCount, formatUsd } from "@/lib/format";
 import { useProtocolStats } from "@/lib/hooks/use-protocol-stats";
 import { cn } from "@/lib/utils";
 
-const DASH = "—";
+const DASH = "–";
 
 /**
  * The hero's live readout: four numbers pulled straight from CC3, refreshed

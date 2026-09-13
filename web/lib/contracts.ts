@@ -111,7 +111,7 @@ export const worldIdSetupIssues: WorldIdSetupIssue[] = [
   },
   !WORLD_RP_ID && {
     envVar: "NEXT_PUBLIC_WORLD_RP_ID",
-    what: "Relying-party id (rp_…) — IDKit 4.x signs every proof request against it.",
+    what: "Relying-party id (rp_…). IDKit 4.x signs every proof request against it.",
   },
 ].filter((issue): issue is WorldIdSetupIssue => Boolean(issue));
 

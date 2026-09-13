@@ -710,7 +710,7 @@ workflow commits. The relay is running, so the live file may be longer than this
 Snapshot taken 2026-09-12T13:55Z. Rows 1 to 5 landed on the v1 deployment; rows 6 onward landed on
 the current contracts. **Rows 13 to 18 were relayed by the GitHub Actions cron**
 ([`.github/workflows/relay.yml`](../.github/workflows/relay.yml), every 15 minutes), not from a
-laptop — the workflow derives its cursor from chain state, relays, and commits the new rows back to
+laptop. The workflow derives its cursor from chain state, relays, and commits the new rows back to
 `main`, so this file's git history is also the relayer's uptime record.
 
 | # | Source | Ethereum tx | Block | Creditcoin tx | Call | Gas | Humans | Lag |
@@ -873,7 +873,7 @@ up cleanly.
 
 Prerequisites: [Bun](https://bun.sh) and [Foundry](https://getfoundry.sh)
 (`curl -L https://foundry.paradigm.xyz | bash && foundryup`). Clone with
-`--recurse-submodules` — `forge-std` is a submodule. The shell scripts target bash 3.2, the macOS
+`--recurse-submodules`, since `forge-std` is a submodule. The shell scripts target bash 3.2, the macOS
 default, which is why they avoid associative arrays.
 
 ### Without a wallet

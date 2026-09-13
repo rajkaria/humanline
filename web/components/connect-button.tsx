@@ -142,7 +142,7 @@ function ConnectWallet({ className }: { className?: string }) {
           <DialogHeader>
             <DialogTitle>Connect a wallet</DialogTitle>
             <DialogDescription>
-              Pick the wallet to use. It will then ask to switch to {creditcoinTestnet.name} — and
+              Pick the wallet to use. It will then ask to switch to {creditcoinTestnet.name}, and
               to add the network first if it has never seen it.
             </DialogDescription>
           </DialogHeader>

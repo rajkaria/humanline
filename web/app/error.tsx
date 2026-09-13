@@ -32,14 +32,14 @@ export default function RouteError({
         <TriangleAlertIcon className="size-5" aria-hidden />
       </span>
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight">This page broke</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Well, that broke.</h1>
         <p className="max-w-xl text-sm text-muted-foreground">
-          Most failures here are a testnet RPC endpoint refusing a request. Reloading usually
-          fixes it; if it does not, the chain reads on{" "}
+          Nine times out of ten this is the testnet RPC refusing a request. Reload and it
+          usually comes back. If it doesn&rsquo;t, every chain read on{" "}
           <Link href="/judge" className="text-brand underline-offset-4 hover:underline">
             /judge
           </Link>{" "}
-          can all be run from a terminal instead.
+          can be run from a terminal instead.
         </p>
         <p className="font-mono text-xs break-words text-muted-foreground">
           {describeError(error)}

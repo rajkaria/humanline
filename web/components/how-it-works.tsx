@@ -160,7 +160,7 @@ export function HowItWorksDiagram({ className }: { className?: string }) {
               0x0FD2 BlockProver
             </text>
             <text x={396} y={98} className="fill-muted-foreground text-[10.5px]">
-              verifyAndEmit — inclusion
+              verifyAndEmit · inclusion
             </text>
             <text x={396} y={114} className="fill-muted-foreground text-[10.5px]">
               + continuity of the source tx

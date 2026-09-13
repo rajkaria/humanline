@@ -65,7 +65,7 @@ export const CONTRACT_META: ContractMeta[] = [
     key: "attestedWorldIDSepolia",
     name: "AttestedWorldID (Sepolia staging)",
     blurb:
-      "The same contract pointed at World's Sepolia staging identity manager (chainKey 1) — the judge-reproducible path.",
+      "The same contract pointed at World's Sepolia staging identity manager (chainKey 1). This is the path a judge can reproduce.",
     envVar: "NEXT_PUBLIC_ATTESTED_WORLD_ID_SEPOLIA_ADDRESS",
     aliases: [
       "attestedworldidsepolia",

@@ -178,7 +178,7 @@ describe("durations", () => {
     expect(formatTerm(600)).toBe("10 minutes");
     expect(formatTerm(300)).toBe("5 minutes");
     expect(formatTerm(3600)).toBe("1 hour");
-    expect(formatTerm(0)).toBe("—");
+    expect(formatTerm(0)).toBe("–");
     expect(formatTerm(90)).toBe("90 seconds");
   });
 });
@@ -192,11 +192,11 @@ describe("timestamps", () => {
     expect(formatRelativeTime(NOW - 240, NOW)).toBe("4m ago");
     expect(formatRelativeTime(NOW - 3 * 3600, NOW)).toBe("3h ago");
     expect(formatRelativeTime(NOW + 240, NOW)).toBe("in 4m");
-    expect(formatRelativeTime(0, NOW)).toBe("—");
+    expect(formatRelativeTime(0, NOW)).toBe("–");
   });
 
   test("formatTimestamp is UTC and stable between server and client", () => {
-    expect(formatTimestamp(0)).toBe("—");
+    expect(formatTimestamp(0)).toBe("–");
     expect(formatTimestamp(1_700_000_000)).toBe("2023-11-14 22:13:20 UTC");
   });
 });

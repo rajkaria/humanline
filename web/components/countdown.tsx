@@ -25,7 +25,7 @@ export function Countdown({
 }) {
   const now = useNow(1000);
 
-  if (deadline === 0n) return <span className={className}>—</span>;
+  if (deadline === 0n) return <span className={className}>–</span>;
   if (now === 0) return <span className={cn("tabular-nums", className)}>…</span>;
 
   const remaining = Number(deadline) - now;

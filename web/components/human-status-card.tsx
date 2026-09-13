@@ -50,8 +50,8 @@ export function HumanStatusCard({
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Connect a wallet on Creditcoin CC3 testnet to see whether it is bound to a
-            human, and to open a credit line.
+            Connect a wallet on Creditcoin CC3 testnet to see whether it belongs to a
+            verified human, and to open a credit line if it does.
           </p>
         </CardContent>
       </Card>
@@ -83,7 +83,7 @@ export function HumanStatusCard({
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <p className="text-sm text-muted-foreground">
-            This wallet is not bound to a World ID nullifier. Verify below — it takes one
+            This wallet is not bound to a World ID nullifier yet. Verify below. It takes one
             proof and one transaction, and the credit line that follows belongs to you, not
             to this key.
           </p>
@@ -132,7 +132,7 @@ export function HumanStatusCard({
                   {formatRelativeTime(human.registeredAt)}
                 </span>
               ) : (
-                "—"
+                "–"
               )
             }
           />
@@ -150,7 +150,7 @@ export function HumanStatusCard({
           </div>
         ) : (
           <p className="pt-3 text-sm text-muted-foreground">
-            No credit line yet. Open one below — the first limit is set by the pool&rsquo;s{" "}
+            No credit line yet. Open one below. The first limit is set by the pool&rsquo;s{" "}
             <code className="font-mono text-xs">INITIAL_LIMIT</code>.
           </p>
         )}

@@ -154,7 +154,7 @@ export function SignalHashCheck() {
                 <code className="font-mono">{WORLD_APP_ID}</code> /{" "}
                 <code className="font-mono">{WORLD_ACTION}</code>) do not derive the external
                 nullifier the registry stores. Proofs produced by this widget would not
-                verify — set <code className="font-mono">NEXT_PUBLIC_WORLD_APP_ID</code> and{" "}
+                verify. Set <code className="font-mono">NEXT_PUBLIC_WORLD_APP_ID</code> and{" "}
                 <code className="font-mono">NEXT_PUBLIC_WORLD_ACTION</code> to the values the
                 contract was deployed with.
               </p>

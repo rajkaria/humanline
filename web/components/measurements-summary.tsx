@@ -8,8 +8,8 @@ type Snapshot = Omit<Measurements, "relayTxs" | "latency"> & {
 };
 const m = generated as unknown as Partial<Snapshot>;
 
-const int = (v: number | null | undefined) => (v === null || v === undefined ? "—" : Math.round(v).toLocaleString("en-US"));
-const minutes = (s: number | null | undefined) => (s === null || s === undefined ? "—" : `${(s / 60).toFixed(0)} min`);
+const int = (v: number | null | undefined) => (v === null || v === undefined ? "–" : Math.round(v).toLocaleString("en-US"));
+const minutes = (s: number | null | undefined) => (s === null || s === undefined ? "–" : `${(s / 60).toFixed(0)} min`);
 
 function Tile({ label, value, detail }: { label: string; value: string; detail: string }) {
   return (
@@ -32,7 +32,7 @@ export function MeasurementsSummary() {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <Tile
           label="Gas per World ID update"
-          value={fit ? `${int(fit.slope)} / update` : "—"}
+          value={fit ? `${int(fit.slope)} / update` : "–"}
           detail={fit ? `base ${int(fit.intercept)}, R² ${fit.r2.toFixed(3)}, ${fit.n} batches` : "not enough batches yet"}
         />
         <Tile
@@ -52,12 +52,12 @@ export function MeasurementsSummary() {
         />
         <Tile
           label="0x0FD2 verify gas"
-          value={m.anchors?.verifyFit ? `+${int(m.anchors.verifyFit.slope)} / continuity root` : "—"}
+          value={m.anchors?.verifyFit ? `+${int(m.anchors.verifyFit.slope)} / continuity root` : "–"}
           detail={`attestation read ${int(m.anchors?.attestationReadGas)} gas, checkpoint read ${int(m.anchors?.checkpointReadGas)} gas`}
         />
         <Tile
           label="Share of BlockProver traffic"
-          value={m.precompile ? `${(m.precompile.humanlineShare * 100).toFixed(2)}%` : "—"}
+          value={m.precompile ? `${(m.precompile.humanlineShare * 100).toFixed(2)}%` : "–"}
           detail={m.precompile ? `${int(m.precompile.txs)} proof txs from ${m.precompile.callers.length} contracts in ${m.precompile.hours.toFixed(0)} h` : ""}
         />
       </div>

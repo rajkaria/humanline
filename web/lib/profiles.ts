@@ -56,7 +56,7 @@ export const PROFILES: Record<ProfileId, Profile> = {
     worldEnv: "staging",
     worldIdKey: "attestedWorldIDSepolia",
     sourceChain: "Ethereum Sepolia",
-    who: "Judges and reviewers — no Orb needed. 10-minute terms so a full borrow → repay cycle fits in a demo.",
+    who: "Judges and reviewers, no Orb needed. 10-minute terms so a full borrow and repay cycle fits in a demo.",
     deployment: demo,
     available: isAvailable(demo),
   },
@@ -67,7 +67,7 @@ export const PROFILES: Record<ProfileId, Profile> = {
     worldEnv: "production",
     worldIdKey: "attestedWorldIDMainnet",
     sourceChain: "Ethereum mainnet",
-    who: "Anyone with an Orb-verified World ID. 30-day terms, 7-day grace — the real product.",
+    who: "Anyone with an Orb-verified World ID. 30-day terms, 7-day grace. This is the real product.",
     deployment: production,
     available: isAvailable(production),
   },
@@ -90,7 +90,7 @@ export function profileById(id: string | null | undefined): Profile | undefined 
 /** Term length in a form the UI can print without unit maths. */
 export function termLabel(profile: Profile): string {
   const seconds = profile.deployment.config.termSeconds;
-  if (!seconds) return "—";
+  if (!seconds) return "–";
   if (seconds % 86_400 === 0) return `${seconds / 86_400} days`;
   if (seconds % 3_600 === 0) return `${seconds / 3_600} hours`;
   return `${Math.round(seconds / 60)} minutes`;

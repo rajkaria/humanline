@@ -51,9 +51,9 @@ export function GasCard() {
           data.error === "already_funded"
             ? "This wallet already has enough gas."
             : data.error === "faucet_empty"
-              ? "The gas faucet is empty — use the public Creditcoin faucet below."
+              ? "Our gas faucet is empty. Use the public Creditcoin faucet below."
               : data.error === "not_configured"
-                ? "This deployment has no gas faucet configured — use the public faucet below."
+                ? "This deployment has no gas faucet configured. Use the public faucet below."
                 : (data.detail ?? "Could not send gas."),
         );
         setState("idle");
@@ -107,13 +107,13 @@ export function GasCard() {
             <p className="text-xs text-muted-foreground">
               {state === "sent" ? (
                 <>
-                  1 tCTC is on its way — enough to register, borrow and repay many times
+                  1 tCTC is on its way. That is enough to register, borrow and repay many times
                   over. {hash ? <span className="font-mono text-[11px]">{hash.slice(0, 14)}…</span> : null}
                 </>
               ) : (
                 <>
                   Your proof is bound to your address, so you send the registration
-                  transaction yourself — which needs a little CC3 testnet gas. Balance:{" "}
+                  transaction yourself, which needs a little CC3 testnet gas. Balance:{" "}
                   <span className="font-mono">
                     {value === undefined ? "…" : Number(formatEther(value)).toFixed(4)} tCTC
                   </span>

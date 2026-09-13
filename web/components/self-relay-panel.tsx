@@ -81,8 +81,8 @@ export function SelfRelayPanel({
           <p className="text-sm font-medium text-foreground">Or relay it yourself, right now</p>
           <p className="text-xs leading-relaxed text-muted-foreground">
             Relaying is permissionless. Your wallet sends the Attestcoin proof of World&rsquo;s update
-            on {sourceLabel}; Creditcoin&rsquo;s 0x0FD2 precompile checks it, so it does not matter
-            who sends it.
+            on {sourceLabel}. Creditcoin&rsquo;s 0x0FD2 precompile checks it, so it doesn&rsquo;t matter
+            who sends it. Today, that can be you.
           </p>
         </div>
       </div>
@@ -210,8 +210,8 @@ function AttestationWait({
       {targetAttested !== undefined ? (
         <p className="text-[11px] text-muted-foreground" data-testid="self-relay-attested">
           {targetAttested
-            ? "✓ ChainInfo 0x0FD3: your update's block is already attested — it only needs burying deeper."
-            : "ChainInfo 0x0FD3: your update's block is not attested yet — attestors are still catching up to it."}
+            ? "✓ ChainInfo 0x0FD3: your update's block is already attested. It only needs burying a little deeper."
+            : "ChainInfo 0x0FD3: your update's block is not attested yet. The attestors are still catching up to it."}
         </p>
       ) : null}
       <div className="h-1 overflow-hidden rounded-full bg-muted" aria-hidden>

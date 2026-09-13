@@ -238,7 +238,7 @@ export function formatDuration(seconds: number | bigint): string {
 /** Duration-style contract constants (`TERM`, `GRACE`) in long form: `30 days`. */
 export function formatTerm(seconds: number | bigint): string {
   const s = Number(seconds);
-  if (!Number.isFinite(s) || s <= 0) return "—";
+  if (!Number.isFinite(s) || s <= 0) return "–";
   if (s % DAY === 0) return `${s / DAY} day${s / DAY === 1 ? "" : "s"}`;
   if (s % HOUR === 0) return `${s / HOUR} hour${s / HOUR === 1 ? "" : "s"}`;
   if (s % MINUTE === 0) return `${s / MINUTE} minute${s / MINUTE === 1 ? "" : "s"}`;
@@ -254,7 +254,7 @@ export function formatRelativeTime(
   nowSeconds: number = Math.floor(Date.now() / 1000),
 ): string {
   const ts = Number(timestampSeconds);
-  if (!Number.isFinite(ts) || ts <= 0) return "—";
+  if (!Number.isFinite(ts) || ts <= 0) return "–";
   const delta = nowSeconds - ts;
   if (Math.abs(delta) < 45) return "just now";
   const body = formatDuration(Math.abs(delta));
@@ -264,7 +264,7 @@ export function formatRelativeTime(
 /** Absolute UTC timestamp, stable between server and client render. */
 export function formatTimestamp(timestampSeconds: number | bigint): string {
   const ts = Number(timestampSeconds);
-  if (!Number.isFinite(ts) || ts <= 0) return "—";
+  if (!Number.isFinite(ts) || ts <= 0) return "–";
   const d = new Date(ts * 1000);
   const pad = (n: number) => n.toString().padStart(2, "0");
   return (
@@ -306,7 +306,7 @@ export function describeError(error: unknown): string {
   const revert = err.metaMessages?.find((m) => m.includes("Error:") || m.includes("reverted"));
   if (err.shortMessage) {
     const named = extractCustomError(err.metaMessages?.join("\n") ?? "");
-    return named ? `${named} — ${firstLine(err.shortMessage)}` : firstLine(err.shortMessage);
+    return named ? `${named}: ${firstLine(err.shortMessage)}` : firstLine(err.shortMessage);
   }
   if (revert) return firstLine(revert);
   if (err.details) return firstLine(err.details);

@@ -44,7 +44,7 @@ import { NEGATIVE_PATHS, NEGATIVE_PATH_FILTER } from "@/lib/negative-paths";
 export const metadata: Metadata = {
   title: "Judge",
   description:
-    "Every Humanline claim, with the exact command that checks it — no wallet required.",
+    "Every Humanline claim, with the exact command that checks it. No wallet required.",
 };
 
 // The RP status probe hits a third-party endpoint; never cache a failure.
@@ -61,7 +61,7 @@ export default async function JudgePage() {
       <PageHeader
         eyebrow="Reproducibility"
         title="Check every claim yourself"
-        description="Nothing on this page asks you to trust the site. Each row is a value you can read off the chain, a command you can run, or a test you can execute."
+        description="Nothing on this page asks you to trust the site. Each row is a value you can read off the chain, a command you can run, or a test you can execute. Bring a terminal and a healthy dose of suspicion."
       />
 
       <Addresses />
@@ -71,7 +71,7 @@ export default async function JudgePage() {
         <SectionHeading
           id="happened"
           title="What has already happened"
-          description="Not instructions — receipts. A real World ID identity verified on Creditcoin, and a full borrow-and-repay cycle, both with transaction hashes you can open."
+          description="Receipts, not instructions. A real World ID identity verified on Creditcoin, and a full borrow-and-repay cycle, both with transaction hashes you can open."
         />
         <E2eEvidence />
       </section>
@@ -108,7 +108,7 @@ export default async function JudgePage() {
         <SectionHeading
           id="attacks"
           title="Live refusals"
-          description="The twelve attacks, fired at the deployed contracts as read-only calls while this page loaded. No wallet, no gas — the chain says no, by name."
+          description="The twelve attacks, fired at the deployed contracts as read-only calls while this page loaded. No wallet, no gas. The chain says no, and it says it by name."
         />
         <Suspense fallback={<p className="text-sm text-muted-foreground">Firing twelve attacks at CC3 testnet…</p>}>
           <LiveAttacks />
@@ -152,7 +152,7 @@ function Addresses() {
       <SectionHeading
         id="addresses"
         title="Addresses"
-        description={`Everything on Creditcoin CC3 testnet, chainId ${creditcoinTestnet.id}. The table below is the reproducible deployment — the one you can run end to end with World's simulator. The Orb-tree deployment for real verified humans follows it.`}
+        description={`Everything on Creditcoin CC3 testnet, chainId ${creditcoinTestnet.id}. The table below is the reproducible deployment, the one you can run end to end with World's simulator. The Orb-tree deployment for real verified humans follows it.`}
       />
 
       <div className="overflow-x-auto rounded-xl ring-1 ring-foreground/10">
@@ -185,7 +185,7 @@ function Addresses() {
                       ? "deployments.json"
                       : contract.source === "env"
                         ? "env"
-                        : "—"}
+                        : "none"}
                   </Badge>
                 </TableCell>
               </TableRow>
@@ -211,7 +211,7 @@ function Addresses() {
                 <HashLink value={PRECOMPILES.chainInfo} kind="address" />
               </TableCell>
               <TableCell className="hidden text-xs text-muted-foreground xl:table-cell">
-                Supported chains and attested tips — the finality-depth guard.
+                Supported chains and attested tips. This is the finality-depth guard.
               </TableCell>
               <TableCell className="text-right">
                 <Badge variant="outline">native</Badge>
@@ -225,7 +225,7 @@ function Addresses() {
                 <HashLink value={PRECOMPILES.attestorStash} kind="address" />
               </TableCell>
               <TableCell className="hidden text-xs text-muted-foreground xl:table-cell">
-                Attestor counts per source chain — the quorum floor.
+                Attestor counts per source chain. This is the quorum floor.
               </TableCell>
               <TableCell className="text-right">
                 <Badge variant="outline">native</Badge>
@@ -298,7 +298,7 @@ function ProductionAddresses() {
       <SectionHeading
         id="addresses-production"
         title="The Orb-tree deployment"
-        description={`The same contracts verifying against the Ethereum mainnet identity tree instead of Sepolia staging — ${termLabel(profile)} terms, for people with an Orb-verified World ID. Open /app?profile=production to use it. hUSD and both AttestedWorldID instances are shared with the table above.`}
+        description={`The same contracts verifying against the Ethereum mainnet identity tree instead of Sepolia staging, with ${termLabel(profile)} terms, for people with an Orb-verified World ID. Open /app?profile=production to use it. hUSD and both AttestedWorldID instances are shared with the table above.`}
       />
       <div className="overflow-x-auto rounded-xl ring-1 ring-foreground/10">
         <Table>
@@ -322,7 +322,7 @@ function ProductionAddresses() {
                 </TableCell>
                 <TableCell className="hidden max-w-md text-xs text-muted-foreground xl:table-cell">
                   {contract.key === "humanRegistry"
-                    ? "AttestedWorldID (Ethereum mainnet) — World's Orb-verified tree, relayed by Attestcoin."
+                    ? "AttestedWorldID (Ethereum mainnet): World's Orb-verified tree, relayed by Attestcoin."
                     : contract.blurb}
                 </TableCell>
               </TableRow>
@@ -384,7 +384,7 @@ function VerifyCommands() {
           <CardDescription>
             Clone with <code className="font-mono">--recurse-submodules</code>, then{" "}
             <code className="font-mono">bun install &amp;&amp; (cd contracts &amp;&amp; bun install)</code>.
-            Foundry is not vendored — install it with{" "}
+            Foundry is not vendored. Install it with{" "}
             <code className="font-mono">curl -L https://foundry.paradigm.xyz | bash &amp;&amp; foundryup</code>.
           </CardDescription>
         </CardHeader>
@@ -409,7 +409,7 @@ function VerifyCommands() {
             command={`cd contracts && CC3_FORK=${RPC} forge test --match-contract Fork -vv`}
           />
           <CommandBlock
-            title="Web unit tests — World ID hashing and formatting"
+            title="Web unit tests: World ID hashing and formatting"
             description="Reproduces hashToField and the external nullifier exactly as the Solidity does."
             command={`cd web && bun test`}
           />
@@ -507,7 +507,7 @@ function WorldIdCard({ rpStatus }: { rpStatus: RpStatus | null }) {
 
         <CommandBlock
           title="Recompute the external nullifier"
-          description="hashToField(abi.encodePacked(hashToField(app_id), action)) — the web test asserts this equals what the registry stores."
+          description="hashToField(abi.encodePacked(hashToField(app_id), action)). The web test asserts this equals what the registry stores."
           command={`cd web && bun test test/worldid.test.ts`}
         />
 
@@ -515,8 +515,8 @@ function WorldIdCard({ rpStatus }: { rpStatus: RpStatus | null }) {
           <span className="font-medium">Relying-party status</span>
           {rpStatus === null ? (
             <span className="text-muted-foreground">
-              developer.world.org did not answer. The RP status endpoint is informational —
-              registration is verified on Creditcoin, not by World&rsquo;s API.
+              developer.world.org did not answer. The RP status endpoint is informational.
+              Registration is verified on Creditcoin, not by World&rsquo;s API.
             </span>
           ) : rpStatus.ok ? (
             <pre className="overflow-x-auto font-mono text-[11px] text-muted-foreground">

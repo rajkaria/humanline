@@ -11,8 +11,8 @@ export function SiteFooter() {
           <Wordmark />
           <p className="max-w-xs text-sm text-muted-foreground">
             One human, one credit line. Proof of personhood from World ID, carried to
-            Creditcoin by the Attestcoin Protocol with no bridge and no oracle
-            operator in between.
+            Creditcoin by Attestcoin, with no bridge and no oracle operator standing in
+            between. Built by people who think a wallet was never a person.
           </p>
         </div>
 
@@ -42,7 +42,7 @@ export function SiteFooter() {
       <div className="border-t border-foreground/10">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-2 px-4 py-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p>
-            Built for BUIDL CTC 2026 Fall. Testnet only — hUSD is a test asset and
+            Built for BUIDL CTC 2026 Fall. Testnet only: hUSD is a test asset and
             lender deposits are testnet funds.
           </p>
           <p className="font-mono">

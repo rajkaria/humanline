@@ -14,7 +14,7 @@ export default function VotePage() {
       <PageHeader
         eyebrow="Built on @humanline/sdk"
         title="One person, one vote"
-        description="A poll that a wallet farm cannot stuff. HumanPoll is a separate contract that only inherits the SDK's HumanGated modifier: every verified human gets one ballot per poll, and moving to a new wallet does not buy a second one."
+        description="A poll that a wallet farm can't stuff. HumanPoll is a separate contract that only inherits the SDK's HumanGated modifier: every verified human gets one ballot per poll, and moving to a new wallet doesn't buy you a second one."
       />
       <VotePanel />
     </PageShell>

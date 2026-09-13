@@ -17,7 +17,7 @@ export default function AppPage() {
       <PageHeader
         eyebrow="Your line"
         title="Verify, then borrow"
-        description="One proof binds your World ID nullifier to this wallet. The line that follows belongs to the human, not the key — re-bind to a new wallet and the history comes with you."
+        description="One proof binds your World ID nullifier to this wallet. The line that follows belongs to you, the human, not to the key. Move to a new wallet and your history comes with you."
       />
       <div className="pt-8">
         {/* ProfileProvider reads `?profile=`, which makes this subtree client-dynamic;

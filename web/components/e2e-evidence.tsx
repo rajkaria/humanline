@@ -70,8 +70,8 @@ function PersonhoodCard() {
         </div>
         <CardDescription>
           A real World ID simulator identity on the staging tree, proved against a root that
-          Attestcoin relayed, with the Groth16 proof verified by the contract on Creditcoin —
-          not by an API.
+          Attestcoin relayed, with the Groth16 proof verified by the contract on Creditcoin.
+          Not by an API, not by us.
         </CardDescription>
       </CardHeader>
 
@@ -118,7 +118,7 @@ function PersonhoodCard() {
           <BadgeCheckIcon className="size-4 shrink-0 text-success" aria-hidden />
           <span className="text-muted-foreground">
             The signal hash above is{" "}
-            <code className="font-mono">hashToField(abi.encodePacked(wallet))</code> — the
+            <code className="font-mono">hashToField(abi.encodePacked(wallet))</code>, the
             same value the widget below recomputes from the deployed contract.
           </span>
         </div>
@@ -154,7 +154,7 @@ function CreditLoopCard() {
           ) : null}
         </div>
         <CardDescription>
-          Faucet, deposit, open, borrow, repay — every step a real transaction on CC3
+          Faucet, deposit, open, borrow, repay. Every step a real transaction on CC3
           testnet, ending with an on-time repayment that raised the limit.
         </CardDescription>
       </CardHeader>
@@ -168,7 +168,7 @@ function CreditLoopCard() {
               value={
                 e.principalAfterBorrow
                   ? `${formatUsd(BigInt(e.principalAfterBorrow))} hUSD`
-                  : "—"
+                  : "–"
               }
             />
             <Figure

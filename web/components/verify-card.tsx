@@ -121,7 +121,7 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
     if (wasWaiting.current && rootConfirmed) {
       wasWaiting.current = false;
       toast.success("Your proof reached Creditcoin", {
-        description: "Step 3 is unlocked — verify whenever you are ready.",
+        description: "Step 3 is unlocked. Verify whenever you are ready.",
       });
     }
   }, [rootNotRelayedYet, rootConfirmed]);
@@ -195,8 +195,8 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
               Verify you are a human
             </CardTitle>
             <CardDescription>
-              One anonymous proof from World ID. Creditcoin never learns who you are — only that
-              this wallet belongs to a unique human.
+              One anonymous proof from World ID. Creditcoin never learns who you are, only that
+              this wallet belongs to a unique human. That is all it needs.
             </CardDescription>
           </div>
           <Badge
@@ -237,7 +237,7 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
                 <span className="block pt-1">
                   Set{" "}
                   <code className="font-mono text-[11px]">WORLD_RP_SIGNER_PRIVATE_KEY</code> in{" "}
-                  <code className="font-mono text-[11px]">web/.env.local</code> — it comes from the
+                  <code className="font-mono text-[11px]">web/.env.local</code>. It comes from the
                   repo-root <code className="font-mono text-[11px]">.secrets.env</code>. It is read
                   only on the server and never reaches the browser.
                 </span>
@@ -422,7 +422,7 @@ export function VerifySteps({ states }: { states: [StepState, StepState, StepSta
                 {label}
                 <span className="sr-only">
                   {" "}
-                  — {state === "done" ? "done" : state === "upcoming" ? "not started" : "in progress"}
+                  : {state === "done" ? "done" : state === "upcoming" ? "not started" : "in progress"}
                 </span>
               </span>
             </span>
@@ -460,11 +460,11 @@ export function RelayWaitPanel({
           <span className="relative inline-flex size-2.5 rounded-full bg-brand" />
         </span>
         <div className="flex min-w-0 flex-col gap-1">
-          <p className="text-sm font-medium text-foreground">Proof received — syncing to Creditcoin</p>
+          <p className="text-sm font-medium text-foreground">Proof received. Syncing to Creditcoin</p>
           <p className="text-xs leading-relaxed text-muted-foreground">
             World just added you to its latest update. Creditcoin accepts it once its attestors
             have followed Ethereum about 32 blocks past it (roughly 15 minutes), and then any
-            relayer can carry it across. This step unlocks on its own — or relay it yourself below.
+            relayer can carry it across. This step unlocks on its own, or you can relay it yourself below.
           </p>
         </div>
       </div>
@@ -506,7 +506,7 @@ export function RelayWaitPanel({
 
       <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
         <InfoIcon className="size-3 shrink-0" aria-hidden />
-        Keep this tab open — your proof lives here until it is verified.
+        Keep this tab open. Your proof lives here until it is verified.
       </p>
     </div>
   );
@@ -536,7 +536,7 @@ export function ReadyPanel({
         )}
         <div className="flex min-w-0 flex-col gap-1">
           <p className="text-sm font-medium text-foreground">
-            {confirming ? "Proof received — checking Creditcoin…" : "Your proof is ready"}
+            {confirming ? "Proof received. Checking Creditcoin…" : "Your proof is ready"}
           </p>
           <p className="text-xs leading-relaxed text-muted-foreground">
             One transaction checks the proof on Creditcoin and links this wallet to your World ID.
@@ -582,9 +582,9 @@ export function TechnicalDetails({
           <Field label="Signal (your wallet)" value={address ?? "connect a wallet"} mono />
           <Field
             label="signalHash"
-            value={signalHash === undefined ? "—" : `0x${signalHash.toString(16)}`}
+            value={signalHash === undefined ? "–" : `0x${signalHash.toString(16)}`}
             mono
-            title="hashToField(abi.encodePacked(address)) — the registry recomputes this from msg.sender"
+            title="hashToField(abi.encodePacked(address)). The registry recomputes this from msg.sender"
           />
         </dl>
         {proof ? (

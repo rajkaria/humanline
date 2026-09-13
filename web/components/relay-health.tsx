@@ -18,7 +18,7 @@ function pct(ratio: number): string {
 }
 
 function dur(sec: number | null): string {
-  return sec === null ? "—" : formatDuration(sec);
+  return sec === null ? "–" : formatDuration(sec);
 }
 
 /**
@@ -210,7 +210,7 @@ export function RelayHealth() {
         ))}
         {others.length > 0 ? (
           <span>
-            — {others.reduce((n, x) => n + x.roots, 0)} of {r.endToEndAll.count} roots carried by wallets that
+            Plus {others.reduce((n, x) => n + x.roots, 0)} of {r.endToEndAll.count} roots carried by wallets that
             are not Humanline&rsquo;s.
           </span>
         ) : null}

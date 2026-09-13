@@ -56,10 +56,10 @@ export function RelayRewardCard() {
       </CardHeader>
       <CardContent>
         <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Stat label="Per fresh root" value={reward === undefined ? "—" : `${formatCtc(reward)} tCTC`} emphasis />
-          <Stat label="Can still pay" value={available === undefined ? "—" : `${formatCtc(available)} tCTC`} />
-          <Stat label="Roots rewarded" value={rootsRewarded === undefined ? "—" : formatCount(rootsRewarded)} />
-          <Stat label="Paid out" value={totalRewarded === undefined ? "—" : `${formatCtc(totalRewarded)} tCTC`} />
+          <Stat label="Per fresh root" value={reward === undefined ? "–" : `${formatCtc(reward)} tCTC`} emphasis />
+          <Stat label="Can still pay" value={available === undefined ? "–" : `${formatCtc(available)} tCTC`} />
+          <Stat label="Roots rewarded" value={rootsRewarded === undefined ? "–" : formatCount(rootsRewarded)} />
+          <Stat label="Paid out" value={totalRewarded === undefined ? "–" : `${formatCtc(totalRewarded)} tCTC`} />
         </dl>
         <p className="pt-3 text-xs text-muted-foreground">
           Paid only when the call moves Creditcoin&rsquo;s tip to a root younger than{" "}

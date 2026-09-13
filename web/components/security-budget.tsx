@@ -47,7 +47,7 @@ export function SecurityBudget({ creditLine, symbol }: { creditLine: `0x${string
         Every loan here rests on roots Attestcoin&rsquo;s attestors vouched for
         {chain ? ` on ${chain.name}` : ""}. So the pool never lends more in total than they have at
         stake: {formatCount(attestors)} bonded attestors × {formatCtc(minBond)} CTC minimum bond ={" "}
-        {formatCtc(bonded)} CTC, at {rate === undefined ? "—" : formatUsd(rate)} {symbol} per bonded CTC.
+        {formatCtc(bonded)} CTC, at {rate === undefined ? "–" : formatUsd(rate)} {symbol} per bonded CTC.
         Read live from AttestorStash <code className="font-mono text-[11px]">0x0FD4</code> on every draw.
       </p>
       <div className="flex items-baseline justify-between text-xs text-muted-foreground">

@@ -186,30 +186,31 @@ export function CreditPanel({
             Open your credit line
           </CardTitle>
           <CardDescription>
-            One line per human. Opening it costs nothing and requires no collateral — the
-            pool is lending against the fact that you are a person who cannot start over.
+            One line per human. Opening it costs nothing and needs no collateral. The pool
+            is lending against the one thing you can&rsquo;t fake: you are a person who cannot
+            start over.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Stat
               label="Starting limit"
-              value={terms.initialLimit === undefined ? "—" : formatUsd(terms.initialLimit)}
+              value={terms.initialLimit === undefined ? "–" : formatUsd(terms.initialLimit)}
               hint={symbol}
             />
             <Stat
               label="Ceiling"
-              value={terms.maxLimit === undefined ? "—" : formatUsd(terms.maxLimit)}
+              value={terms.maxLimit === undefined ? "–" : formatUsd(terms.maxLimit)}
               hint={symbol}
             />
             <Stat
               label="Fee per term"
-              value={terms.feeBps === undefined ? "—" : formatBps(terms.feeBps)}
+              value={terms.feeBps === undefined ? "–" : formatBps(terms.feeBps)}
               hint="charged at borrow"
             />
             <Stat
               label="Term"
-              value={terms.term === undefined ? "—" : formatTerm(terms.term)}
+              value={terms.term === undefined ? "–" : formatTerm(terms.term)}
               hint={terms.grace === undefined ? undefined : `${formatTerm(terms.grace)} grace`}
             />
           </dl>
@@ -293,8 +294,8 @@ export function CreditPanel({
         {line.frozen ? (
           <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-muted-foreground">
             This line was frozen after a default. It stays frozen on every wallet this human
-            ever binds — that is the point of keying credit to a person rather than a key.
-            Repaying is still possible; the freeze is not.
+            ever binds. That is the whole point of keying credit to a person rather than a key.
+            Repaying is still possible. Escaping the freeze is not.
           </div>
         ) : null}
 
@@ -396,7 +397,7 @@ export function CreditPanel({
             <p className="min-h-8 text-xs text-muted-foreground">
               {repayAmount !== null && repayAmount > balance ? (
                 <span className="text-warning">
-                  Not enough {symbol} in this wallet — use the faucet below.
+                  Not enough {symbol} in this wallet. Grab some from the faucet below.
                 </span>
               ) : repayAmount !== null && repayAmount >= line.principal && line.principal > 0n ? (
                 "Clears the balance. If it is on time the limit grows 25%."

@@ -32,8 +32,8 @@ export function ProfileSwitch() {
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-sm font-medium">Which tree are you proving against?</h2>
           <p className="text-xs text-muted-foreground">
-            Both are live on Creditcoin CC3. Your choice changes the registry, the credit
-            line and the World ID environment together — they have to agree.
+            Both are live on Creditcoin CC3. Your choice switches the registry, the credit
+            line and the World ID environment together, because they have to agree.
           </p>
         </div>
 

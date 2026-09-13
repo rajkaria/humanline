@@ -68,8 +68,8 @@ export function EventHistory({ human }: { human: bigint }) {
           </div>
         ) : !data || data.length === 0 ? (
           <p className="py-6 text-center text-sm text-muted-foreground">
-            No activity yet. Open a line and borrow to start a history that follows you
-            across wallets.
+            Nothing here yet. Open a line and borrow to start a history that follows you
+            from wallet to wallet.
           </p>
         ) : (
           <div className="overflow-x-auto">
@@ -90,7 +90,7 @@ export function EventHistory({ human }: { human: bigint }) {
                       <Badge className={TONE[event.kind]}>{event.kind}</Badge>
                     </TableCell>
                     <TableCell className="text-right font-mono tabular-nums">
-                      {event.amount === undefined ? "—" : formatUsd(event.amount)}
+                      {event.amount === undefined ? "–" : formatUsd(event.amount)}
                       <span className="pl-1 text-[10px] text-muted-foreground">
                         {AMOUNT_LABEL[event.kind]}
                       </span>

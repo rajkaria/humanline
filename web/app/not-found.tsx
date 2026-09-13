@@ -9,10 +9,10 @@ export default function NotFound() {
     <PageShell width="prose" className="flex flex-col items-start gap-6 py-24">
       <span className="font-mono text-sm text-brand">404</span>
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Nothing here</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Nothing lives here</h1>
         <p className="max-w-xl text-sm text-muted-foreground">
-          That page does not exist. The four that do: the app, the relay feed, the judge
-          page, and the docs.
+          That page doesn&rsquo;t exist, and we checked twice. The ones that do: the app, the
+          relay feed, the vote, the judge page and the docs.
         </p>
       </div>
       <div className="flex flex-wrap gap-2">

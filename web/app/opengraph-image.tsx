@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Humanline — one human, one credit line";
+export const alt = "Humanline: one human, one credit line";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -55,8 +55,8 @@ export default function OpengraphImage() {
             One human, one credit line.
           </div>
           <div style={{ fontSize: 27, color: "#a2a3b1", maxWidth: 880, lineHeight: 1.4 }}>
-            World ID proof of personhood, carried to Creditcoin by the Attestcoin Protocol. No
-            bridge, no oracle operator, no second wallet.
+            Prove you&rsquo;re a person once with World ID. Attestcoin carries it to Creditcoin.
+            No bridge, no oracle operator, no second wallet.
           </div>
         </div>
 

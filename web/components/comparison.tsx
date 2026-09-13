@@ -12,9 +12,9 @@ const ROWS: Array<{
   },
   {
     question: "Can a sybil farm forge the history?",
-    passport: "Yes — open ten wallets, repay yourself ten times, mint ten perfect scores.",
+    passport: "Yes. Open ten wallets, repay yourself ten times, mint ten perfect scores.",
     humanline:
-      "No — the nullifier is derived from an Orb-verified identity, and the tree has one leaf per person.",
+      "No. The nullifier is derived from an Orb-verified identity, and the tree has one leaf per person.",
   },
   {
     question: "What happens after a default?",
@@ -30,7 +30,7 @@ const ROWS: Array<{
   {
     question: "Who has to be trusted?",
     passport: "The scorer, the bridge operator, or the team holding the admin key.",
-    humanline: "Nobody. No admin keys, no pause, no upgradeability — and anyone can run the relayer.",
+    humanline: "Nobody. No admin keys, no pause, no upgradeability. And anyone can run the relayer.",
   },
   {
     question: "Where is the proof checked?",

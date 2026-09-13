@@ -15,7 +15,7 @@ export default function RelayPage() {
       <PageHeader
         eyebrow="Attestcoin"
         title="Root relay"
-        description="Every row is a real transaction on Ethereum, proven to Creditcoin by the 0x0FD2 precompile. No bridge signed it, no oracle reported it, and anyone can submit the next one."
+        description="Every row is a real transaction on Ethereum, proven to Creditcoin by the 0x0FD2 precompile. No bridge signed it, no oracle reported it, and the next one can come from anyone. Including you."
       />
       <div className="pt-8">
         <RelayClient />

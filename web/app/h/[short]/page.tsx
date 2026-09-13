@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 const hUsd = (units: string) => (Number(BigInt(units)) / 1e6).toLocaleString("en-US", { maximumFractionDigits: 2 });
-const date = (s: number | null) => (s ? new Date(s * 1000).toISOString().slice(0, 10) : "—");
+const date = (s: number | null) => (s ? new Date(s * 1000).toISOString().slice(0, 10) : "–");
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
@@ -64,7 +64,7 @@ export default async function HumanPage({ params }: Props) {
       <PageHeader
         eyebrow="Verified human"
         title={`Human ${short}`}
-        description="One World ID, proved on Creditcoin against a root that arrived through Attestcoin. The history below belongs to the person, not to a wallet."
+        description="One World ID, proved on Creditcoin against a root that arrived through Attestcoin. The history below belongs to the person, not to any wallet they have held."
       />
       {matches.length === 0 ? (
         <Card>

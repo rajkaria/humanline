@@ -1,4 +1,4 @@
-# End-to-end: World ID (staging, simulator) → Creditcoin CC3 — 2026-09-12 09:27 UTC
+# End-to-end: World ID (staging, simulator) → Creditcoin CC3 · 2026-09-12 09:27 UTC
 
 - Request: IDKit 4.2 `IDKit.request({... allow_legacy_proofs: true, environment: "staging"}).preset(orbLegacy({ signal: wallet }))`, rp_context signed with the Humanline RP key (rp_84b02642423cadf5).
 - Identity: World simulator "Identity #0" (Orb level). Response protocol_version 3.0, fields identifier / merkle_root / nullifier / proof / signal_hash (see e2e-worldid-staging-result.json).

@@ -133,8 +133,8 @@ export function LenderPanel({
         </CardTitle>
         <CardDescription>
           Deposit {symbol} and fund uncollateralised lines. The pool absorbs write-offs, so
-          a default reduces every share&rsquo;s value — there is no insurance fund and no
-          backstop.
+          a default reduces every share&rsquo;s value. There is no insurance fund and no
+          backstop, and we would rather tell you that here than in the small print.
         </CardDescription>
       </CardHeader>
 
@@ -264,7 +264,7 @@ export function LenderPanel({
               ) : overIdle ? (
                 <span className="text-warning">
                   That redeems {formatUsd(withdrawAssets!)} {symbol}, but only{" "}
-                  {formatUsd(idle)} {symbol} is idle — the rest is out on loan until it is
+                  {formatUsd(idle)} {symbol} is idle. The rest is out on loan until it is
                   repaid.
                 </span>
               ) : withdrawAssets !== null && withdrawAssets > 0n ? (
@@ -309,7 +309,7 @@ export function LenderPanel({
 
         <StatRow
           label="Shares outstanding"
-          value={totalShares === 0n ? "—" : formatShares(totalShares)}
+          value={totalShares === 0n ? "–" : formatShares(totalShares)}
           className="border-t border-foreground/10 pt-3"
         />
       </CardContent>

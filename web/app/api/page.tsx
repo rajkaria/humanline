@@ -28,7 +28,7 @@ export default function ApiPage() {
       />
 
       <section className="flex flex-col gap-4">
-        <SectionHeading id="spec" title="Specification" description="OpenAPI 3.1, machine-readable. Import it into any client generator." />
+        <SectionHeading id="spec" title="Specification" description="OpenAPI 3.1, machine-readable. Drop it into any client generator and go." />
         <CommandBlock command="curl -s https://humanline.credit/api/openapi.json" />
         <p className="text-sm text-muted-foreground">
           Prefer TypeScript? The same reads, plus a React hook and the <code className="font-mono">HumanGated</code> Solidity
