@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 480" width="480" height="480" role="img" aria-label="Humanline">
+  <title>Humanline</title>
+  <defs>
+    <linearGradient id="m" x1="3" y1="8" x2="29" y2="24" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#9f90ff"/>
+      <stop offset="0.45" stop-color="#7fa6f4"/>
+      <stop offset="1" stop-color="#28d7dc"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.42" cy="0.5" r="0.62">
+      <stop offset="0" stop-color="#6d5dfc" stop-opacity="0.22"/>
+      <stop offset="0.55" stop-color="#28d7dc" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#0d0e16" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="480" height="480" fill="#0d0e16"/>
+  <rect width="480" height="480" fill="url(#glow)"/>
+  <g transform="translate(64 64) scale(11)">
+    <path d="M19.91 10.21 A 9.4 9.4 0 1 0 19.91 21.79" fill="none" stroke="url(#m)" stroke-width="1.7" stroke-linecap="round" opacity="0.34"/>
+    <path d="M18.15 13 A 6.4 6.4 0 1 0 18.15 19" fill="none" stroke="url(#m)" stroke-width="2.1" stroke-linecap="round" opacity="0.66"/>
+    <circle cx="12.5" cy="16" r="3.5" fill="url(#m)"/>
+    <path d="M15.6 16 H 28.4" fill="none" stroke="url(#m)" stroke-width="3.1" stroke-linecap="round"/>
+  </g>
+</svg>

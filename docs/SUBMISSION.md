@@ -17,10 +17,10 @@ Humanline
 ### Project Logo (Image URL, optional)
 
 ```
-{{LOGO_URL}}
+https://raw.githubusercontent.com/rajkaria/humanline/main/docs/brand/humanline-logo-480.png
 ```
 
-PNG or SVG. If no logo is ready at submission, leave blank rather than uploading a placeholder.
+480 × 480 PNG, 106 KB (form limit 2 MB), rendered from `docs/brand/humanline-logo.svg` (the same mark as `web/app/icon.svg`). Upload the file directly where the form asks for an image.
 
 ### Project Sector
 
@@ -28,7 +28,7 @@ PNG or SVG. If no logo is ready at submission, leave blank rather than uploading
 DeFi
 ```
 
-Secondary fit is RWA. The form takes one value, and DeFi is correct: this is a lending pool with an identity primitive under it. Do not select AI.
+If the form shows Category instead (Crypto / Web3, Quantum Computing, Space, AI / Robotics, Other), choose **Crypto / Web3**. Secondary fit is RWA. The sector field takes one value, and DeFi is correct: this is a lending pool with an identity primitive under it. Do not select AI.
 
 ### Project Description
 
