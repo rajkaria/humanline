@@ -241,7 +241,13 @@ if (command === "human" && arg) {
     await client.simulateContract({ account: second, address: C.CreditLine, abi: lineAbi, functionName: "borrow", args: [1_000_000n] });
     throw new Error("borrow from the new wallet was not refused");
   } catch (error) {
-    borrowRefusal = error instanceof Error ? (error.message.match(/LineFrozen|reverted[^\n]*/)?.[0] ?? error.message.slice(0, 120)) : String(error);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const decoded = (error as any)?.cause?.data as { errorName?: string; args?: readonly unknown[] } | undefined;
+    borrowRefusal = decoded?.errorName
+      ? `${decoded.errorName}(${(decoded.args ?? []).map((a) => (typeof a === "bigint" ? `0x${a.toString(16)}` : String(a))).join(",")})`
+      : error instanceof Error
+        ? error.message.slice(0, 120)
+        : String(error);
   }
   console.log(`  new wallet inherits frozen=${inherited.frozen}; borrow refused: ${borrowRefusal}`);
   if (!inherited.frozen) throw new Error("the new wallet's line is not frozen");
