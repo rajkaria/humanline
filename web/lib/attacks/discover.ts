@@ -8,7 +8,7 @@
  * fires the calls.
  */
 
-import { createPublicClient, http, type Address, type Hex } from "viem";
+import { createPublicClient, encodePacked, http, keccak256, type Address, type Hex, type PublicClient } from "viem";
 
 import { attestedWorldIdAbi, humanRegistryAbi } from "../abi";
 import type { SingleProofJson } from "../relay/proof";
@@ -44,6 +44,46 @@ async function proofFor(proverUrl: string, chainKey: number, txHash: string): Pr
 }
 
 type Receipt = { transactionHash: Hex; status: Hex; type: Hex; to: Address | null };
+
+/** The digest a continuity proof folds to: keccak(uint64 height ‖ root ‖ previous), from the lower endpoint up. */
+export function foldDigest(proof: SingleProofJson): { upperHeight: number; digest: Hex } {
+  let digest = proof.continuityProof.lowerEndpointDigest as Hex;
+  proof.continuityProof.roots.forEach((root, i) => {
+    digest = keccak256(encodePacked(["uint64", "bytes32", "bytes32"], [BigInt(Number(proof.headerNumber) + i), root as Hex, digest]));
+  });
+  return { upperHeight: Number(proof.headerNumber) + proof.continuityProof.roots.length - 1, digest };
+}
+
+/** Whether the proof's continuity chain ends at a checkpoint Creditcoin recorded, which does not expire. */
+export async function checkpointAnchored(client: Pick<PublicClient, "readContract">, proof: SingleProofJson): Promise<boolean> {
+  const { upperHeight, digest } = foldDigest(proof);
+  const checkpoint = await client.readContract({
+    address: "0x0000000000000000000000000000000000000fD3",
+    abi: [
+      {
+        type: "function",
+        name: "get_checkpoint_for_height",
+        stateMutability: "view",
+        inputs: [
+          { name: "chainKey", type: "uint64" },
+          { name: "height", type: "uint64" },
+        ],
+        outputs: [
+          {
+            type: "tuple",
+            components: [
+              { name: "hash", type: "bytes32" },
+              { name: "exists", type: "bool" },
+            ],
+          },
+        ],
+      },
+    ] as const,
+    functionName: "get_checkpoint_for_height",
+    args: [BigInt(proof.chainKey), BigInt(upperHeight)],
+  });
+  return checkpoint.exists && checkpoint.hash.toLowerCase() === digest.toLowerCase();
+}
 
 export async function discoverAttackInputs(o: DiscoverOptions): Promise<AttackInputs> {
   const log = o.log ?? (() => {});
@@ -105,7 +145,12 @@ export async function discoverAttackInputs(o: DiscoverOptions): Promise<AttackIn
       });
       if (seen !== 0n) continue;
       try {
-        stale = await proofFor(o.proverUrl, 1, candidate.transactionHash!);
+        const proof = await proofFor(o.proverUrl, 1, candidate.transactionHash!);
+        if (!(await checkpointAnchored(cc3, proof))) {
+          log(`stale candidate ${candidate.transactionHash}: continuity ends at an attestation, not a checkpoint; skipping`);
+          continue;
+        }
+        stale = proof;
         break;
       } catch (error) {
         log(`stale candidate ${candidate.transactionHash}: ${String(error)}`);
@@ -140,8 +185,11 @@ export async function discoverAttackInputs(o: DiscoverOptions): Promise<AttackIn
     functionName: "get_latest_attestation_height_and_hash",
     args: [1n],
   });
+  // Recorded inputs are replayed for weeks by /judge and CI, so a proof is kept only when its
+  // continuity chain ends at a checkpoint. One that ends at the then-latest attestation stops
+  // verifying once the attestation bound moves on, and the attack would fail for the wrong reason.
   let reverted: SingleProofJson | undefined;
-  for (let block = tip.height - 40n; block > tip.height - 400n && !reverted; block -= 1n) {
+  for (let block = tip.height - 600n; block > tip.height - 3_000n && !reverted; block -= 1n) {
     const receipts = (await sepolia.request({
       method: "eth_getBlockReceipts" as never,
       params: [`0x${block.toString(16)}`] as never,
@@ -149,7 +197,9 @@ export async function discoverAttackInputs(o: DiscoverOptions): Promise<AttackIn
     const failed = (receipts ?? []).find((r) => r.status === "0x0" && (r.type === "0x0" || r.type === "0x2") && r.to);
     if (!failed) continue;
     try {
-      reverted = await proofFor(o.proverUrl, 1, failed.transactionHash);
+      const proof = await proofFor(o.proverUrl, 1, failed.transactionHash);
+      if (await checkpointAnchored(cc3, proof)) reverted = proof;
+      else log(`reverted candidate ${failed.transactionHash}: continuity ends at an attestation, not a checkpoint; skipping`);
     } catch (error) {
       log(`reverted candidate ${failed.transactionHash}: ${String(error)}`);
     }

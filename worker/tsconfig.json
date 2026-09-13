@@ -12,7 +12,7 @@
     "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["bun-types"]
+    "types": ["bun"]
   },
   "include": ["src/**/*.ts", "test/**/*.ts"]
 }
