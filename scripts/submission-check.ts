@@ -37,10 +37,13 @@ const DEPLOYMENTS = ["deployments/cc3-testnet.json", "deployments/cc3-testnet.pr
   existsSync(join(ROOT, f)),
 );
 
+// The first endpoint answers everything. The rest are asked only when a transaction lookup comes back
+// empty: publicnode load-balances across nodes whose receipt indexes disagree, so one null receipt is
+// not proof the transaction is missing.
 const RPC = {
-  cc3: "https://rpc.cc3-testnet.creditcoin.network",
-  ethereum: "https://ethereum-rpc.publicnode.com",
-  sepolia: "https://ethereum-sepolia-rpc.publicnode.com",
+  cc3: ["https://rpc.cc3-testnet.creditcoin.network"],
+  ethereum: ["https://ethereum-rpc.publicnode.com", "https://mainnet.gateway.tenderly.co"],
+  sepolia: ["https://ethereum-sepolia-rpc.publicnode.com", "https://sepolia.gateway.tenderly.co"],
 } as const;
 type Chain = keyof typeof RPC;
 const BLOCKSCOUT_API = "https://creditcoin-testnet.blockscout.com/api/v2";
@@ -60,9 +63,9 @@ async function withRetry<T>(fn: () => Promise<T>, attempts = 3): Promise<T> {
   throw last;
 }
 
-async function rpc<T>(chain: Chain, method: string, params: unknown[]): Promise<T> {
+async function rpc<T>(chain: Chain, method: string, params: unknown[], url: string = RPC[chain][0]): Promise<T> {
   return withRetry(async () => {
-    const response = await fetch(RPC[chain], {
+    const response = await fetch(url, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
@@ -80,8 +83,16 @@ async function hasCode(address: string): Promise<boolean> {
 }
 
 async function receiptStatus(chain: Chain, hash: string): Promise<string | null> {
-  const receipt = await rpc<{ status: string } | null>(chain, "eth_getTransactionReceipt", [hash]);
-  return receipt ? receipt.status : null;
+  for (const url of RPC[chain]) {
+    const receipt = await rpc<{ status: string } | null>(chain, "eth_getTransactionReceipt", [hash], url).catch(() => null);
+    if (receipt) return receipt.status;
+  }
+  // Last resort: a mined transaction with no receipt on any endpoint is still a transaction that exists.
+  for (const url of RPC[chain]) {
+    const tx = await rpc<{ blockNumber: string | null } | null>(chain, "eth_getTransactionByHash", [hash], url).catch(() => null);
+    if (tx?.blockNumber) return `mined in block ${Number.parseInt(tx.blockNumber, 16)}, receipt not indexed`;
+  }
+  return null;
 }
 
 async function isVerified(address: string): Promise<boolean> {
