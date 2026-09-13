@@ -65,10 +65,14 @@ export async function GET(request: Request) {
     const webhook = process.env.RELAY_ALERT_WEBHOOK;
     if (webhook && !dryRun && shouldAlert(report.health)) {
       const text = `Humanline relay ${report.health.status}: ${report.health.reason} https://humanline.credit/relay`;
+      // ntfy.sh topics take the message as a plain-text body; Slack and Discord take JSON.
+      const ntfy = new URL(webhook).hostname === "ntfy.sh";
       await fetch(webhook, {
         method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ text, content: text }),
+        headers: ntfy
+          ? { "content-type": "text/plain", title: "Humanline relay", tags: "warning" }
+          : { "content-type": "application/json" },
+        body: ntfy ? text : JSON.stringify({ text, content: text }),
         signal: AbortSignal.timeout(10_000),
       }).catch(() => undefined);
       result.alerted = true;
