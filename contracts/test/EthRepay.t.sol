@@ -18,6 +18,33 @@ import {ICreditLine} from "../src/interfaces/ICreditLine.sol";
 import {ICreditHistory} from "../src/interfaces/ICreditHistory.sol";
 import {SourceProof} from "../src/interfaces/ISourceProof.sol";
 
+/// @dev A credit line that re-enters `EthRepay` while being repaid.
+contract ReentrantLine {
+    address public immutable ASSET;
+    address public target;
+    bytes public callData;
+    bytes public reentryError;
+
+    constructor(address asset) {
+        ASSET = asset;
+    }
+
+    function arm(address target_, bytes memory callData_) external {
+        target = target_;
+        callData = callData_;
+    }
+
+    function lineOf(uint256) external pure returns (ICreditLine.Line memory line) {
+        line.principal = 10e6;
+    }
+
+    function repayFor(uint256, uint256) external {
+        (bool ok, bytes memory ret) = target.call(callData);
+        require(!ok, "reentry must fail");
+        reentryError = ret;
+    }
+}
+
 /// @notice Cross-chain settlement on CreditLine v3: `EthRepay` against a real Circle USDC transfer on
 ///         Sepolia (0.01 USDC from 0x6dBe…A5d2 to 0x139b…764b, used here as the repayment address),
 ///         plus the v3 limit boost and `repayFor`.
@@ -160,6 +187,42 @@ contract EthRepayTest is Fixtures {
     function test_ConstructorRefusesZeroAddresses() public {
         vm.expectRevert(EthRepay.BadParameters.selector);
         new EthRepayHarness(address(links), address(pool), address(0), _stablecoins(6));
+        vm.expectRevert(EthRepay.BadParameters.selector);
+        new EthRepayHarness(address(0), address(pool), REPAY_ADDRESS, _stablecoins(6));
+        vm.expectRevert(EthRepay.BadParameters.selector);
+        new EthRepayHarness(address(links), address(0), REPAY_ADDRESS, _stablecoins(6));
+    }
+
+    function test_ConstructorRefusesABadStablecoin() public {
+        EthRepay.Stablecoin[] memory s = _stablecoins(6);
+        s[0].token = address(0);
+        vm.expectRevert(EthRepay.BadParameters.selector);
+        new EthRepayHarness(address(links), address(pool), REPAY_ADDRESS, s);
+
+        vm.expectRevert(EthRepay.BadParameters.selector);
+        new EthRepayHarness(address(links), address(pool), REPAY_ADDRESS, _stablecoins(37));
+
+        EthRepayHarness widest = new EthRepayHarness(address(links), address(pool), REPAY_ADDRESS, _stablecoins(36));
+        assertEq(widest.stablecoinDecimalsOf(1), 36, "36 decimals is the largest accepted");
+    }
+
+    function test_AFloatExactlyEqualToTheRepaymentIsEnough() public {
+        deal(address(husd), address(repay), 10_000); // the proved transfer is 0.01 USDC
+        assertEq(repay.creditRepayment(sourceProofOf(f), 0), 10_000);
+        assertEq(repay.reserve(), 0, "the float is used to the last unit");
+    }
+
+    /// @dev Only the exact error proves the lock stopped it: without `nonReentrant` the inner call
+    ///      would still fail, on `AlreadyConsumed`.
+    function test_ReentryThroughTheCreditLineFailsOnTheLockItself() public {
+        ReentrantLine line = new ReentrantLine(address(husd));
+        EthRepayHarness guarded = new EthRepayHarness(address(links), address(line), REPAY_ADDRESS, _stablecoins(6));
+        deal(address(husd), address(guarded), 1_000e6);
+        SourceProof memory p = sourceProofOf(f);
+        line.arm(address(guarded), abi.encodeCall(EthRepay.creditRepayment, (p, 0)));
+
+        assertEq(guarded.creditRepayment(p, 0), 10_000);
+        assertEq(bytes4(line.reentryError()), EthRepay.Reentrancy.selector, "stopped by the lock");
     }
 
     // ------------------------------------------------------------------ CreditLine v3

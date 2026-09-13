@@ -25,6 +25,8 @@ There are no admin keys, no pause switch and no upgrade path in any of them. Eve
 
 Read the table as: an attacker tries the thing in column one, and column two is the line of code that stops them. Test names in braces are filled in from the shipped suite; the file each lives in is fixed.
 
+Twelve of these attacks are also fired at the deployed contracts, not only at mocks: `bun run worker/src/cli.ts attack` sends each as a read-only `eth_call` to CC3 testnet with real proofs, and every one is refused with its named revert (recorded in `evidence/attacks.json`, re-run every six hours by `.github/workflows/attacks.yml`, and live on `/judge`). Beyond the tests, the suites are measured: 93.6% line and 93.5% branch coverage, a scripted mutation score, and a triaged Slither run, all in [`docs/MEASUREMENTS.md`](MEASUREMENTS.md).
+
 ### 1.1 Root relay (`AttestedWorldID`)
 
 | Threat | Where it is stopped | Error | Test |

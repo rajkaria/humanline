@@ -795,6 +795,15 @@ the EIP-170 limit; deploying it costs roughly 3.38 M gas because the constructor
 
 A relay transaction costs on the order of 0.0002 CTC on CC3 testnet.
 
+**Measured across every relay since deployment.** `bun run worker/src/cli.ts measure` reads every
+`RootRelayed` transaction on both instances and fits gas against batch size and continuity span:
+gas ≈ 162,015 + 108,745 per update + 441 per continuity root (R² 0.996 over 25 transactions). Sizes the
+live relay never needed are measured on a fresh copy of the live bytecode through an `eth_call` state
+override, with real consecutive Sepolia updates: 1 to 6 updates cost 265,480 to 1,422,550 gas, a full
+batch of 10 projects to about 2.5 M gas, which fits about 30 times in one 75 M-gas CC3 block, and 11 is
+refused with `BatchTooLarge(11)`. The tables, latency, proof sizes and Humanline's share of `0x0FD2`
+traffic are in [`docs/MEASUREMENTS.md`](MEASUREMENTS.md).
+
 ---
 
 ## 5. Worker flow
@@ -969,6 +978,12 @@ explanation and exits 2. `check` and every `--dry-run` path still work.
 
 Each row: the attack, the error it produces, and the test that proves it. Solidity test names are
 function names in `contracts/test/`; worker test names are the test strings in `worker/test/`.
+
+The tests run against mocks. The same attacks also run against the **deployed** contracts and the real
+precompiles: `bun run worker/src/cli.ts attack` fires twelve of them as read-only `eth_call`s with real
+Sepolia transactions and real Attestcoin proofs, and all twelve come back refused with their named
+revert. `/judge` repeats them on page load with no wallet, and a workflow repeats them every six hours.
+The list and the recorded answers are in [`docs/MEASUREMENTS.md`](MEASUREMENTS.md) section 2.
 
 ### Relay (`AttestedWorldID`)
 

@@ -5,6 +5,10 @@ import {
   TerminalIcon,
 } from "lucide-react";
 import type { Metadata } from "next";
+import { Suspense } from "react";
+
+import { LiveAttacks } from "@/components/live-attacks";
+import { MeasurementsSummary } from "@/components/measurements-summary";
 
 import { BrowserVerifyDemo } from "@/components/browser-verify-demo";
 import { CommandBlock } from "@/components/command-block";
@@ -98,6 +102,26 @@ export default async function JudgePage() {
           description="Every attack in the security model, the guard that stops it, and the test that fires it."
         />
         <NegativePathTable />
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <SectionHeading
+          id="attacks"
+          title="Live refusals"
+          description="The twelve attacks, fired at the deployed contracts as read-only calls while this page loaded. No wallet, no gas — the chain says no, by name."
+        />
+        <Suspense fallback={<p className="text-sm text-muted-foreground">Firing twelve attacks at CC3 testnet…</p>}>
+          <LiveAttacks />
+        </Suspense>
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <SectionHeading
+          id="measurements"
+          title="Measurements"
+          description="Gas, the batch cap, latency, proof size and precompile share, measured on the live chains by one command."
+        />
+        <MeasurementsSummary />
       </section>
 
       <section className="flex flex-col gap-4">

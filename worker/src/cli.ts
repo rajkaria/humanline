@@ -5,6 +5,8 @@
 //   bun run src/cli.ts prove 0x... --source mainnet [--dry-run]
 //   bun run src/cli.ts relay --source all [--once] [--from N] [--dry-run]
 //   bun run src/cli.ts status
+//   bun run src/cli.ts attack [--discover]      twelve live refusals → evidence/attacks.json
+//   bun run src/cli.ts measure                  gas, latency, proof sizes, precompile share → evidence/measurements.json
 import { appendFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { Command } from "commander";
@@ -638,6 +640,125 @@ program
     log("");
     log(failures === 0 ? `all ${txHashes.length} local proofs match the hosted prover` : `${failures} mismatch(es)`);
     if (failures > 0) process.exitCode = 1;
+  });
+
+// ---------------------------------------------------------------------------
+// attack
+// ---------------------------------------------------------------------------
+
+program
+  .command("attack")
+  .option("--discover", "re-discover the attack inputs (reverted tx, pre-history root, registered wallet) and their proofs")
+  .option("--inputs <file>", "attack inputs JSON", resolve(REPO_ROOT, "evidence/attack-inputs.json"))
+  .option("--out <file>", "results JSON", resolve(REPO_ROOT, "evidence/attacks.json"))
+  .description("fire the twelve named attacks at the live CC3 contracts as eth_calls and record each refusal")
+  .action(async (opts: { discover?: boolean; inputs: string; out: string }) => {
+    bootEnv();
+    const { runAttacks } = await import("../../web/lib/attacks/core");
+    const dep = requireDeployments(globals().deployments).data;
+    const addr = (key: string) => (dep.contracts as Record<string, string>)[key] as `0x${string}`;
+    const fixture = (name: string) => Bun.file(resolve(REPO_ROOT, "contracts/test/fixtures", name)).json();
+
+    let inputs: import("../../web/lib/attacks/core").AttackInputs;
+    if (opts.discover || !(await Bun.file(opts.inputs).exists())) {
+      const { discoverAttackInputs } = await import("../../web/lib/attacks/discover");
+      const cc3 = cc3Provider();
+      const blockOf = async (key: string) => {
+        const hash = (dep.txHashes as Record<string, string> | undefined)?.[key];
+        const receipt = hash ? await cc3.getTransactionReceipt(hash) : null;
+        return BigInt(receipt?.blockNumber ?? 0);
+      };
+      log("discovering attack inputs (CC3 logs, Sepolia receipts, proof builder)...");
+      inputs = await discoverAttackInputs({
+        cc3Rpc: cc3RpcUrl(),
+        sepoliaRpc: sourceRpcUrl(SOURCES.sepolia),
+        proverUrl: proverUrl(),
+        sepoliaRelay: addr("AttestedWorldIDSepolia"),
+        mainnetRelay: addr("AttestedWorldIDMainnet"),
+        registry: addr("HumanRegistry"),
+        relayDeployBlock: await blockOf("AttestedWorldIDSepolia"),
+        registryDeployBlock: await blockOf("HumanRegistry"),
+        identityManager: SOURCES.sepolia.manager as `0x${string}`,
+        relayed: await fixture("sepolia-0x36678603.json"),
+        foreign: await fixture("sepolia-usdc-transfer-0x2e34a903.json"),
+        log: (line) => log(`  ${line}`),
+      });
+      await Bun.write(opts.inputs, `${JSON.stringify(inputs, null, 2)}\n`);
+      log(`wrote ${opts.inputs}`);
+    } else {
+      inputs = await Bun.file(opts.inputs).json();
+    }
+
+    const t0 = Date.now();
+    const run = await runAttacks(inputs, { rpcUrl: cc3RpcUrl() });
+    log("");
+    log(`live attacks against CC3 testnet — Sepolia attested tip ${run.attestedTip}, ${run.attestors ?? "?"} bonded attestors`);
+    for (const r of run.results) {
+      const mark = r.outcome === "refused" ? "REFUSED " : r.outcome.toUpperCase().padEnd(8);
+      log(`  ${mark} ${pad(r.title, 36)} ${r.error ?? ""}${r.args?.length ? `(${r.args.join(", ")})` : ""}`);
+    }
+    const refused = run.results.filter((r) => r.outcome === "refused").length;
+    log("");
+    log(`${refused}/${run.results.length} refused with the expected named revert (${Date.now() - t0}ms)`);
+    await Bun.write(
+      opts.out,
+      `${JSON.stringify({ at: new Date().toISOString(), chainId: 102031, rpc: cc3RpcUrl(), attestedTip: run.attestedTip, attestors: run.attestors, refused, total: run.results.length, results: run.results }, null, 2)}\n`,
+    );
+    log(`wrote ${opts.out}`);
+    if (refused !== run.results.length) process.exitCode = 1;
+  });
+
+// ---------------------------------------------------------------------------
+// measure
+// ---------------------------------------------------------------------------
+
+program
+  .command("measure")
+  .option("--out <file>", "measurements JSON", resolve(REPO_ROOT, "evidence/measurements.json"))
+  .option("--doc <file>", "document whose generated block is rewritten", resolve(REPO_ROOT, "docs/MEASUREMENTS.md"))
+  .option("--precompile-blocks <n>", "CC3 blocks scanned for 0x0FD2 usage (5760 ≈ 24h)", "5760")
+  .description("gas per batch size, the 10/11 cap, attestation vs checkpoint, latency, proof sizes, 0x0FD2 usage")
+  .action(async (opts: { out: string; doc: string; precompileBlocks: string }) => {
+    bootEnv();
+    const { collectMeasurements } = await import("../../web/lib/measure/collect");
+    const { renderMeasurements, spliceMeasurements } = await import("../../web/lib/measure/report");
+    const dep = requireDeployments(globals().deployments).data;
+    const contracts = dep.contracts as Record<string, string>;
+    const cc3 = cc3Provider();
+    const blockOf = async (key: string) => {
+      const hash = dep.txHashes?.[key];
+      const receipt = hash ? await cc3.getTransactionReceipt(hash) : null;
+      return BigInt(receipt?.blockNumber ?? 0);
+    };
+    const fixtures = ["sepolia-0x36678603.json", "mainnet-0x81ece311.json", "sepolia-usdc-transfer-0x2e34a903.json", "sepolia-aave-borrow-0xe4723adf.json", "sepolia-aave-repay-0xf3770ee1.json"];
+    const proofs = await Promise.all(fixtures.map((f) => Bun.file(resolve(REPO_ROOT, "contracts/test/fixtures", f)).json()));
+    const attackInputs = Bun.file(resolve(REPO_ROOT, "evidence/attack-inputs.json"));
+    if (await attackInputs.exists()) {
+      const inputs = await attackInputs.json();
+      for (const key of ["stale", "reverted"]) if (inputs[key]) proofs.push(inputs[key]);
+    }
+
+    const t0 = Date.now();
+    const m = await collectMeasurements({
+      cc3Rpc: cc3RpcUrl(),
+      proverUrl: proverUrl(),
+      relays: [
+        { name: "sepolia", chainKey: 1, address: contracts.AttestedWorldIDSepolia as `0x${string}`, deployBlock: await blockOf("AttestedWorldIDSepolia"), sourceRpc: sourceRpcUrl(SOURCES.sepolia) },
+        { name: "mainnet", chainKey: 3, address: contracts.AttestedWorldIDMainnet as `0x${string}`, deployBlock: await blockOf("AttestedWorldIDMainnet"), sourceRpc: sourceRpcUrl(SOURCES.mainnet) },
+      ],
+      vault: contracts.RelayReward as `0x${string}`,
+      humanline: Object.values(contracts).filter((v): v is `0x${string}` => typeof v === "string" && v.startsWith("0x")),
+      identityManagerSepolia: SOURCES.sepolia.manager as `0x${string}`,
+      precompileScanBlocks: Number(opts.precompileBlocks),
+      proofs,
+      log: (line) => log(`  ${line}`),
+    });
+    await Bun.write(opts.out, `${JSON.stringify(m, null, 2)}\n`);
+    const docFile = Bun.file(opts.doc);
+    const doc = (await docFile.exists()) ? await docFile.text() : "# Measurements\n";
+    await Bun.write(opts.doc, spliceMeasurements(doc, renderMeasurements(m)));
+    log("");
+    log(`wrote ${opts.out} and the generated block of ${opts.doc} (${Math.round((Date.now() - t0) / 1000)}s)`);
   });
 
 program

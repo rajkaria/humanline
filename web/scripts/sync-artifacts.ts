@@ -176,6 +176,48 @@ if (existsSync(evidencePath)) {
   console.log("[sync-artifacts] evidence     — not found, using empty snapshot");
 }
 
+// ---------------------------------------------------------------- live attacks
+// `/judge` re-fires the recorded attacks on page load; it needs the inputs (real proofs) and shows
+// the last recorded run as the fallback when CC3 is unreachable.
+const attacks: Record<string, unknown> = {};
+for (const [key, file] of [
+  ["inputs", "attack-inputs.json"],
+  ["recorded", "attacks.json"],
+] as const) {
+  const path = join(repoRoot, "evidence", file);
+  if (!existsSync(path)) continue;
+  try {
+    attacks[key] = JSON.parse(readFileSync(path, "utf8"));
+    console.log(`[sync-artifacts] attacks/${file} ← ${path}`);
+  } catch (error) {
+    console.warn(`[sync-artifacts] evidence/${file} is not valid JSON: ${String(error)}`);
+  }
+}
+write("attacks.json", attacks);
+
+// ---------------------------------------------------------------- measurements
+// `/judge` shows the headline numbers; the per-transaction records and latency series stay in the
+// evidence file (they only grow), so the bundle carries the summaries.
+const measurementsPath = join(repoRoot, "evidence", "measurements.json");
+if (existsSync(measurementsPath)) {
+  try {
+    const { relayTxs, latency, ...rest } = JSON.parse(readFileSync(measurementsPath, "utf8")) as {
+      relayTxs?: unknown[];
+      latency?: { series?: unknown[] } & Record<string, unknown>;
+    } & Record<string, unknown>;
+    write("measurements.json", {
+      ...rest,
+      relayTxCount: relayTxs?.length ?? 0,
+      latency: latency ? { ...latency, series: undefined } : undefined,
+    });
+    console.log(`[sync-artifacts] measurements ← ${measurementsPath}`);
+  } catch (error) {
+    console.warn(`[sync-artifacts] evidence/measurements.json is not valid JSON: ${String(error)}`);
+  }
+} else if (!existsSync(join(outDir, "measurements.json"))) {
+  write("measurements.json", {});
+}
+
 if (checkOnly) {
   if (stale.length > 0) {
     console.error(

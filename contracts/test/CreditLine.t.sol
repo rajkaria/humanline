@@ -310,6 +310,18 @@ contract CreditLineTest is Test {
         pool.borrow(25e6);
     }
 
+    /// @dev The limit check is `owed > available`, so owing exactly the limit is allowed:
+    ///      24.752476 hUSD plus its 1% fee (0.247524, rounded down) is exactly 25 hUSD.
+    function test_BorrowingExactlyTheLimitSucceeds() public {
+        _deposit(lender, 1_000e6);
+        vm.startPrank(alice);
+        pool.openLine();
+        pool.borrow(24_752_476);
+        vm.stopPrank();
+        assertEq(pool.lineOf(ALICE_HUMAN).principal, INITIAL_LIMIT, "owes exactly the limit");
+        assertEq(pool.availableCredit(ALICE_HUMAN), 0);
+    }
+
     function test_TheFeeCountsAgainstTheLimitAcrossDraws() public {
         _deposit(lender, 1_000e6);
         vm.startPrank(alice);
@@ -441,6 +453,18 @@ contract CreditLineTest is Test {
 
         uint256 attackerOut = _withdraw(attacker, attackerShares);
         assertLt(attackerOut, 1_000e6 + 1, "the attack loses money; the donation is not recoverable");
+    }
+
+    /// @dev A deposit that would mint zero shares is refused rather than silently donated.
+    function test_ADepositTooSmallToMintAShareReverts() public {
+        _deposit(lender, 1_000e6);
+        deal(address(husd), address(pool), 1e30); // share price inflated far past one unit per share
+        deal(address(husd), lender2, 1);
+        vm.startPrank(lender2);
+        husd.approve(address(pool), 1);
+        vm.expectRevert(bytes4(keccak256("ZeroAmount()")));
+        pool.deposit(1);
+        vm.stopPrank();
     }
 
     /// @dev Fees are income when they are paid, not when the loan is drawn, so the share price only

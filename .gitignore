@@ -26,3 +26,4 @@ docs/context/
 # Local relay daemon output; the canonical evidence log is written by CI.
 evidence/relay-local.jsonl
 .burn-rate/
+contracts/lcov.info

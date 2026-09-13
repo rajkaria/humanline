@@ -149,6 +149,68 @@ contract AttestedWorldIDTest is Fixtures {
         assertEq(relay.humansAddedTotal(), 100, "a deletion inserts nobody");
     }
 
+    // ---------------------------------------------------------- calldata boundaries (step 6)
+    // The cross-check reads raw words, so each length guard is pinned at its exact boundary: the
+    // shortest well-formed calldata is accepted and one word less, or one pointer too far, is not.
+
+    /// @dev `registerIdentities` words after the selector: 8 proof words, preRoot, startIndex,
+    ///      offset of the commitments array, postRoot, then whatever the offset points at.
+    function _registerCalldata(uint256 tail, bytes memory extra) internal view returns (bytes memory) {
+        (uint256 preRoot,, uint256 postRoot) = _treeChangeFromLogs(mainnet.txBytes);
+        return bytes.concat(
+            bytes4(0x2217b211), new bytes(8 * 32), bytes32(preRoot), bytes32(0), bytes32(tail), bytes32(postRoot), extra
+        );
+    }
+
+    function test_AcceptsTheShortestWellFormedRegisterCalldata() public {
+        // Exactly 4 + 12 words; the offset points at its own word, so the "length" read is 320.
+        bytes memory data = _registerCalldata(320, "");
+        assertEq(data.length, 4 + 12 * 32);
+        _execute(TxBytes.withData(mainnet.txBytes, data));
+        assertEq(relay.humansAddedTotal(), 320);
+    }
+
+    function test_AcceptsALengthWordEndingExactlyAtTheCalldataEnd() public {
+        bytes memory data = _registerCalldata(384, abi.encode(uint256(5)));
+        assertEq(4 + 384 + 32, data.length);
+        _execute(TxBytes.withData(mainnet.txBytes, data));
+        assertEq(relay.humansAddedTotal(), 5);
+    }
+
+    function test_RevertsWhenTheLengthWordPointsPastTheCalldata() public {
+        bytes memory data = _registerCalldata(4_096, abi.encode(uint256(5)));
+        vm.expectRevert(IAttestedWorldID.CalldataLogMismatch.selector);
+        _execute(TxBytes.withData(mainnet.txBytes, data));
+    }
+
+    function test_RevertsOnAnIdentityCountThatOverflowsUint32() public {
+        bytes memory data = _registerCalldata(384, abi.encode(uint256(type(uint32).max) + 1));
+        vm.expectRevert(IAttestedWorldID.CalldataLogMismatch.selector);
+        _execute(TxBytes.withData(mainnet.txBytes, data));
+    }
+
+    function test_AcceptsTheLargestUint32IdentityCount() public {
+        bytes memory data = _registerCalldata(384, abi.encode(uint256(type(uint32).max)));
+        _execute(TxBytes.withData(mainnet.txBytes, data));
+        assertEq(relay.humansAddedTotal(), type(uint32).max);
+    }
+
+    function test_AcceptsTheShortestWellFormedDeleteCalldata() public {
+        (uint256 preRoot,, uint256 postRoot) = _treeChangeFromLogs(mainnet.txBytes);
+        bytes memory data =
+            bytes.concat(bytes4(0xea10fbbe), new bytes(8 * 32), bytes32(uint256(352)), bytes32(preRoot), bytes32(postRoot));
+        assertEq(data.length, 4 + 11 * 32);
+        _execute(TxBytes.withData(mainnet.txBytes, data));
+        assertEq(relay.rootCount(), 2, "bootstrap from a deletion");
+        assertEq(relay.humansAddedTotal(), 0);
+    }
+
+    function test_AcceptsExactlyTheAttestorFloor() public {
+        relay.setAttestorCount(MIN_ATTESTORS);
+        _execute(mainnet);
+        assertEq(relay.rootCount(), 2, "relayed with the minimum quorum");
+    }
+
     /// @dev Deadswitch's decoy-log finding: another contract in the same transaction emitting the
     ///      same topic must be skipped, not treated as the update and not treated as fatal.
     function test_IgnoresDecoyTreeChangedFromAnotherEmitter() public {

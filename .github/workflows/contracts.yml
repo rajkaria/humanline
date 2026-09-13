@@ -55,15 +55,15 @@ jobs:
           CC3_FORK: "1"
         run: forge test --match-contract Fork -vv
 
+      # Coverage compiles unoptimized, where the Gluwa decoder is stack-too-deep; the script runs it
+      # on a scratch copy with memory-safe assembly annotations (see its header for why that is sound).
       - name: Coverage
-        working-directory: contracts
         run: |
-          forge coverage --ir-minimum --report summary --report lcov \
-            --no-match-coverage "(test|script|vendor|node_modules)" --no-match-contract Fork | tee coverage.txt
+          bash scripts/coverage.sh
           {
             echo "### Solidity coverage"
             echo '```'
-            grep -E "^\| (File|src/|Total)" coverage.txt || cat coverage.txt
+            cat evidence/coverage.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 

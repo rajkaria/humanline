@@ -1,0 +1,59 @@
+name: live-attacks
+
+# Fires the twelve named attacks at the deployed CC3 testnet contracts as read-only eth_calls and
+# fails if any is not refused with its expected named revert. No keys, no gas: every call is a
+# simulation against live state, so this runs on a schedule as a standing proof, not a one-off demo.
+on:
+  schedule:
+    - cron: "23 */6 * * *"
+  push:
+    branches: [main]
+    paths:
+      - "web/lib/attacks/**"
+      - "evidence/attack-inputs.json"
+      - ".github/workflows/attacks.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: live-attacks
+  cancel-in-progress: true
+
+jobs:
+  attack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Fire the attacks against CC3 testnet
+        run: bun run worker/src/cli.ts attack --out attacks.json
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ -f attacks.json ]; then
+            {
+              echo "### Live refusals"
+              echo
+              echo "| Attack | Outcome | Error |"
+              echo "|---|---|---|"
+              bun -e 'const r = await Bun.file("attacks.json").json(); for (const a of r.results) console.log(`| ${a.title} | ${a.outcome} | ${a.error ?? ""} |`)'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: attacks
+          path: attacks.json
+          if-no-files-found: ignore

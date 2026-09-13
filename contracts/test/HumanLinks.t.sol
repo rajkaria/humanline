@@ -344,6 +344,72 @@ contract HumanLinksTest is Fixtures {
         links.txChainId(abi.encode(uint8(0), chunks));
     }
 
+    function test_TxChainIdLegacyBoundaries() public {
+        bytes[] memory chunks = _typedChunks(3);
+        chunks[1] = abi.encode(uint128(1), uint256(35), bytes32(0), bytes32(0));
+        assertEq(links.txChainId(abi.encode(uint8(0), chunks)), 0, "v = 35 is the lowest EIP-155 value");
+
+        uint256 maxV = uint256(type(uint64).max) * 2 + 35;
+        chunks[1] = abi.encode(uint128(1), maxV, bytes32(0), bytes32(0));
+        assertEq(links.txChainId(abi.encode(uint8(0), chunks)), type(uint64).max, "largest representable id");
+
+        chunks[1] = abi.encode(uint128(1), maxV + 2, bytes32(0), bytes32(0));
+        vm.expectRevert(abi.encodeWithSelector(ProvenSource.UnsupportedTxType.selector, uint8(0)));
+        links.txChainId(abi.encode(uint8(0), chunks));
+    }
+
+    function test_TxChainIdReadsTypes3And4AndRefusesEverythingElse() public {
+        bytes[] memory four = _typedChunks(4);
+        four[1] = abi.encode(uint64(8453), uint128(1), uint128(1));
+        assertEq(links.txChainId(abi.encode(uint8(3), four)), 8453, "EIP-4844");
+        assertEq(links.txChainId(abi.encode(uint8(4), four)), 8453, "EIP-7702");
+
+        four[1] = abi.encode(uint256(type(uint64).max));
+        assertEq(links.txChainId(abi.encode(uint8(4), four)), type(uint64).max);
+        four[1] = abi.encode(uint256(type(uint64).max) + 1);
+        vm.expectRevert(abi.encodeWithSelector(ProvenSource.UnsupportedTxType.selector, uint8(1)));
+        links.txChainId(abi.encode(uint8(1), four));
+
+        vm.expectRevert(abi.encodeWithSelector(ProvenSource.UnsupportedTxType.selector, uint8(5)));
+        links.txChainId(abi.encode(uint8(5), _typedChunks(3)));
+
+        vm.expectRevert(abi.encodeWithSelector(ProvenSource.UnsupportedTxType.selector, uint8(1)));
+        links.txChainId(abi.encode(uint8(1), _typedChunks(2)));
+
+        bytes[] memory empty = _typedChunks(3);
+        empty[1] = "";
+        vm.expectRevert(abi.encodeWithSelector(ProvenSource.UnsupportedTxType.selector, uint8(1)));
+        links.txChainId(abi.encode(uint8(1), empty));
+    }
+
+    /// @dev The dirty-bits guard is `> type(uint160).max`, so the highest address is still clean.
+    function test_TheHighestAddressIsAValidIntentWallet() public {
+        address top = address(type(uint160).max);
+        uint256 topHuman = uint256(keccak256("top-nullifier"));
+        uint256[8] memory proof;
+        vm.prank(top);
+        registry.register(1, topHuman, proof);
+
+        SourceProof memory p = _linkProof(wallet, links.linkIntent(topHuman, top));
+        vm.prank(top);
+        links.linkBySourceTx(p);
+        assertEq(links.humanOfWallet(wallet), topHuman);
+    }
+
+    function test_TheZeroAddressCannotBeLinked() public {
+        SourceProof memory p = _linkProof(address(0), links.linkIntent(ALICE_HUMAN, alice));
+        vm.prank(alice);
+        vm.expectRevert(IHumanLinks.ZeroWallet.selector);
+        links.linkBySourceTx(p);
+    }
+
+    function _typedChunks(uint256 n) internal view returns (bytes[] memory chunks) {
+        chunks = new bytes[](n);
+        chunks[0] = abi.encode(uint64(0), uint64(21_000), wallet, false, wallet, uint256(0), bytes(""));
+        chunks[1] = abi.encode(uint256(1));
+        chunks[n - 1] = abi.encode(uint8(1), uint64(21_000), new EvmV1Decoder.LogEntryTuple[](0), new bytes(256));
+    }
+
     function testFuzz_OnlyTheExactIntentLinks(uint256 human, address ccWallet) public {
         vm.assume(human != ALICE_HUMAN && ccWallet != alice);
         SourceProof memory p = _linkProof(wallet, links.linkIntent(human, ccWallet));

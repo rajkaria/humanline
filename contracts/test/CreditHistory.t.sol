@@ -209,6 +209,47 @@ contract CreditHistoryTest is Fixtures {
         reserves[0].chainKey = 3; // no pool configured on chain key 3
         vm.expectRevert(ICreditHistory.BadParameters.selector);
         new CreditHistoryHarness(address(links), pools, reserves, MIN_GAP, BOOST_BPS, MAX_BOOST);
+
+        vm.expectRevert(ICreditHistory.BadParameters.selector);
+        new CreditHistoryHarness(address(0), _pools(), _reserves(), MIN_GAP, BOOST_BPS, MAX_BOOST);
+
+        ICreditHistory.AavePool[] memory noPool = _pools();
+        noPool[0].pool = address(0);
+        vm.expectRevert(ICreditHistory.BadParameters.selector);
+        new CreditHistoryHarness(address(links), noPool, _reserves(), MIN_GAP, BOOST_BPS, MAX_BOOST);
+
+        assertEq(
+            address(new CreditHistoryHarness(address(links), _pools(), _reserves(), MIN_GAP, 10_000, MAX_BOOST)) != address(0),
+            true,
+            "a 100% boost is the largest accepted"
+        );
+
+        ICreditHistory.Reserve[] memory widest = _reserves();
+        widest[0].decimals = 36;
+        CreditHistoryHarness wide = new CreditHistoryHarness(address(links), _pools(), widest, MIN_GAP, BOOST_BPS, MAX_BOOST);
+        assertEq(wide.reserveDecimals(widest[0].chainKey, widest[0].token), 36, "36 decimals is the largest accepted");
+        widest[0].decimals = 37;
+        vm.expectRevert(ICreditHistory.BadParameters.selector);
+        new CreditHistoryHarness(address(links), _pools(), widest, MIN_GAP, BOOST_BPS, MAX_BOOST);
+    }
+
+    /// @dev The gap rule is "at least MIN_GAP blocks later", so a repayment exactly at the gap counts.
+    function test_ARepaymentExactlyAtTheMinimumGapCounts() public {
+        uint64 gap = uint64(repayF.headerNumber - borrowF.headerNumber);
+        CreditHistoryHarness exact = _deploy(gap, MAX_BOOST);
+        bytes32 borrowId = exact.proveBorrow(sourceProofOf(borrowF), BORROW_LOG);
+        assertEq(exact.proveRepay(sourceProofOf(repayF), REPAY_LOG, borrowId), 85_231_495);
+
+        CreditHistoryHarness oneMore = _deploy(gap + 1, MAX_BOOST);
+        bytes32 id2 = oneMore.proveBorrow(sourceProofOf(borrowF), BORROW_LOG);
+        vm.expectRevert();
+        oneMore.proveRepay(sourceProofOf(repayF), REPAY_LOG, id2);
+    }
+
+    function test_ReserveDecimalsOnlyForReservesThatCount() public {
+        assertEq(history.reserveDecimals(1, SEPOLIA_AAVE_USDC), 6);
+        vm.expectRevert(abi.encodeWithSelector(ICreditHistory.UnsupportedReserve.selector, uint64(1), address(0xdead)));
+        history.reserveDecimals(1, address(0xdead));
     }
 
     function testFuzz_CreditNeverExceedsTheBorrowAndBoostNeverExceedsTheCap(uint256 borrowAmt, uint256 repayAmt, uint256 cap)

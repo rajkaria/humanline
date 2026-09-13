@@ -1,0 +1,798 @@
+{
+ "tool": "slither 0.11.6",
+ "config": "contracts/slither.config.json",
+ "findings": [
+  {
+   "check": "reentrancy-eth",
+   "impact": "High",
+   "confidence": "Medium",
+   "file": "src/RelayReward.sol",
+   "lines": 138,
+   "description": "Reentrancy in RelayReward.relay(address,uint64,uint64[],bytes[],INativeQueryVerifier.MerkleProof[],INativeQueryVerifier.ContinuityProof) (src/RelayReward.sol#138-181):"
+  },
+  {
+   "check": "uninitialized-state",
+   "impact": "High",
+   "confidence": "High",
+   "file": "src/HumanLinks.sol",
+   "lines": 49,
+   "description": "HumanLinks._walletsOf (src/HumanLinks.sol#49) is never initialized. It is used in:"
+  },
+  {
+   "check": "incorrect-equality",
+   "impact": "Medium",
+   "confidence": "High",
+   "file": "src/HUSD.sol",
+   "lines": 45,
+   "description": "HUSD.faucetAvailableAt(address) (src/HUSD.sol#45-48) uses a dangerous strict equality:"
+  },
+  {
+   "check": "incorrect-equality",
+   "impact": "Medium",
+   "confidence": "High",
+   "file": "src/CreditLine.sol",
+   "lines": 137,
+   "description": "CreditLine.deposit(uint256) (src/CreditLine.sol#137-149) uses a dangerous strict equality:"
+  },
+  {
+   "check": "reentrancy-no-eth",
+   "impact": "Medium",
+   "confidence": "Medium",
+   "file": "src/HumanRegistry.sol",
+   "lines": 52,
+   "description": "Reentrancy in HumanRegistry.register(uint256,uint256,uint256[8]) (src/HumanRegistry.sol#52-80):"
+  },
+  {
+   "check": "uninitialized-local",
+   "impact": "Medium",
+   "confidence": "Medium",
+   "file": "src/RelayReward.sol",
+   "lines": 166,
+   "description": "RelayReward.relay(address,uint64,uint64[],bytes[],INativeQueryVerifier.MerkleProof[],INativeQueryVerifier.ContinuityProof).credited (src/RelayReward.sol#166) is a local variable never initialized"
+  },
+  {
+   "check": "uninitialized-local",
+   "impact": "Medium",
+   "confidence": "Medium",
+   "file": "src/RelayReward.sol",
+   "lines": 165,
+   "description": "RelayReward.relay(address,uint64,uint64[],bytes[],INativeQueryVerifier.MerkleProof[],INativeQueryVerifier.ContinuityProof).paid (src/RelayReward.sol#165) is a local variable never initialized"
+  },
+  {
+   "check": "missing-zero-check",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/CreditLine.sol",
+   "lines": 104,
+   "description": "CreditLine.constructor(address,address,uint256,uint256,uint256,uint64,uint64,uint64,uint64,uint256,address).registry (src/CreditLine.sol#104) lacks a zero-check on :"
+  },
+  {
+   "check": "missing-zero-check",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/HumanRegistry.sol",
+   "lines": 41,
+   "description": "HumanRegistry.constructor(address,string,string).worldId (src/HumanRegistry.sol#41) lacks a zero-check on :"
+  },
+  {
+   "check": "missing-zero-check",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/CreditLine.sol",
+   "lines": 113,
+   "description": "CreditLine.constructor(address,address,uint256,uint256,uint256,uint64,uint64,uint64,uint64,uint256,address).history (src/CreditLine.sol#113) lacks a zero-check on :"
+  },
+  {
+   "check": "missing-zero-check",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/HumanLinks.sol",
+   "lines": 52,
+   "description": "HumanLinks.constructor(address,uint64[],uint64[],uint64,uint32).registry (src/HumanLinks.sol#52) lacks a zero-check on :"
+  },
+  {
+   "check": "missing-zero-check",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/CreditLine.sol",
+   "lines": 103,
+   "description": "CreditLine.constructor(address,address,uint256,uint256,uint256,uint64,uint64,uint64,uint64,uint256,address).asset (src/CreditLine.sol#103) lacks a zero-check on :"
+  },
+  {
+   "check": "calls-loop",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/ProvenSource.sol",
+   "lines": 199,
+   "description": "ProvenSource._chainInfoChainId(uint64) (src/ProvenSource.sol#199-202) has external calls inside a loop: result = ChainInfoLib.get().get_chain_by_key(chainKey) (src/ProvenSource.sol#200)"
+  },
+  {
+   "check": "calls-loop",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/ProvenSource.sol",
+   "lines": 199,
+   "description": "ProvenSource._chainInfoChainId(uint64) (src/ProvenSource.sol#199-202) has external calls inside a loop: result = ChainInfoLib.get().get_chain_by_key(chainKey) (src/ProvenSource.sol#200)"
+  },
+  {
+   "check": "calls-loop",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/ProvenSource.sol",
+   "lines": 199,
+   "description": "ProvenSource._chainInfoChainId(uint64) (src/ProvenSource.sol#199-202) has external calls inside a loop: result = ChainInfoLib.get().get_chain_by_key(chainKey) (src/ProvenSource.sol#200)"
+  },
+  {
+   "check": "reentrancy-benign",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/CreditHistory.sol",
+   "lines": 128,
+   "description": "Reentrancy in CreditHistory.proveRepay(SourceProof,uint256,bytes32) (src/CreditHistory.sol#128-164):"
+  },
+  {
+   "check": "reentrancy-benign",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/EthRepay.sol",
+   "lines": 112,
+   "description": "Reentrancy in EthRepay.creditRepayment(SourceProof,uint256) (src/EthRepay.sol#112-150):"
+  },
+  {
+   "check": "reentrancy-benign",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/RelayReward.sol",
+   "lines": 138,
+   "description": "Reentrancy in RelayReward.relay(address,uint64,uint64[],bytes[],INativeQueryVerifier.MerkleProof[],INativeQueryVerifier.ContinuityProof) (src/RelayReward.sol#138-181):"
+  },
+  {
+   "check": "reentrancy-benign",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/CreditHistory.sol",
+   "lines": 97,
+   "description": "Reentrancy in CreditHistory.proveBorrow(SourceProof,uint256) (src/CreditHistory.sol#97-123):"
+  },
+  {
+   "check": "reentrancy-benign",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/HumanRegistry.sol",
+   "lines": 52,
+   "description": "Reentrancy in HumanRegistry.register(uint256,uint256,uint256[8]) (src/HumanRegistry.sol#52-80):"
+  },
+  {
+   "check": "reentrancy-benign",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/HumanLinks.sol",
+   "lines": 64,
+   "description": "Reentrancy in HumanLinks.linkBySourceTx(SourceProof) (src/HumanLinks.sol#64-79):"
+  },
+  {
+   "check": "reentrancy-benign",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/RelayReward.sol",
+   "lines": 138,
+   "description": "Reentrancy in RelayReward.relay(address,uint64,uint64[],bytes[],INativeQueryVerifier.MerkleProof[],INativeQueryVerifier.ContinuityProof) (src/RelayReward.sol#138-181):"
+  },
+  {
+   "check": "reentrancy-events",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/HumanLinks.sol",
+   "lines": 64,
+   "description": "Reentrancy in HumanLinks.linkBySourceTx(SourceProof) (src/HumanLinks.sol#64-79):"
+  },
+  {
+   "check": "reentrancy-events",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/CreditHistory.sol",
+   "lines": 97,
+   "description": "Reentrancy in CreditHistory.proveBorrow(SourceProof,uint256) (src/CreditHistory.sol#97-123):"
+  },
+  {
+   "check": "reentrancy-events",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/CreditHistory.sol",
+   "lines": 128,
+   "description": "Reentrancy in CreditHistory.proveRepay(SourceProof,uint256,bytes32) (src/CreditHistory.sol#128-164):"
+  },
+  {
+   "check": "reentrancy-events",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/HumanRegistry.sol",
+   "lines": 52,
+   "description": "Reentrancy in HumanRegistry.register(uint256,uint256,uint256[8]) (src/HumanRegistry.sol#52-80):"
+  },
+  {
+   "check": "timestamp",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/CreditLine.sol",
+   "lines": 374,
+   "description": "CreditLine._settle(uint256,ICreditLine.Line) (src/CreditLine.sol#374-392) uses timestamp for comparisons"
+  },
+  {
+   "check": "timestamp",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/RelayReward.sol",
+   "lines": 203,
+   "description": "RelayReward._isFresh(uint128) (src/RelayReward.sol#203-205) uses timestamp for comparisons"
+  },
+  {
+   "check": "timestamp",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/HumanLinks.sol",
+   "lines": 82,
+   "description": "HumanLinks.linkBySignature(address,uint256,bytes) (src/HumanLinks.sol#82-90) uses timestamp for comparisons"
+  },
+  {
+   "check": "timestamp",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/HUSD.sol",
+   "lines": 45,
+   "description": "HUSD.faucetAvailableAt(address) (src/HUSD.sol#45-48) uses timestamp for comparisons"
+  },
+  {
+   "check": "timestamp",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/CreditLine.sol",
+   "lines": 264,
+   "description": "CreditLine.markDefault(uint256) (src/CreditLine.sol#264-284) uses timestamp for comparisons"
+  },
+  {
+   "check": "timestamp",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/HUSD.sol",
+   "lines": 33,
+   "description": "HUSD.faucet() (src/HUSD.sol#33-42) uses timestamp for comparisons"
+  },
+  {
+   "check": "timestamp",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/CreditLine.sol",
+   "lines": 333,
+   "description": "CreditLine.isInDefault(uint256) (src/CreditLine.sol#333-336) uses timestamp for comparisons"
+  },
+  {
+   "check": "timestamp",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/RelayReward.sol",
+   "lines": 138,
+   "description": "RelayReward.relay(address,uint64,uint64[],bytes[],INativeQueryVerifier.MerkleProof[],INativeQueryVerifier.ContinuityProof) (src/RelayReward.sol#138-181) uses timestamp for comparisons"
+  },
+  {
+   "check": "timestamp",
+   "impact": "Low",
+   "confidence": "Medium",
+   "file": "src/HumanLinks.sol",
+   "lines": 135,
+   "description": "HumanLinks._link(uint256,address,IHumanLinks.Method,uint64,uint64,bytes32) (src/HumanLinks.sol#135-154) uses timestamp for comparisons"
+  },
+  {
+   "check": "assembly",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/ProvenSource.sol",
+   "lines": 135,
+   "description": "ProvenSource.queryIdOf(uint64,uint64,uint256) (src/ProvenSource.sol#135-144) uses assembly"
+  },
+  {
+   "check": "low-level-calls",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/RelayReward.sol",
+   "lines": 184,
+   "description": "Low level call in RelayReward.claim() (src/RelayReward.sol#184-192):"
+  },
+  {
+   "check": "low-level-calls",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/RelayReward.sol",
+   "lines": 138,
+   "description": "Low level call in RelayReward.relay(address,uint64,uint64[],bytes[],INativeQueryVerifier.MerkleProof[],INativeQueryVerifier.ContinuityProof) (src/RelayReward.sol#138-181):"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/CreditHistory.sol",
+   "lines": 47,
+   "description": "Variable CreditHistory.LINKS (src/CreditHistory.sol#47) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/IChainInfo.sol",
+   "lines": 58,
+   "description": "Function IChainInfo.get_latest_checkpoint_height_and_hash(uint64) (src/interfaces/IChainInfo.sol#58-61) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/EthRepay.sol",
+   "lines": 43,
+   "description": "Variable EthRepay.CREDIT_LINE (src/EthRepay.sol#43) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/CreditHistory.sol",
+   "lines": 51,
+   "description": "Variable CreditHistory.BOOST_BPS (src/CreditHistory.sol#51) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/HumanRegistry.sol",
+   "lines": 21,
+   "description": "Variable HumanRegistry.WORLD_ID (src/HumanRegistry.sol#21) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/CreditLine.sol",
+   "lines": 82,
+   "description": "Variable CreditLine.SECURITY_CHAIN_KEY (src/CreditLine.sol#82) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/ICreditLine.sol",
+   "lines": 63,
+   "description": "Function ICreditLine.SOURCE_CHAIN_ID() (src/interfaces/ICreditLine.sol#63) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/ICreditHistory.sol",
+   "lines": 86,
+   "description": "Function ICreditHistory.MIN_GAP_BLOCKS() (src/interfaces/ICreditHistory.sol#86) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/HumanRegistry.sol",
+   "lines": 25,
+   "description": "Variable HumanRegistry.APP_ID (src/HumanRegistry.sol#25) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/CreditLine.sol",
+   "lines": 68,
+   "description": "Variable CreditLine.ASSET (src/CreditLine.sol#68) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/RelayReward.sol",
+   "lines": 50,
+   "description": "Variable RelayReward.MAX_ROOT_AGE (src/RelayReward.sol#50) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/ICreditLine.sol",
+   "lines": 54,
+   "description": "Function ICreditLine.REGISTRY() (src/interfaces/ICreditLine.sol#54) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/EthRepay.sol",
+   "lines": 46,
+   "description": "Variable EthRepay.ASSET_DECIMALS (src/EthRepay.sol#46) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/IChainInfo.sol",
+   "lines": 48,
+   "description": "Function IChainInfo.get_chain_by_key(uint64) (src/interfaces/IChainInfo.sol#48) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/ICreditLine.sol",
+   "lines": 58,
+   "description": "Function ICreditLine.TERM() (src/interfaces/ICreditLine.sol#58) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/CreditHistory.sol",
+   "lines": 53,
+   "description": "Variable CreditHistory.MAX_BOOST (src/CreditHistory.sol#53) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/ICreditLine.sol",
+   "lines": 55,
+   "description": "Function ICreditLine.INITIAL_LIMIT() (src/interfaces/ICreditLine.sol#55) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/ProvenSource.sol",
+   "lines": 29,
+   "description": "Variable ProvenSource.FINALITY_DEPTH (src/ProvenSource.sol#29) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/IHumanRegistry.sol",
+   "lines": 30,
+   "description": "Function IHumanRegistry.EXTERNAL_NULLIFIER_HASH() (src/interfaces/IHumanRegistry.sol#30) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/IChainInfo.sol",
+   "lines": 79,
+   "description": "Function IChainInfo.get_attestation_genesis_height(uint64) (src/interfaces/IChainInfo.sol#79) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/IHumanRegistry.sol",
+   "lines": 31,
+   "description": "Function IHumanRegistry.APP_ID() (src/interfaces/IHumanRegistry.sol#31) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/CreditLine.sol",
+   "lines": 72,
+   "description": "Variable CreditLine.INITIAL_LIMIT (src/CreditLine.sol#72) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/ProvenSource.sol",
+   "lines": 31,
+   "description": "Variable ProvenSource.MIN_ATTESTORS (src/ProvenSource.sol#31) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/ICreditLine.sol",
+   "lines": 67,
+   "description": "Function ICreditLine.HISTORY() (src/interfaces/ICreditLine.sol#67) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/CreditLine.sol",
+   "lines": 80,
+   "description": "Variable CreditLine.GRACE (src/CreditLine.sol#80) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/ICreditHistory.sol",
+   "lines": 85,
+   "description": "Function ICreditHistory.LINKS() (src/interfaces/ICreditHistory.sol#85) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/EthRepay.sol",
+   "lines": 42,
+   "description": "Variable EthRepay.LINKS (src/EthRepay.sol#42) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/IHumanRegistry.sol",
+   "lines": 29,
+   "description": "Function IHumanRegistry.WORLD_ID() (src/interfaces/IHumanRegistry.sol#29) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/IChainInfo.sol",
+   "lines": 52,
+   "description": "Function IChainInfo.get_latest_attestation_height_and_hash(uint64) (src/interfaces/IChainInfo.sol#52-55) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/IHumanRegistry.sol",
+   "lines": 32,
+   "description": "Function IHumanRegistry.ACTION() (src/interfaces/IHumanRegistry.sol#32) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/RelayReward.sol",
+   "lines": 48,
+   "description": "Variable RelayReward.REWARD_PER_ROOT (src/RelayReward.sol#48) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/CreditLine.sol",
+   "lines": 70,
+   "description": "Variable CreditLine.REGISTRY (src/CreditLine.sol#70) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/examples/HumanGate.sol",
+   "lines": 11,
+   "description": "Variable HumanGate.REGISTRY (src/examples/HumanGate.sol#11) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/HumanRegistry.sol",
+   "lines": 23,
+   "description": "Variable HumanRegistry.EXTERNAL_NULLIFIER_HASH (src/HumanRegistry.sol#23) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/IChainInfo.sol",
+   "lines": 64,
+   "description": "Function IChainInfo.is_height_attested(uint64,uint64) (src/interfaces/IChainInfo.sol#64) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/CreditLine.sol",
+   "lines": 88,
+   "description": "Variable CreditLine.HISTORY (src/CreditLine.sol#88) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/ICreditLine.sol",
+   "lines": 53,
+   "description": "Function ICreditLine.ASSET() (src/interfaces/ICreditLine.sol#53) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/ICreditHistory.sol",
+   "lines": 88,
+   "description": "Function ICreditHistory.MAX_BOOST() (src/interfaces/ICreditHistory.sol#88) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/ProvenSource.sol",
+   "lines": 27,
+   "description": "Variable ProvenSource.VERIFIER (src/ProvenSource.sol#27) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/CreditLine.sol",
+   "lines": 78,
+   "description": "Variable CreditLine.TERM (src/CreditLine.sol#78) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/IChainInfo.sol",
+   "lines": 73,
+   "description": "Function IChainInfo.find_lowest_attested_after(uint64,uint64) (src/interfaces/IChainInfo.sol#73-76) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/IChainInfo.sol",
+   "lines": 45,
+   "description": "Function IChainInfo.get_supported_chains() (src/interfaces/IChainInfo.sol#45) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/HumanRegistry.sol",
+   "lines": 27,
+   "description": "Variable HumanRegistry.ACTION (src/HumanRegistry.sol#27) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/ICreditLine.sol",
+   "lines": 56,
+   "description": "Function ICreditLine.MAX_LIMIT() (src/interfaces/ICreditLine.sol#56) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/EthRepay.sol",
+   "lines": 48,
+   "description": "Variable EthRepay.REPAY_ADDRESS (src/EthRepay.sol#48) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/EthRepay.sol",
+   "lines": 45,
+   "description": "Variable EthRepay.ASSET (src/EthRepay.sol#45) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/ICreditLine.sol",
+   "lines": 57,
+   "description": "Function ICreditLine.FEE_BPS() (src/interfaces/ICreditLine.sol#57) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/IChainInfo.sol",
+   "lines": 67,
+   "description": "Function IChainInfo.get_attestation_bounds(uint64,uint64) (src/interfaces/IChainInfo.sol#67-70) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/CreditLine.sol",
+   "lines": 76,
+   "description": "Variable CreditLine.FEE_BPS (src/CreditLine.sol#76) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/ICreditHistory.sol",
+   "lines": 87,
+   "description": "Function ICreditHistory.BOOST_BPS() (src/interfaces/ICreditHistory.sol#87) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/ICreditLine.sol",
+   "lines": 65,
+   "description": "Function ICreditLine.EXPOSURE_PER_BONDED_CTC() (src/interfaces/ICreditLine.sol#65) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/IHumanLinks.sol",
+   "lines": 81,
+   "description": "Function IHumanLinks.REGISTRY() (src/interfaces/IHumanLinks.sol#81) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/CreditLine.sol",
+   "lines": 86,
+   "description": "Variable CreditLine.EXPOSURE_PER_BONDED_CTC (src/CreditLine.sol#86) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/CreditLine.sol",
+   "lines": 74,
+   "description": "Variable CreditLine.MAX_LIMIT (src/CreditLine.sol#74) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/IHumanLinks.sol",
+   "lines": 82,
+   "description": "Function IHumanLinks.MAX_LINKS() (src/interfaces/IHumanLinks.sol#82) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/ICreditLine.sol",
+   "lines": 59,
+   "description": "Function ICreditLine.GRACE() (src/interfaces/ICreditLine.sol#59) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/ICreditLine.sol",
+   "lines": 61,
+   "description": "Function ICreditLine.SECURITY_CHAIN_KEY() (src/interfaces/ICreditLine.sol#61) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/interfaces/IHumanLinks.sol",
+   "lines": 83,
+   "description": "Function IHumanLinks.LINK_MARKER() (src/interfaces/IHumanLinks.sol#83) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/HumanLinks.sol",
+   "lines": 46,
+   "description": "Variable HumanLinks.REGISTRY (src/HumanLinks.sol#46) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/CreditHistory.sol",
+   "lines": 49,
+   "description": "Variable CreditHistory.MIN_GAP_BLOCKS (src/CreditHistory.sol#49) is not in mixedCase"
+  },
+  {
+   "check": "naming-convention",
+   "impact": "Informational",
+   "confidence": "High",
+   "file": "src/CreditLine.sol",
+   "lines": 84,
+   "description": "Variable CreditLine.SOURCE_CHAIN_ID (src/CreditLine.sol#84) is not in mixedCase"
+  }
+ ]
+}

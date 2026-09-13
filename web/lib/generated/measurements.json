@@ -1,0 +1,735 @@
+{
+  "generatedAt": "2026-09-13T07:03:05.184Z",
+  "cc3": {
+    "chainId": 102031,
+    "head": 5479386,
+    "blockGasLimit": 75000000
+  },
+  "gasByBatchSize": [
+    {
+      "n": 1,
+      "observed": 16,
+      "min": 237972,
+      "median": 276948,
+      "max": 279188
+    },
+    {
+      "n": 2,
+      "observed": 6,
+      "min": 496720,
+      "median": 520016,
+      "max": 633808
+    },
+    {
+      "n": 3,
+      "observed": 2,
+      "min": 773365,
+      "median": 773365,
+      "max": 791161
+    },
+    {
+      "n": 4,
+      "observed": 1,
+      "min": 741470,
+      "median": 741470,
+      "max": 741470
+    }
+  ],
+  "liveFit": {
+    "intercept": 77086.84729064046,
+    "slope": 211857.9162561576,
+    "r2": 0.9096279746305691,
+    "n": 25
+  },
+  "liveModel": {
+    "intercept": 162014.97010901925,
+    "b1": 108744.56022510865,
+    "b2": 440.84097709243355,
+    "r2": 0.9961430409232941,
+    "n": 25
+  },
+  "probe": {
+    "points": [
+      {
+        "n": 1,
+        "ok": true,
+        "executionGas": 190628,
+        "txGas": 265480,
+        "calldataBytes": 6500,
+        "continuityRoots": 6,
+        "fromBlock": 11689195,
+        "toBlock": 11689195
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "executionGas": 292753,
+        "txGas": 568997,
+        "calldataBytes": 21988,
+        "continuityRoots": 306,
+        "fromBlock": 11689195,
+        "toBlock": 11689499
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "executionGas": 396695,
+        "txGas": 874679,
+        "calldataBytes": 37476,
+        "continuityRoots": 606,
+        "fromBlock": 11689195,
+        "toBlock": 11689785
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "executionGas": 502855,
+        "txGas": 1179307,
+        "calldataBytes": 53028,
+        "continuityRoots": 906,
+        "fromBlock": 11689195,
+        "toBlock": 11690034
+      },
+      {
+        "n": 5,
+        "ok": true,
+        "executionGas": 588518,
+        "txGas": 1291998,
+        "calldataBytes": 56164,
+        "continuityRoots": 906,
+        "fromBlock": 11689195,
+        "toBlock": 11690034
+      },
+      {
+        "n": 6,
+        "ok": true,
+        "executionGas": 682074,
+        "txGas": 1422550,
+        "calldataBytes": 62116,
+        "continuityRoots": 906,
+        "fromBlock": 11689195,
+        "toBlock": 11690075
+      }
+    ],
+    "fit": {
+      "intercept": 107937.06666666665,
+      "slope": 235970.88571428572,
+      "r2": 0.9641384889626465,
+      "n": 6
+    },
+    "model": {
+      "intercept": 140799.56719298242,
+      "b1": 121212.94736842105,
+      "b2": 608.5648245614035,
+      "r2": 0.999944527989475,
+      "n": 6
+    },
+    "note": "6 consecutive Sepolia tree updates in blocks 11689195..11690075 (one batch proof spans at most 1,000 blocks), relayed onto a fresh copy of the live relay bytecode."
+  },
+  "anchors": {
+    "attestationReadGas": 3125,
+    "checkpointReadGas": 3125,
+    "verify": [
+      {
+        "txHash": "0x366786038986b2f9e70e1fc1b2be3a419b7a4a3ef36732ed48bcd4083d058bb7",
+        "chainKey": 1,
+        "anchor": "checkpoint",
+        "continuityRoots": 38,
+        "gas": 12908,
+        "ok": true
+      },
+      {
+        "txHash": "0x81ece3110019bf17255ee88a9728ce4327319d7622e528645e8253cf36fdc7e3",
+        "chainKey": 3,
+        "anchor": "checkpoint",
+        "continuityRoots": 36,
+        "gas": 12908,
+        "ok": true
+      },
+      {
+        "txHash": "0x2e34a9030ece366901a54228bed260f20cedfd6db22253d005b0aaeb27e8c7cb",
+        "chainKey": 1,
+        "anchor": "checkpoint",
+        "continuityRoots": 99,
+        "gas": 15884,
+        "ok": true
+      },
+      {
+        "txHash": "0xe4723adf319cb5ed6bb7b001ea4589d6d02be73cb04e014b08a6bae53580576c",
+        "chainKey": 1,
+        "anchor": "checkpoint",
+        "continuityRoots": 15,
+        "gas": 11851,
+        "ok": true
+      },
+      {
+        "txHash": "0xf3770ee1dd44ae37451bfaa2de6eeee0ea0619d6f8e4221ad3fff889bd2b67cb",
+        "chainKey": 1,
+        "anchor": "checkpoint",
+        "continuityRoots": 74,
+        "gas": 14684,
+        "ok": true
+      },
+      {
+        "txHash": "0x75303ecf5dce1420261aa7f8fd30194221bd5bf106fc008792ceb24a263bcbc5",
+        "chainKey": 1,
+        "anchor": "checkpoint",
+        "continuityRoots": 10,
+        "gas": 11612,
+        "ok": true
+      },
+      {
+        "txHash": "0x4137f3bb2a7c5c7dfe015572a628ace47e43eef563edb6aa628423db0ea88dd8",
+        "chainKey": 1,
+        "anchor": "checkpoint",
+        "continuityRoots": 1,
+        "gas": 3380,
+        "ok": true
+      },
+      {
+        "txHash": "0xf7424cd6eeda75d6761a8724b740e46479a9e437d910240f2fcec2ece8926ea7",
+        "chainKey": 1,
+        "anchor": "checkpoint",
+        "continuityRoots": 6,
+        "gas": 11420,
+        "ok": true
+      }
+    ],
+    "verifyFit": {
+      "intercept": 9091.74317469035,
+      "slope": 78.54141434579641,
+      "r2": 0.5415263695849998,
+      "n": 8
+    }
+  },
+  "cap": {
+    "tenError": "QueryAlreadyProcessed",
+    "elevenError": "BatchTooLarge",
+    "projectedGasAt10": 2467646,
+    "headroomAt10": 30
+  },
+  "proofSizes": {
+    "calldata": {
+      "count": 33,
+      "min": 3684,
+      "p50": 6564,
+      "p90": 31268,
+      "max": 39876,
+      "mean": 12612
+    },
+    "txBytes": {
+      "count": 39,
+      "min": 2400,
+      "p50": 5216,
+      "p90": 5216,
+      "max": 5216,
+      "mean": 5071.589743589743
+    },
+    "continuityRoots": {
+      "count": 26,
+      "min": 2,
+      "p50": 7,
+      "p90": 573,
+      "max": 671,
+      "mean": 156.76923076923077
+    },
+    "histogram": [
+      {
+        "from": 2000,
+        "to": 4000,
+        "count": 1
+      },
+      {
+        "from": 4000,
+        "to": 6000,
+        "count": 0
+      },
+      {
+        "from": 6000,
+        "to": 8000,
+        "count": 21
+      },
+      {
+        "from": 8000,
+        "to": 10000,
+        "count": 2
+      },
+      {
+        "from": 10000,
+        "to": 12000,
+        "count": 0
+      },
+      {
+        "from": 12000,
+        "to": 14000,
+        "count": 0
+      },
+      {
+        "from": 14000,
+        "to": 16000,
+        "count": 0
+      },
+      {
+        "from": 16000,
+        "to": 18000,
+        "count": 0
+      },
+      {
+        "from": 18000,
+        "to": 20000,
+        "count": 0
+      },
+      {
+        "from": 20000,
+        "to": 22000,
+        "count": 1
+      },
+      {
+        "from": 22000,
+        "to": 24000,
+        "count": 2
+      },
+      {
+        "from": 24000,
+        "to": 26000,
+        "count": 1
+      },
+      {
+        "from": 26000,
+        "to": 28000,
+        "count": 1
+      },
+      {
+        "from": 28000,
+        "to": 30000,
+        "count": 0
+      },
+      {
+        "from": 30000,
+        "to": 32000,
+        "count": 1
+      },
+      {
+        "from": 32000,
+        "to": 34000,
+        "count": 1
+      },
+      {
+        "from": 34000,
+        "to": 36000,
+        "count": 0
+      },
+      {
+        "from": 36000,
+        "to": 38000,
+        "count": 1
+      },
+      {
+        "from": 38000,
+        "to": 40000,
+        "count": 1
+      }
+    ]
+  },
+  "precompile": {
+    "fromBlock": 5473627,
+    "toBlock": 5479386,
+    "hours": 24.041666666666668,
+    "logs": 8449,
+    "txs": 5015,
+    "callers": [
+      {
+        "to": "0x0c019ee3298111b3b067ae1ba93f73d93ee5230e",
+        "txs": 2072,
+        "humanline": false
+      },
+      {
+        "to": "0x2d8a4d5a34120ff9742d7a4dad37f4ff6335c118",
+        "txs": 1256,
+        "humanline": false
+      },
+      {
+        "to": "0xf7283adefb2801db75160a49da2f7e5e8fdc36c5",
+        "txs": 631,
+        "humanline": false
+      },
+      {
+        "to": "0xb462c2772b8003e3c511c373ddc5715642b34d4c",
+        "txs": 358,
+        "humanline": false
+      },
+      {
+        "to": "0x4bc16e89beb350859aec04a55a5c2e197c06e2ab",
+        "txs": 114,
+        "humanline": false
+      },
+      {
+        "to": "0xa972422a821f622bcc1a72d0b19242f1ae2c6047",
+        "txs": 81,
+        "humanline": false
+      },
+      {
+        "to": "0x1fc6c2cfb9e339012b70d45977737b9e411efdc9",
+        "txs": 75,
+        "humanline": false
+      },
+      {
+        "to": "0xa15564c2fcd3c63f3f9e45e9ef17d104c8445817",
+        "txs": 59,
+        "humanline": false
+      },
+      {
+        "to": "0x0d5c854ec2df99c458cbbe639493435292fb22fc",
+        "txs": 46,
+        "humanline": false
+      },
+      {
+        "to": "0x2af3203cceae275a990a540c49d282e41199121c",
+        "txs": 38,
+        "humanline": false
+      },
+      {
+        "to": "0x666aecd5f08406d8d0d3cf511399fdc7ccbc6d39",
+        "txs": 32,
+        "humanline": false
+      },
+      {
+        "to": "0x3a7c3cc67034197208923587b8dc5c4674cbcef7",
+        "txs": 18,
+        "humanline": true
+      },
+      {
+        "to": "0xc2a1583f9a469ee98f2a1acf6297a0d6a073f276",
+        "txs": 16,
+        "humanline": false
+      },
+      {
+        "to": "0x76131b6547b584e9f101618239a26b2accd8aa43",
+        "txs": 15,
+        "humanline": false
+      },
+      {
+        "to": "0x1122ef3fa4ab0693809e42a00b2476efcf4468ad",
+        "txs": 14,
+        "humanline": true
+      },
+      {
+        "to": "0xf7f1e82cfa97d07812d8a61dd4c05b1c228f5851",
+        "txs": 13,
+        "humanline": false
+      },
+      {
+        "to": "0xedaa8ea3b1d97853dcff189a33c64e6ed538d79c",
+        "txs": 13,
+        "humanline": false
+      },
+      {
+        "to": "0x47172643d148300d2649c475d68a5bd49267e60c",
+        "txs": 10,
+        "humanline": false
+      },
+      {
+        "to": "0x8f14b2cc1b807203d332de6e3da6274176fdb584",
+        "txs": 10,
+        "humanline": false
+      },
+      {
+        "to": "0x886498645c18a787f6283c25012771d77b068df2",
+        "txs": 9,
+        "humanline": false
+      },
+      {
+        "to": "0x0000000000000000000000000000000000000fd2",
+        "txs": 8,
+        "humanline": false
+      },
+      {
+        "to": "0x9612df91eaf5a5fcb9eafc929e59f7d7294e7624",
+        "txs": 7,
+        "humanline": false
+      },
+      {
+        "to": "0xce0c01b9c2e407af328eb25d06aea0f1929aabc7",
+        "txs": 6,
+        "humanline": false
+      },
+      {
+        "to": "0x0a0d9f5875b54d9adfa4fc121d9c5f70eee2450f",
+        "txs": 6,
+        "humanline": false
+      },
+      {
+        "to": "0xf249cc50f8f0c512ec70ad1df759cf3c06412d0e",
+        "txs": 6,
+        "humanline": false
+      },
+      {
+        "to": "0x8b4231ce80f3e6bd49bffc5ab918dd0a16f14908",
+        "txs": 6,
+        "humanline": false
+      },
+      {
+        "to": "0xa44ceef4678cde6f7ab7eba77d364efd5896d56a",
+        "txs": 5,
+        "humanline": false
+      },
+      {
+        "to": "0x3701dbbcec38b86181b00a55c9d15560a480aa92",
+        "txs": 5,
+        "humanline": false
+      },
+      {
+        "to": "0xdff00fde3829ffca7a1dcab0aa30602dd9f380a4",
+        "txs": 4,
+        "humanline": false
+      },
+      {
+        "to": "0x5c5bee8b3d942cb7782071e13a272c7ae9f7c907",
+        "txs": 4,
+        "humanline": false
+      },
+      {
+        "to": "0x32328dc8858279f35dec9e704d51291b37f06290",
+        "txs": 4,
+        "humanline": false
+      },
+      {
+        "to": "0x5c013e630955822c1dc76e8d3261f8ddeda1fb78",
+        "txs": 4,
+        "humanline": false
+      },
+      {
+        "to": "0xa93dd76ce639dd9be4c780363d54706e098aa1c4",
+        "txs": 3,
+        "humanline": false
+      },
+      {
+        "to": "0xfa19b4ddcea765ce8662ec9ea15438adce44e237",
+        "txs": 3,
+        "humanline": false
+      },
+      {
+        "to": "0xd6dc3b2fe9d2d84da83e8bab4c1ccd86b4b99dc6",
+        "txs": 3,
+        "humanline": false
+      },
+      {
+        "to": "0x42623b442fd0f3bc6796da0a08a0074ba16f3209",
+        "txs": 3,
+        "humanline": false
+      },
+      {
+        "to": "0xc8e0472a5aa4bf6e6120c65682cb19a65cb2ffe8",
+        "txs": 3,
+        "humanline": false
+      },
+      {
+        "to": "0xfe0a4cbeca0d7aca0e81b694bcfcf6033356eb1a",
+        "txs": 3,
+        "humanline": false
+      },
+      {
+        "to": "0x76cc9a24f01267c68cf55d7d20d33125ef8b6bf1",
+        "txs": 3,
+        "humanline": false
+      },
+      {
+        "to": "0x4c9672edd87b8da173e55bc255b1633cdd33e2de",
+        "txs": 3,
+        "humanline": false
+      },
+      {
+        "to": "0x2a8142db4c3b90333339a6e25b225e808098bdb0",
+        "txs": 2,
+        "humanline": false
+      },
+      {
+        "to": "0x3eee179edd6fe6e40d7d23f0110ea639f2da82b8",
+        "txs": 2,
+        "humanline": false
+      },
+      {
+        "to": "0x9b6eb52d26cef7b04bb52b307db86262bd8d6c8a",
+        "txs": 2,
+        "humanline": false
+      },
+      {
+        "to": "0x74f6e83aa79a16ced41ec5b0697879e51e81cad0",
+        "txs": 2,
+        "humanline": false
+      },
+      {
+        "to": "0xaac41539949d6a8810a42944182a51ccafc421f1",
+        "txs": 2,
+        "humanline": false
+      },
+      {
+        "to": "0x9a6c6f042f82142b43d66ab430015eca1e5a9d15",
+        "txs": 2,
+        "humanline": false
+      },
+      {
+        "to": "0xf1b7edd3510bd465fb6b66b7bee0b347684cf3ae",
+        "txs": 2,
+        "humanline": false
+      },
+      {
+        "to": "0x812bceec2de8c8ac71c7af7a8e2d4467e65fdf18",
+        "txs": 2,
+        "humanline": false
+      },
+      {
+        "to": "0x786292b7699c3e03db61dfd4a8358210f6f986e3",
+        "txs": 2,
+        "humanline": false
+      },
+      {
+        "to": "0x88796526aeb03f701a2248b54a4a5f0f8f933fa8",
+        "txs": 2,
+        "humanline": false
+      },
+      {
+        "to": "0x4d11b60809724b0b67b28da2f38438ae97f1c671",
+        "txs": 2,
+        "humanline": false
+      },
+      {
+        "to": "0xd5226c2ec2c6958a9785c29dadbc28810f718ccf",
+        "txs": 2,
+        "humanline": false
+      },
+      {
+        "to": "0x55a5f5da217644e20c0ca8953e1e4e605248376e",
+        "txs": 2,
+        "humanline": false
+      },
+      {
+        "to": "0xa208b46d4016d799799591a41500e3f3b44549a0",
+        "txs": 2,
+        "humanline": false
+      },
+      {
+        "to": "0x18052272cc69113de2b45d2bdb4e1fb287f4e906",
+        "txs": 1,
+        "humanline": false
+      },
+      {
+        "to": "0x1ca573b695309b2bfaf7f306b76dc16443708117",
+        "txs": 1,
+        "humanline": false
+      },
+      {
+        "to": "0x92b54b2988f6672688806821e7893101c0eac104",
+        "txs": 1,
+        "humanline": false
+      },
+      {
+        "to": "0x5197b3b2bd055975d86899e657952ba9437384e0",
+        "txs": 1,
+        "humanline": false
+      },
+      {
+        "to": "0xe3565a1a1b947f363ab433889522267ce3d4736f",
+        "txs": 1,
+        "humanline": false
+      },
+      {
+        "to": "0x185c81ed5a757d1e290baba55f051f3ce791d641",
+        "txs": 1,
+        "humanline": false
+      },
+      {
+        "to": "0x380e460e07f5a1a1282f282905a1065ed7a6bab7",
+        "txs": 1,
+        "humanline": false
+      },
+      {
+        "to": "0xced503d0eeb04c13f8974caa85d06a22f0441c88",
+        "txs": 1,
+        "humanline": false
+      },
+      {
+        "to": "0x68952727aa2e684bec378120a651434b1de5e915",
+        "txs": 1,
+        "humanline": false
+      },
+      {
+        "to": "0x101f9e577005e896410c06359ebd5bf488ca98ef",
+        "txs": 1,
+        "humanline": false
+      },
+      {
+        "to": "0x02501978888a9bedfed93f9665c7ddea466f12f5",
+        "txs": 1,
+        "humanline": false
+      },
+      {
+        "to": "0x79fa79c1fdc7efaa75bc039cdbdfc1ce109775e7",
+        "txs": 1,
+        "humanline": false
+      },
+      {
+        "to": "0xd64562a3f0858eb3b42fef46895ad851ef2d2c91",
+        "txs": 1,
+        "humanline": false
+      },
+      {
+        "to": "0x9766480a872ad7df2a5cf86f9e307804a3f7afe0",
+        "txs": 1,
+        "humanline": true
+      },
+      {
+        "to": "0x9b4345b7772bd26dd4a0e94e0bd64bd1de15de3c",
+        "txs": 1,
+        "humanline": false
+      },
+      {
+        "to": "0x194a9c60d872281109074fe4aad68bfad67e23c9",
+        "txs": 1,
+        "humanline": false
+      },
+      {
+        "to": "0xaab31fb58cf430689a48a5b3d2a632a38fbb8f05",
+        "txs": 1,
+        "humanline": false
+      },
+      {
+        "to": "0xde64d5037ca820d4adfa703c4faf5451be840c9d",
+        "txs": 1,
+        "humanline": false
+      }
+    ],
+    "humanlineTxs": 33,
+    "humanlineShare": 0.006580259222333001
+  },
+  "relayTxCount": 33,
+  "latency": {
+    "summary": {
+      "count": 46,
+      "min": 826,
+      "p50": 1674,
+      "p90": 8596,
+      "max": 10015,
+      "mean": 3363.5434782608695
+    },
+    "spanHours": 21.579166666666666,
+    "byRelay": {
+      "sepolia": {
+        "count": 27,
+        "min": 837,
+        "p50": 1674,
+        "p90": 7362,
+        "max": 9783,
+        "mean": 3192
+      },
+      "mainnet": {
+        "count": 19,
+        "min": 826,
+        "p50": 2791,
+        "p90": 9409,
+        "max": 10015,
+        "mean": 3607.315789473684
+      }
+    }
+  }
+}

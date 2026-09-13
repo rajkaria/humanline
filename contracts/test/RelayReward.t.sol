@@ -34,10 +34,16 @@ contract Reenterer {
     RelayReward public vault;
     bool public reentered;
     bytes4 public reentrySelector;
+    bool public acceptPayment;
+    bytes public reentryError;
 
     function arm(RelayReward v, bytes4 selector) external {
         vault = v;
         reentrySelector = selector;
+    }
+
+    function setAcceptPayment(bool accept) external {
+        acceptPayment = accept;
     }
 
     function go(bytes memory callData) external {
@@ -50,10 +56,11 @@ contract Reenterer {
     }
 
     receive() external payable {
-        (bool ok,) = address(vault).call(abi.encodeWithSelector(reentrySelector));
+        (bool ok, bytes memory ret) = address(vault).call(abi.encodeWithSelector(reentrySelector));
         reentered = ok;
         require(!ok, "reentry must fail");
-        revert("reject payment");
+        if (!acceptPayment) revert("reject payment");
+        reentryError = ret;
     }
 }
 
@@ -260,6 +267,27 @@ contract RelayRewardTest is Fixtures {
         bot.go(abi.encodeCall(RelayReward.relay, (address(relay), 3, h, txs, p, continuityProofOf(mainnet))));
         assertEq(vault.claimable(address(bot)), REWARD, "payment failed, so it was credited");
         assertEq(address(vault).balance, 1 ether, "nothing left the vault");
+    }
+
+    /// @dev Pins the guard itself: without `nonReentrant` the re-entered `claim` would still fail,
+    ///      but with `NothingToClaim`, so only the exact error proves the lock is what stopped it.
+    function test_ReentryDuringPaymentFailsOnTheLockItself() public {
+        Reenterer bot = new Reenterer();
+        bot.arm(vault, RelayReward.claim.selector);
+        bot.setAcceptPayment(true);
+        _bootstrapDirect();
+        (uint64[] memory h, bytes[] memory txs, INativeQueryVerifier.MerkleProof[] memory p) = _chain(bootRoot, 1);
+        bot.go(abi.encodeCall(RelayReward.relay, (address(relay), 3, h, txs, p, continuityProofOf(mainnet))));
+        assertEq(bytes4(bot.reentryError()), RelayReward.Reentrancy.selector, "stopped by the lock");
+        assertEq(address(bot).balance, REWARD, "and the honest payment still went through");
+        assertEq(vault.claimable(address(bot)), 0);
+    }
+
+    function test_ConstructorRefusesTheZeroAddressAsARelay() public {
+        address[] memory zero = new address[](2);
+        zero[0] = address(relay);
+        vm.expectRevert(abi.encodeWithSelector(RelayReward.UnknownRelay.selector, address(0)));
+        new RelayReward(zero, REWARD, MAX_AGE);
     }
 
     function test_FundingEmitsAndIsAccepted() public {
