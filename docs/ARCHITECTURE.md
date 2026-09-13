@@ -1,6 +1,6 @@
 # Humanline: Architecture
 
-Two chains, three precompiles, three contracts, one worker, and no trusted party anywhere in the path.
+Two chains, three precompiles, three contracts, one worker, and no trusted party anywhere in the path. Not even us.
 
 This document redraws SPEC §5. The flowchart shows what talks to what. The two sequence diagrams show the only two paths that matter: getting a World ID root onto Creditcoin, and turning a human into a borrower. The data-flow table at the end says, for every value that crosses a boundary, where it came from and what checks it.
 
@@ -27,7 +27,7 @@ mainnet Orb tree**, with 30-day terms, for people who hold a real Orb-verified W
 
 Nothing else differs: both read the same two `AttestedWorldID` instances, both draw on the same
 hUSD, and the web app switches between them at runtime. A registry is bound to exactly one identity
-tree because a proof is only a member of one tree — that binding is an immutable constructor
+tree because a proof is only a member of one tree. That binding is an immutable constructor
 argument, not a setting.
 
 ---
@@ -227,17 +227,17 @@ sequenceDiagram
 
     W->>W: send self, 0 value, calldata = LINK_MARKER ‖ (human, H, 102031, HumanLinks)
     APP->>PRV: proof-by-tx (after attestation + 32 blocks)
-    H->>HL: linkBySourceTx(proof) — to == from, intent names H and H's human
+    H->>HL: linkBySourceTx(proof): to == from, intent names H and H's human
     HL-->>H: WalletLinked(human, W, SourceTx)
 
     APP->>APP: /api/crosschain/history: W's Aave Borrow/Repay with receipt-local log indexes
-    H->>CH: proveBorrow(proof, logIndex) — pool emitter, onBehalfOf == user, stable reserve, W linked
-    H->>CH: proveRepay(proof, logIndex, borrowId) — ≥ 7,200 blocks later, repayer == user, no aTokens
+    H->>CH: proveBorrow(proof, logIndex): pool emitter, onBehalfOf == user, stable reserve, W linked
+    H->>CH: proveRepay(proof, logIndex, borrowId): 7,200+ blocks later, repayer == user, no aTokens
     CH-->>CL: boostOf(human) = min(25% × verified repaid $, 500)
     CL-->>H: limitOf(human) = min(limit + boost, MAX_LIMIT)
 
     W->>W: USDC.transfer(REPAY_ADDRESS, amount) on Ethereum or Sepolia
-    H->>ER: creditRepayment(proof, logIndex) — USDC emitter, to == REPAY_ADDRESS, W linked
+    H->>ER: creditRepayment(proof, logIndex): USDC emitter, to == REPAY_ADDRESS, W linked
     ER->>CL: repayFor(human, min(amount, owed)) from the settlement float
 ```
 

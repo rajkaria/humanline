@@ -1,4 +1,4 @@
-# Humanline — web
+# Humanline web app
 
 The Humanline front end: landing page, borrower + lender app, live Attestcoin relay
 feed, judge reproducibility page, and integrator docs.
@@ -11,7 +11,7 @@ that is a hash.
 
 ## Quick start
 
-`node` is blocked as a bare command in this repo — use `bun` for everything.
+`node` is blocked as a bare command in this repo. Use `bun` for everything.
 
 ```bash
 cd web
@@ -21,7 +21,7 @@ bun run dev                    # http://localhost:3000
 ```
 
 ```bash
-bun run build      # production build — must pass with zero type errors
+bun run build      # production build, must pass with zero type errors
 bun run lint       # eslint
 bun run typecheck  # tsc --noEmit
 bun test           # unit tests for lib/worldid.ts and lib/format.ts
@@ -82,8 +82,8 @@ The widget is configured as documented at
 ```
 
 `allow_legacy_proofs` plus the `orbLegacy` preset is what makes the widget return a
-World ID **3.0** response — `merkle_root`, `nullifier` and `proof` as an
-ABI-encoded `uint256[8]` — which is exactly what the on-chain Groth16 verifier on
+World ID **3.0** response (`merkle_root`, `nullifier` and `proof` as an
+ABI-encoded `uint256[8]`), which is exactly what the on-chain Groth16 verifier on
 Creditcoin consumes. `lib/worldid.ts` decodes `proof` with viem's
 `decodeAbiParameters` and calls `HumanRegistry.register(root, nullifierHash, proof)`.
 
@@ -108,13 +108,13 @@ Resolution order, per contract, in `lib/contracts.ts`:
 
 1. `deployments/cc3-testnet.json` at the repo root, snapshotted into the build.
 2. `NEXT_PUBLIC_*_ADDRESS` environment variables (see `.env.example`).
-3. Nothing — the view renders a "Not deployed yet" banner naming the environment
+3. Nothing. The view renders a "Not deployed yet" banner naming the environment
    variable it wants.
 
 The build never fails and no page crashes when the deployments file is missing.
 The parser accepts a flat `{ Name: "0x…" }` map, a nested `{ contracts: { … } }`,
 or `{ Name: { address, block } }` entries, matched case- and
-separator-insensitively — the deploy script and this app are written by different
+separator-insensitively, since the deploy script and this app are written by different
 tasks, and this is the cheap way to make them agree.
 
 ABIs are hand-written from the Solidity interfaces in `contracts/src/interfaces` in
@@ -137,7 +137,7 @@ agree; a mismatch is a bug in one of them.
 
 Each snapshot is committed with an empty default, so importing it is always safe.
 Importing the repo files directly would hard-fail the build whenever a sibling task
-had not run yet — and on Vercel, where the build root may be `web/`, they may not
+had not run yet. On Vercel, where the build root may be `web/`, they may not
 be present at all.
 
 Markdown is rendered by `lib/markdown.ts` + `components/markdown.tsx`, a small
@@ -176,7 +176,7 @@ test/                          bun test
 ### Conventions
 
 - **Every hash, address and root** renders through `<HashLink>`: monospace,
-  truncated, with a copy button and a link to the right explorer — Blockscout for
+  truncated, with a copy button and a link to the right explorer: Blockscout for
   Creditcoin, Etherscan for Ethereum, Sepolia Etherscan for staging.
 - **Every write** goes through `useTx`, so signing, pending and confirmation
   feedback is identical everywhere and every toast carries the Blockscout link.
@@ -191,13 +191,13 @@ test/                          bun test
 
 `bun test` covers the two pure modules where a silent bug would be expensive:
 
-- `test/worldid.test.ts` — `hashToField` is `uint256(keccak256(b)) >> 8`,
+- `test/worldid.test.ts`: `hashToField` is `uint256(keccak256(b)) >> 8`,
   recomputed from `@noble/hashes` independently of the implementation;
   `hashSignalAddress` hashes 20 address bytes (not a padded word, not the text of
   the address) and is cross-checked against IDKit's own `hashSignal`;
   `externalNullifierHash` packs the app-id hash as a full `uint256` word followed
   by the raw action bytes, in that order.
-- `test/format.test.ts` — fixed-point formatting and parsing (truncating, never
+- `test/format.test.ts`: fixed-point formatting and parsing (truncating, never
   rounding), durations, relative and absolute timestamps, and viem error
   flattening.
 

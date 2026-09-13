@@ -6,7 +6,7 @@
 
 ### One human, one credit line.
 
-**World ID proof of personhood, carried from Ethereum to Creditcoin by the Attestcoin Protocol with no bridge and no oracle in between, verified by a zero-knowledge proof on Creditcoin itself, and turned into an uncollateralized credit line that follows the person, not the wallet.**
+**Prove you're a person once with World ID. Attestcoin carries that proof from Ethereum to Creditcoin with no bridge and no oracle in between, the chain verifies the zero-knowledge proof for itself, and you get an uncollateralized credit line that follows you, not your wallet.**
 
 [![Live](https://img.shields.io/badge/live-humanline.credit-0ea5e9)](https://humanline.credit)
 [![Chain](https://img.shields.io/badge/Creditcoin_CC3-chainId_102031-1f2937)](https://creditcoin-testnet.blockscout.com)
@@ -34,12 +34,14 @@ BUIDL CTC 2026 Fall · DeFi track · Creditcoin CC3 testnet
 
 ## The thirty-second version
 
+If you read nothing else, read this. Everything below it is the receipt.
+
 - **Every uncollateralized credit design on Creditcoin scores a wallet. A wallet is free.** Open ten, repay yourself ten times, default on the eleventh at full size. Humanline scores the person.
 - **The person is a World ID nullifier**, derived from an Orb iris scan. It is the same value on every wallet the person will ever hold. Credit limits, repayment history and defaults are keyed to it, so a new keypair is not a new borrower.
 - **World ID's tree lives on Ethereum. Creditcoin cannot see it.** Humanline mirrors it with the Attestcoin Protocol: every root arrives as a proof of the real Ethereum transaction that produced it, verified by the `0x0FD2` precompile inside the same Creditcoin transaction that adopts it. No bridge operator, no oracle signer, no admin key.
 - **The zero-knowledge proof is verified on Creditcoin itself**, on the bn128 precompiles. Groth16 on Creditcoin was an open question. It is now a deployed contract with real humans in it.
 - **Attestcoin is load-bearing 22 different ways**, including one nobody else has tried: the attestors' bonded stake, read live from `0x0FD4`, caps how much the pool may lend.
-- **Nothing here asks for trust.** Anyone can relay, from the app, from a wallet funded only by the faucet, or through a vault that pays them. Twelve named attacks are fired at the deployed contracts every time the judge page loads. Coverage, invariants, mutation score, gas curves and latency are published from chain data.
+- **Nothing here asks for trust, and that includes trusting us.** Anyone can relay, from the app, from a wallet funded only by the faucet, or through a vault that pays them. Twelve named attacks are fired at the deployed contracts every time the judge page loads. Coverage, invariants, mutation score, gas curves and latency are published from chain data.
 - **Personhood ships as a primitive**: `@humanline/sdk` on npm, `HumanGated.sol`, a CORS-open public API with a loan-lifecycle feed, and `HumanPoll`, one person one vote, built on nothing but the SDK.
 
 ---
@@ -72,7 +74,7 @@ BUIDL CTC 2026 Fall · DeFi track · Creditcoin CC3 testnet
 
 **Every uncollateralized design on the chain has the same hole underneath it: a wallet is not a person.** A borrower opens ten wallets, repays themselves ten times, mints ten spotless credit passports, and defaults on the eleventh loan at full size. The score was real. The person behind it was not. That is why "uncollateralized" lending keeps quietly asking for collateral from exactly the people who have none.
 
-When we surveyed the BUIDL CTC gallery it held eighty-seven submissions. About thirty were credit passports built on the same pattern: read repayments on a testnet, mint a score. Zero touched identity. Zero used a zero-knowledge proof. Zero did proof of personhood. Every one of those passports can be forged by *generating a new wallet*. Not hacked. Generated.
+When we went through the BUIDL CTC gallery it held eighty-seven submissions. About thirty were credit passports built on the same pattern: read repayments on a testnet, mint a score. Zero touched identity. Zero used a zero-knowledge proof. Zero did proof of personhood. Every one of those passports can be forged by *generating a new wallet*. Not hacked. Generated. That was the moment Humanline stopped being an idea and became a to-do list.
 
 **Proof of personhood already exists, and it is already in Creditcoin's markets.** World ID's Orb-verified population is concentrated in Kenya, Argentina, Indonesia, the Philippines, Brazil and Malaysia. That is the map Creditcoin's mission describes. The obstacle was never adoption. It was plumbing: World ID's identity tree lives on Ethereum, and the only ways to bring it to another chain have been a trusted bridge or a trusted oracle, which is precisely the kind of party a credit system for the unbanked should not rest on.
 
@@ -98,13 +100,13 @@ Humanline keys **every piece of credit state** to that nullifier and never to an
 
 Re-registering from a new wallet *moves* the binding. It never mints a second human. Default, and `LineFrozen` attaches to the nullifier and travels with it. The test that pins this, `test_DefaultSurvivesAWalletRebind`, is the single most important test in the repository.
 
-The forgery that breaks every other credit passport costs nothing. Forging a Humanline identity costs a second iris.
+The forgery that breaks every other credit passport costs nothing. Forging a Humanline identity costs a second iris. We like those odds.
 
 ---
 
 ## What we built
 
-Eighteen verified contracts across two live deployments, a relay worker, a web app with nine pages and fourteen API routes, an npm package, a public API, and a second consumer app, all running unattended on Creditcoin CC3 testnet.
+Eighteen verified contracts across two live deployments, a relay worker, a web app with nine pages and fourteen API routes, an npm package, a public API, and a second consumer app, all running unattended on Creditcoin CC3 testnet. None of it is a mock, and none of it needs us awake.
 
 ```
 ETHEREUM MAINNET (chainKey 3)             CREDITCOIN CC3 TESTNET (chainId 102031)
@@ -159,7 +161,7 @@ Two deployments run side by side against the **same** relayed roots, because "a 
 | Reproducible | World's **Sepolia staging** tree | anyone, via the [World ID Simulator](https://simulator.worldcoin.org) | 10 min term, 5 min grace | [humanline.credit/app](https://humanline.credit/app) |
 | Real | World's **Ethereum mainnet Orb** tree | anyone with an Orb-verified World ID | 30 day term, 7 day grace | [humanline.credit/app?profile=production](https://humanline.credit/app?profile=production) |
 
-The switch is on the page. You are never asked to trust that the other one exists.
+The switch is on the page. You are never asked to take our word that the other one exists.
 
 **No owner, no pause, no upgrade path, in any contract.** Every parameter is an immutable set at construction. There is nobody to appeal to, including us. That is the design.
 
@@ -167,7 +169,7 @@ The switch is on the page. You are never asked to trust that the other one exist
 
 ## How each technology is used at its core
 
-Humanline is not a product with integrations bolted on. Each technology below is doing the one thing it was built to do, at the layer where removing it would collapse the system.
+Humanline is not a product with integrations bolted on for a checklist. Each technology below is doing the one thing it was built to do, at the layer where pulling it out would collapse the system.
 
 ### Attestcoin Protocol: the only door a root can walk through
 
@@ -233,7 +235,7 @@ Solidity 0.8.28 with `via_ir` (required: `EvmV1Decoder` is stack-too-deep under 
 
 ## Why it is the deepest Attestcoin integration on Creditcoin
 
-Depth is not a count. It is dependency. Remove Attestcoin from Humanline and there is no root, therefore no verified human, therefore no credit. There is no degraded mode, no admin setter, no fallback path.
+Depth is not a count. It is dependency. Remove Attestcoin from Humanline and there is no root, therefore no verified human, therefore no credit. There is no degraded mode, no admin setter, no fallback path. We built it that way on purpose, and we would build it that way again.
 
 What only Humanline does:
 
@@ -268,7 +270,7 @@ And it fits the mission Creditcoin describes for itself. Credal lenders do not h
 
 ## A relay nobody has to trust or wait for
 
-A relayer is a liveness dependency even when it is not a trust dependency. Humanline removes it three ways.
+A relayer is a liveness dependency even when it is not a trust dependency. We did not want anyone waiting on us, so Humanline removes it three ways.
 
 **Self-relay, in the app.** World mints a proof against its newest root, which may not have reached Creditcoin yet. When it has not, the verify card's Sync step offers *Relay it now from your wallet*. `/api/relay/plan` finds the `TreeChanged` transaction whose `postRoot` is the proof's root by its indexed topic, walks the `preRoot → postRoot` chain back to the root Creditcoin already follows, and splits the gap into `executeBatch` calls of at most 10 members within one continuity span. If the update is still shallower than the 32-block finality depth it shows how many attested blocks are left and an ETA, using `is_height_attested` and the same ChainInfo reads the contract uses. `/api/relay/proof` builds the proof, the browser dry-runs it with the precompile's free `verify` view and then `eth_call`, tops up an empty wallet from `/api/gas`, and the user's own wallet sends it. The contract re-checks everything, so the planner cannot talk anyone into relaying a false root.
 
@@ -284,7 +286,7 @@ Measured over the relay's history in [`docs/MEASUREMENTS.md`](docs/MEASUREMENTS.
 
 ## Cross-chain credit identity
 
-A person's credit identity should not stop at Creditcoin's edge. Three contracts, all through `ProvenSource`, extend it back into Ethereum.
+A person's credit identity should not stop at Creditcoin's edge, because their money doesn't. Three contracts, all through `ProvenSource`, extend it back into Ethereum.
 
 **`HumanLinks`: one human, their wallets.** The wallet sends itself a zero-value transaction on Ethereum or Sepolia whose calldata is the link intent: a marker plus `abi.encode(human, creditcoinWallet, creditcoinChainId, address(this))`. The human's registered Creditcoin wallet submits the Attestcoin proof. Because it is a self-send, the calldata cannot be anyone else's contract call. Because the intent names this chain and this deployment, it cannot be replayed into another. Because the caller must be the human's registered wallet, a stranger cannot attach a wallet to someone else's identity. `linkBySignature` is the gasless EIP-712 alternative, recorded as such. A wallet belongs to one human forever, and a human holds at most 8.
 
@@ -298,7 +300,7 @@ All three are tested against real Sepolia transactions the live `0x0FD2` verifie
 
 ## Build on it: the SDK, the API, the first app
 
-Personhood is a primitive, so it ships as one. We built the package because the most valuable thing Humanline can be for Creditcoin is not a lending app but the `isHuman` call every other lending app makes.
+Personhood is a primitive, so it ships as one. We built the package because the most valuable thing Humanline can be for Creditcoin is not a lending app. It is the `isHuman` call every other lending app makes.
 
 ### `@humanline/sdk`
 
@@ -422,7 +424,7 @@ Twelve stateful invariants in three suites, each with an `afterInvariant` anti-v
 | Root from before the relay's history | `UnknownPreRoot` |
 | One human, a second registration | `SameWallet` |
 
-Twelve of twelve, by name. Every attack in the threat model maps to a named custom error and a named test: [`docs/SECURITY.md`](docs/SECURITY.md).
+Twelve of twelve, by name, every six hours, for as long as the chain is up. Every attack in the threat model maps to a named custom error and a named test: [`docs/SECURITY.md`](docs/SECURITY.md).
 
 ### Measurements from chain data
 
@@ -447,6 +449,8 @@ On every push to `main`: [contracts](.github/workflows/contracts.yml) (build, CI
 
 ## Verify it yourself in five minutes
 
+We would rather you checked than believed us. Everything below works without a wallet, without funds, and without asking us anything.
+
 | | |
 |---|---|
 | Live app | https://humanline.credit |
@@ -462,7 +466,7 @@ On every push to `main`: [contracts](.github/workflows/contracts.yml) (build, CI
 | Deployment records | [`deployments/cc3-testnet.json`](deployments/cc3-testnet.json), [`deployments/cc3-testnet.production.json`](deployments/cc3-testnet.production.json) |
 | Pitch deck | [`docs/deck.pdf`](docs/deck.pdf) |
 
-Three commands, no wallet, no funds:
+Four commands, no wallet, no funds, no permission needed:
 
 ```bash
 git clone --recurse-submodules https://github.com/rajkaria/humanline
@@ -622,13 +626,13 @@ cd packages/sdk
 bun test && bun run build
 ```
 
-Two environment notes that will otherwise cost you ten minutes: Foundry is not vendored, so install it once and call `forge` and `cast` (the scripts honour `FORGE=` and `CAST=`); and the shell scripts target bash 3.2, the macOS default, so they use tab-separated rows instead of associative arrays.
+Two environment notes that will otherwise cost you ten minutes of your life: Foundry is not vendored, so install it once and call `forge` and `cast` (the scripts honour `FORGE=` and `CAST=`); and the shell scripts target bash 3.2, the macOS default, so they use tab-separated rows instead of associative arrays.
 
 ---
 
 ## Where this goes
 
-The endpoint is not a lending app. It is **the personhood layer for Creditcoin**: a public `IHumanRegistry` that any lender, DAO, airdrop, payroll contract or governance module on the chain reads for free, funded by the credit business that sits on top of it. Humanline's own `CreditLine` is the reference implementation and the proof that the registry is good enough to lend against.
+We did not build this to win a hackathon and stop. The endpoint is not a lending app. It is **the personhood layer for Creditcoin**: a public `IHumanRegistry` that any lender, DAO, airdrop, payroll contract or governance module on the chain reads for free, funded by the credit business that sits on top of it. Humanline's own `CreditLine` is the reference implementation and the proof that the registry is good enough to lend against.
 
 | Horizon | Milestone |
 |---|---|
@@ -644,7 +648,7 @@ The full product vision, unit economics and the CEIP ask are in [`docs/VISION.md
 
 ## What is testnet-only, and what we do not claim
 
-Stated up front rather than discovered later. Full reasoning in [`docs/ATTESTCOIN_INTEGRATION.md`](docs/ATTESTCOIN_INTEGRATION.md) section 8 and [`docs/SECURITY.md`](docs/SECURITY.md) section 3.
+Stated up front rather than discovered later, because a system you cannot criticise is a system you cannot trust. Full reasoning in [`docs/ATTESTCOIN_INTEGRATION.md`](docs/ATTESTCOIN_INTEGRATION.md) section 8 and [`docs/SECURITY.md`](docs/SECURITY.md) section 3.
 
 - **The World ID roots are real.** They come from World's own sequencer on Ethereum mainnet, roughly hourly, and each arrives with an Attestcoin proof verified by `0x0FD2` in the same transaction. There is no mock verifier, no canned proof and no replayed fixture anywhere in the deployed path.
 - **hUSD is a test stablecoin we mint.** Lender deposits are testnet funds. The demo deployment shortens terms to minutes so a full borrow, miss and default cycle fits in a video. No economic claim here has been tested with real money.
@@ -654,7 +658,7 @@ Stated up front rather than discovered later. Full reasoning in [`docs/ATTESTCOI
 - **The attestor set is the deepest assumption.** A colluding quorum could attest to a block that does not exist. Humanline enforces a floor of 3 bonded attestors, a depth of 32 attested blocks, and a credit ceiling tied to their bonded stake, and cannot do better than the protocol it sits on.
 - **World ID 4.0** verifies on World Chain, which is not an Attestcoin source chain yet. IDKit is asked for legacy proofs. Periscope is the roadmap answer, and it is a design, not a deployment.
 - **Cross-chain history has edges.** Links prove an externally owned account; smart-contract wallets cannot sign the self-send or the EIP-712 message. On Sepolia, Aave reserves are faucet tokens, so testnet history demonstrates the rules rather than signalling creditworthiness. Someone with capital can still borrow, wait, and repay to build a record, at real interest, for a boost capped at 500 hUSD.
-- **A freeze is permanent and there is nobody to appeal to.** That is the design, and it is also a real product limitation a production version would address with a lender-controlled cure path written into the contract from the start.
+- **A freeze is permanent and there is nobody to appeal to.** That is the design. It is also a real product limitation, and a production version would address it with a lender-controlled cure path written into the contract from the start.
 
 ---
 
@@ -662,7 +666,7 @@ Stated up front rather than discovered later. Full reasoning in [`docs/ATTESTCOI
 
 | | |
 |---|---|
-| Builder | **Raj Karia**, sole builder: contracts, relay worker, web app, SDK, documentation |
+| Builder | **Raj Karia**, sole builder: contracts, relay worker, web app, SDK, documentation, and every word of this README |
 | X | [@rajkaria_](https://x.com/rajkaria_) |
 | GitHub | [@rajkaria](https://github.com/rajkaria) |
 | Repository | https://github.com/rajkaria/humanline |
@@ -674,6 +678,6 @@ Security reports: [`docs/SECURITY.md`](docs/SECURITY.md) section 4.
 
 <div align="center">
 
-**One human, one credit line.** Zero trusted parties.
+**One human, one credit line.** Zero trusted parties. Come and check.
 
 </div>

@@ -1,4 +1,4 @@
-# Humanline worker — the root relay
+# Humanline worker: the root relay
 
 Relays World ID identity-tree roots from Ethereum onto Creditcoin CC3 through the
 Attestcoin Protocol. It watches `TreeChanged` on the World ID identity managers, obtains
@@ -70,7 +70,7 @@ yet" message and **exits 2**. `check` and the `--dry-run` paths still work.
 ### RPC endpoints
 
 The documented default for mainnet (`https://ethereum-rpc.publicnode.com`) rejects
-`eth_getLogs` outright — "Archive requests require a personal token". The worker therefore
+`eth_getLogs` outright ("Archive requests require a personal token"). The worker therefore
 keeps a fallback list per source and rotates to the next endpoint on failure, logging each
 switch. Set `ETH_MAINNET_RPC` to your own archive node for production; a comma-separated
 list is accepted and is tried in order before the built-in fallbacks.
@@ -78,8 +78,8 @@ list is accepted and is tried in order before the built-in fallbacks.
 ## How the relay works
 
 1. **Cursor.** `max(sqlite cursor, last on-chain `RootRelayed` sourceBlock + 1, --from)`.
-   Chain state beats local state, so a fresh worker — or the GitHub Actions cron, which has
-   no disk — resumes correctly. The scan is also clamped to
+   Chain state beats local state, so a fresh worker, or the GitHub Actions cron, which has
+   no disk, resumes correctly. The scan is also clamped to
    `min(head, attestedTip − FINALITY_DEPTH)`, the highest block the contract's finality
    guard could accept right now, so a pass never blocks on blocks that cannot land yet.
 2. **Scan.** `eth_getLogs` for `TreeChanged` from the manager, in ≤ 5,000-block windows,
@@ -92,7 +92,7 @@ list is accepted and is tried in order before the built-in fallbacks.
 5. **Prove.** `waitUntilHeightAttested`, then `getBatchProof`; if the batch call fails the
    worker falls back to per-transaction `getProof` + `execute`.
 6. **Replay the guards locally.** `src/evmv1.ts` decodes the Attestcoin EvmV1 payload in
-   pure TypeScript and re-checks the contract's steps 1–6 — source chain, receipt status,
+   pure TypeScript and re-checks the contract's steps 1 to 6: source chain, receipt status,
    `to == IDENTITY_MANAGER`, exactly one `TreeChanged` from the manager (decoy logs from
    other contracts are skipped, not fatal), known selector, and calldata-vs-log agreement
    on `preRoot`/`postRoot`. A mismatch is recorded instead of burning gas.
@@ -133,7 +133,7 @@ timestamp.
 
 ## Tests
 
-`bun test` — no network, no wallet. Argument mapping and guard replay run against the real
+`bun test`: no network, no wallet. Argument mapping and guard replay run against the real
 proof fixtures in `contracts/test/fixtures/`; the retry policy is driven through mocked
 submissions.
 

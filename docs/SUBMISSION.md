@@ -35,9 +35,9 @@ Secondary fit is RWA. The form takes one value, and DeFi is correct: this is a l
 Paste as one block. Under the 300-word limit (check with `wc -w`).
 
 ```
-One human, one credit line. Humanline brings World ID proof of personhood from Ethereum to Creditcoin through the Attestcoin Protocol, verifies the zero-knowledge proof on Creditcoin itself, and gives a verified human an uncollateralized credit line that follows the person, not the wallet.
+One human, one credit line. Prove you're a person once with World ID. Humanline carries that proof from Ethereum to Creditcoin through the Attestcoin Protocol, verifies the zero-knowledge proof on Creditcoin itself, and gives you an uncollateralized credit line that follows you, not your wallet.
 
-Creditcoin's mission is credit history for people the banking system cannot see. Every uncollateralized design on the chain has the same hole: a wallet is not a person. A borrower can open ten wallets, repay themselves ten times, and default on the eleventh loan at full size.
+Creditcoin's mission is credit history for people the banking system cannot see. Every uncollateralized design on the chain has the same hole underneath it: a wallet is not a person. A borrower can open ten wallets, repay themselves ten times, and default on the eleventh loan at full size. We built Humanline to close that hole.
 
 World ID has Orb-verified humans concentrated in Kenya, Argentina, Indonesia, the Philippines, Brazil and Malaysia, which are Creditcoin's markets. Its identity tree lives on Ethereum, and the only ways across were a trusted bridge or a trusted oracle. Attestcoin removes both.
 
@@ -45,7 +45,7 @@ AttestedWorldID relays World's real identity-tree roots from Ethereum mainnet an
 
 Anyone can relay: from their own wallet in the app, or through a vault that pays them. Twelve attacks are refused by name against the live contracts, on every load of the judge page. Builders get @humanline/sdk, a public API and HumanGated.sol; HumanPoll, one person one vote, is the first app built on it.
 
-No owner, no pause, no upgrade.
+No owner, no pause, no upgrade. Nobody to trust, including us.
 ```
 
 Word count check: run `wc -w` on the block before pasting. The form's limit is 300.
@@ -55,7 +55,7 @@ Word count check: run `wc -w` on the block before pasting. The form's limit is 3
 Paste as one block. Under the 400-word limit (check with `wc -w`). The per-surface table with file and line references is `docs/ATTESTCOIN_INTEGRATION.md` section 2.0.
 
 ```
-Attestcoin is not a feature of Humanline. It is the only reason Humanline can exist without a trusted operator.
+Attestcoin is not a feature of Humanline. It is the only reason Humanline can exist without a trusted operator, and we lean on it in 22 separate places.
 
 Every World ID root enters through verifyAndEmit on the BlockProver precompile at 0x0FD2, singly through ASCBase.execute or up to ten at a time under one continuity proof through executeBatch. There is no admin setter, fallback or degraded mode.
 
@@ -141,7 +141,7 @@ Paste into the form's description if space allows, and into the README regardles
 | `CreditHistory` | `0xa4833b1b667a729e80248004ac91cfa3a2ff3404` |
 | `EthRepay` | `0x231ce1ceb88edefad482fc6dfd49a8454cd1fc48` |
 
-The Orb-tree deployment — the same contracts verifying against World's Ethereum mainnet identity
+The Orb-tree deployment: the same contracts verifying against World's Ethereum mainnet identity
 tree, 30-day terms, for people who actually hold an Orb-verified World ID. It shares the hUSD and
 both `AttestedWorldID` instances above:
 

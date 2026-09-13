@@ -2,7 +2,7 @@
 
 Attestcoin proves two things: that a transaction was included in an attested block on a source chain, and that a given receipt belongs to it. That is all it proves, and it is deliberately narrow. Everything between "this Ethereum transaction happened" and "this person may borrow twenty five dollars" is Humanline's responsibility.
 
-This document lists what we defend against, where each defense sits, what it is trusting, and what it does not cover.
+This document lists what we defend against, where each defense sits, what it is trusting, and what it does not cover. We wrote the last part down on purpose. A system you cannot criticise is a system you cannot trust, and we would rather you found the edges here than in production.
 
 Deployed contracts, CC3 testnet (chainId 102031):
 
@@ -20,7 +20,7 @@ Deployed contracts, CC3 testnet (chainId 102031):
 | `HumanGate` | `0xa3e021de49cec8819ea1bd37a8b5a9df005b776c` |
 | `RelayReward` | `0x9766480a872ad7df2a5cf86f9e307804a3f7afe0` |
 
-There are no admin keys, no pause switch and no upgrade path in any of them. Every configured constant is an immutable set at construction. Anyone can run the relay.
+There are no admin keys, no pause switch and no upgrade path in any of them. Every configured constant is an immutable set at construction. Anyone can run the relay, and nobody, including us, can stop it.
 
 ---
 

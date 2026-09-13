@@ -1,6 +1,6 @@
 # Humanline Vision
 
-> One human, one credit line. World ID proof of personhood reaches Creditcoin through the Attestcoin Protocol, a zero-knowledge proof is verified on Creditcoin itself, and a verified human receives an uncollateralized credit line that follows the person, not the wallet.
+> One human, one credit line. Prove you're a person once with World ID. Attestcoin carries that proof to Creditcoin, the chain verifies it for itself, and you get an uncollateralized credit line that follows you, not your wallet.
 
 Live: https://humanline.credit · Repo: https://github.com/rajkaria/humanline · Demo: {{VIDEO_URL}}
 
@@ -20,13 +20,13 @@ Three contracts and one worker, deployed on Creditcoin CC3 testnet and running u
 
 `HumanGate` (0xa3e021de49cec8819ea1bd37a8b5a9df005b776c) is the twenty-line example that shows a third party how to gate anything on personhood. `hUSD` (0x4bd7f4c6648deb8f107932572ce7e85aca259640) is the test stablecoin the pool lends, six decimals so amounts read like dollars.
 
-That is the whole hackathon build. It is deployed, it is verified on Blockscout, and the relay has been running without a human touching it.
+That is the whole hackathon build. It is deployed, it is verified on Blockscout, and the relay has been running without a human touching it. We check on it the way you check on a garden, not the way you check on a patient.
 
 ## What This Becomes
 
 Creditcoin exists to give credit history to people the banking system cannot see. The protocol has the ledger. Credal has the lender integrations. Aella has more than a million users in Nigeria running BNPL on top of it. What none of them has is an answer to the oldest question in unsecured lending: is this the same person who borrowed last time, and is there exactly one of them.
 
-Every credit passport in this hackathon, and there are about thirty of them, scores a wallet. A wallet is free. A borrower opens ten of them, repays himself ten times, mints ten spotless histories, and defaults on the eleventh loan at full size. The score is real. The person behind it is not.
+Every credit passport in this hackathon, and there are about thirty of them, scores a wallet. A wallet is free. A borrower opens ten of them, repays themselves ten times, mints ten spotless histories, and defaults on the eleventh loan at full size. The score is real. The person behind it is not. That is the hole we could not stop thinking about.
 
 Humanline makes the borrower's identity the thing that carries the debt. The nullifier is derived from an Orb iris scan and it is the same nullifier whatever wallet the person uses, whatever chain they move to, whatever key they lose. A default attaches to it permanently. That is the property that makes uncollateralized lending underwritable at all, and it is the property Creditcoin has been missing.
 
@@ -48,7 +48,7 @@ Success looks like: a borrower in Nairobi repaying from an Ethereum or BSC walle
 
 ### Month 6: the pilot
 
-A supervised lending pilot in Kenya and Argentina with a Creditcoin lending partner. Both are World ID Orb markets and both are Creditcoin markets. Real money, small tickets, the 25 dollar starting line growing to a few hundred over a handful of on-time cycles. Instrument everything: default rate by cohort, limit-growth curve, what fraction of registered humans ever draw, what fraction of frozen humans try to come back with a new wallet and get caught. That last number is the entire thesis, and nobody has ever been able to measure it, because until now there was no way to know.
+A supervised lending pilot in Kenya and Argentina with a Creditcoin lending partner. Both are World ID Orb markets and both are Creditcoin markets. Real money, small tickets, the 25 dollar starting line growing to a few hundred over a handful of on-time cycles. Instrument everything: default rate by cohort, limit-growth curve, what fraction of registered humans ever draw, what fraction of frozen humans try to come back with a new wallet and get caught. That last number is the entire thesis, and nobody has ever been able to measure it, because until now there was no way to know. We want to be the first to publish it.
 
 Success looks like: a published loss curve from real borrowers that a lender can underwrite against, and the registry carrying more integrations than Humanline itself.
 
@@ -106,7 +106,7 @@ One human, first year, assuming a starting limit of 25 hUSD (the deployed `INITI
 
 Everything in that table exists on chain today except the split, which is a policy choice we have not made yet. Add the planned 1 percent origination fee and Humanline's take on this borrower goes from 0.84 to 3.66. Add the one-time 0.10 verification fee and a well-behaved first-year borrower is worth roughly 3.76 USD on 281 USD of cumulative origination. Marginal cost to serve is the on-chain gas, which is a rounding error at Creditcoin's fees, plus a share of the relay.
 
-The number that decides whether this works is the default rate, and the whole design exists to move it. In wallet-scored lending the ceiling on a sybil attack is the attacker's patience. In Humanline it is the number of Orbs the attacker can get in front of, with a different iris each time. We are not claiming a default rate. We are claiming the attack that makes the default rate unknowable has been removed, and that a real one can now be measured.
+The number that decides whether this works is the default rate, and the whole design exists to move it. In wallet-scored lending the ceiling on a sybil attack is the attacker's patience. In Humanline it is the number of Orbs the attacker can get in front of, with a different iris each time. We are not claiming a default rate. We are claiming something smaller and more useful: the attack that makes the default rate unknowable has been removed, and a real one can now be measured.
 
 At the month 6 target of 100,000 humans with active lines, the same per-human arithmetic implies roughly 28 million USD of cumulative origination and roughly 376,000 USD of annual revenue, against a pool that never lent a dollar to a duplicate. Those are targets derived from the table above, not forecasts.
 
@@ -132,4 +132,4 @@ We are asking Credit Labs for the CEIP fast-track and, through it, three things.
 
 **Engineering support to bring World Chain under Attestcoin.** World ID 4.0 verification lives on World Chain, an OP-Stack rollup. Its output roots are posted to Ethereum, which Attestcoin already attests. Proving a World Chain state root through its Ethereum posting would give Attestcoin reach into every OP-Stack rollup, not just World Chain. Humanline is the first application that needs it, and it is a general capability for the protocol. We would build it with the Creditcoin team rather than around them.
 
-What we bring in return is a piece of infrastructure the ecosystem does not have, with no owner key, no upgrade path and no operator, that makes every other credit product on Creditcoin harder to defraud.
+What we bring in return is a piece of infrastructure the ecosystem does not have, with no owner key, no upgrade path and no operator, that makes every other credit product on Creditcoin harder to defraud. We would like to keep building it here.

@@ -1,4 +1,4 @@
-# Humanline — BUIDL CTC 2026 Fall Build Spec
+# Humanline: BUIDL CTC 2026 Fall Build Spec
 
 > One human, one credit line. World ID proof of personhood reaches Creditcoin through the Attestcoin Protocol, a zero-knowledge proof is verified on Creditcoin itself, and a verified human receives an uncollateralized credit line that follows the person, not the wallet.
 
@@ -16,9 +16,9 @@ Proof of personhood exists. World ID has 18M+ Orb-verified humans (July 2026), c
 
 Humanline is three contracts and one worker:
 
-1. **AttestedWorldID** — World's own bridged-root contract (MIT, from `world-id-state-bridge`) with one change: roots arrive as Attestcoin proofs of the real `registerIdentities` / `deleteIdentities` transactions on Ethereum, verified by the 0x0FD2 precompile, instead of by a trusted state bridge. It exposes the same `IWorldID.verifyProof` interface every World ID integration uses.
-2. **HumanRegistry** — binds a World ID nullifier (the human) to a Creditcoin wallet after verifying the Semaphore Groth16 proof on Creditcoin. One human, one registration. Re-binding to a new wallet is allowed; the identity and its history move with the human. Any Creditcoin contract can call `isHuman(address)` / `humanOf(address)`.
-3. **CreditLine** — a lender-funded pool that opens exactly one line per human. Borrow, repay, grow the limit. Miss a deadline and the human's line freezes, on every wallet, forever. Loan events mirror Credal's loan lifecycle so a Creditcoin lender can consume them.
+1. **AttestedWorldID**: World's own bridged-root contract (MIT, from `world-id-state-bridge`) with one change: roots arrive as Attestcoin proofs of the real `registerIdentities` / `deleteIdentities` transactions on Ethereum, verified by the 0x0FD2 precompile, instead of by a trusted state bridge. It exposes the same `IWorldID.verifyProof` interface every World ID integration uses.
+2. **HumanRegistry**: binds a World ID nullifier (the human) to a Creditcoin wallet after verifying the Semaphore Groth16 proof on Creditcoin. One human, one registration. Re-binding to a new wallet is allowed; the identity and its history move with the human. Any Creditcoin contract can call `isHuman(address)` / `humanOf(address)`.
+3. **CreditLine**: a lender-funded pool that opens exactly one line per human. Borrow, repay, grow the limit. Miss a deadline and the human's line freezes, on every wallet, forever. Loan events mirror Credal's loan lifecycle so a Creditcoin lender can consume them.
 
 The worker tails Ethereum for new World ID roots, batches Attestcoin proofs (up to 10 per continuity proof), and relays them in order. Nothing in the system trusts the worker: a bad proof reverts, a root out of sequence reverts, and anyone can run the worker.
 
@@ -111,9 +111,9 @@ No owner, no pause, no upgrade. Constants are immutables.
 
 ## 6. Core features (must ship)
 
-1. **Root relay** — live, unattended relay of real World ID roots from Ethereum mainnet and Sepolia staging into `AttestedWorldID` through Attestcoin, batched, ordered, replay-protected, with guards from all three precompiles.
-2. **Personhood verification on Creditcoin** — a real World ID proof (simulator on staging, Orb on production) verified on Creditcoin against an Attestcoin-relayed root, binding a human to a wallet.
-3. **One human, one credit line** — deposit, open, borrow, repay, limit growth, freeze on default, all keyed by nullifier, with a full UI and explorer links.
+1. **Root relay**: live, unattended relay of real World ID roots from Ethereum mainnet and Sepolia staging into `AttestedWorldID` through Attestcoin, batched, ordered, replay-protected, with guards from all three precompiles.
+2. **Personhood verification on Creditcoin**: a real World ID proof (simulator on staging, Orb on production) verified on Creditcoin against an Attestcoin-relayed root, binding a human to a wallet.
+3. **One human, one credit line**: deposit, open, borrow, repay, limit growth, freeze on default, all keyed by nullifier, with a full UI and explorer links.
 
 ## 7. Nice-to-have (in impact order)
 
