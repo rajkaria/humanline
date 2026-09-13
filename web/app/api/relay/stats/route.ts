@@ -24,7 +24,9 @@ export async function GET(request: Request) {
     return NextResponse.json(report, {
       headers: {
         "access-control-allow-origin": "*",
-        "cache-control": "public, s-maxage=60, stale-while-revalidate=120",
+        // A cold report scans both chains (~10 s). Serve the last one instantly while the CDN
+        // refreshes it in the background; the numbers are at most a minute or two old.
+        "cache-control": "public, s-maxage=60, stale-while-revalidate=3600",
       },
     });
   } catch (error) {

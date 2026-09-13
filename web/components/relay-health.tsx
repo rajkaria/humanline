@@ -30,7 +30,7 @@ export function RelayHealth() {
     queryKey: ["relay-stats"],
     refetchInterval: 60_000,
     queryFn: async (): Promise<RelayReport> => {
-      const response = await fetch("/api/relay/stats", { cache: "no-store" });
+      const response = await fetch("/api/relay/stats");
       const body = (await response.json()) as RelayReport & { message?: string };
       if (!response.ok) throw new Error(body.message ?? `HTTP ${response.status}`);
       return body;
