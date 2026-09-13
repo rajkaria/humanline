@@ -434,10 +434,10 @@
     }
   },
   "recorded": {
-    "at": "2026-09-13T08:30:57.809Z",
+    "at": "2026-09-13T15:32:17.659Z",
     "chainId": 102031,
     "rpc": "https://rpc.cc3-testnet.creditcoin.network",
-    "attestedTip": "11694720",
+    "attestedTip": "11696750",
     "attestors": 7,
     "refused": 12,
     "total": 12,
@@ -456,7 +456,7 @@
         "args": [],
         "revertData": "0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001e4d65726b6c652070726f6f662076616c69646174696f6e206661696c65640000",
         "target": "0x3a7c3cc67034197208923587b8dc5c4674cbcef7",
-        "ms": 1045
+        "ms": 598
       },
       {
         "id": "wrong-emitter",
@@ -473,7 +473,7 @@
         ],
         "revertData": "0x19e749d80000000000000000000000001c7d4b196cb0c7b01d743fbc6116a902379c7238",
         "target": "0x3a7c3cc67034197208923587b8dc5c4674cbcef7",
-        "ms": 952
+        "ms": 643
       },
       {
         "id": "reverted-receipt",
@@ -488,7 +488,7 @@
         "args": [],
         "revertData": "0x12ff7b9a",
         "target": "0x3a7c3cc67034197208923587b8dc5c4674cbcef7",
-        "ms": 925
+        "ms": 599
       },
       {
         "id": "replay",
@@ -505,7 +505,7 @@
         ],
         "revertData": "0x62e48a6546cecbe3df79860bcbf1d7cd1ccfe447eeba6d46cefbb4e64abdd3cb6e8e46bc",
         "target": "0x3a7c3cc67034197208923587b8dc5c4674cbcef7",
-        "ms": 1383
+        "ms": 1306
       },
       {
         "id": "out-of-order",
@@ -519,7 +519,7 @@
         "args": [],
         "revertData": "0x1fe5c306",
         "target": "0x3a7c3cc67034197208923587b8dc5c4674cbcef7",
-        "ms": 1456
+        "ms": 1234
       },
       {
         "id": "unattested-height",
@@ -529,13 +529,13 @@
           "Error: Continuity proof does not match attestation or checkpoint",
           "BatchProofRejected"
         ],
-        "note": "Height 11704720, 10,000 blocks past the attested tip 11694720.",
+        "note": "Height 11706750, 10,000 blocks past the attested tip 11696750.",
         "outcome": "refused",
         "error": "Error: Continuity proof does not match attestation or checkpoint",
         "args": [],
         "revertData": "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000039436f6e74696e756974792070726f6f6620646f6573206e6f74206d61746368206174746573746174696f6e206f7220636865636b706f696e7400000000000000",
         "target": "0x3a7c3cc67034197208923587b8dc5c4674cbcef7",
-        "ms": 1501
+        "ms": 1240
       },
       {
         "id": "below-attestor-floor",
@@ -553,7 +553,7 @@
         ],
         "revertData": "0xc12c3dc1000000000000000000000000000000000000000000000000000000000000000700000000000000000000000000000000000000000000000000000000000003e8",
         "target": "0x00000000000000000000000000000000dec0de01",
-        "ms": 1745
+        "ms": 1605
       },
       {
         "id": "wrong-chain-key",
@@ -570,7 +570,7 @@
         ],
         "revertData": "0x9ced023300000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000003",
         "target": "0x1122ef3fa4ab0693809e42a00b2476efcf4468ad",
-        "ms": 1405
+        "ms": 1256
       },
       {
         "id": "decoy-tree-changed",
@@ -586,7 +586,7 @@
         "args": [],
         "revertData": "0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001e4d65726b6c652070726f6f662076616c69646174696f6e206661696c65640000",
         "target": "0x3a7c3cc67034197208923587b8dc5c4674cbcef7",
-        "ms": 1518
+        "ms": 1231
       },
       {
         "id": "oversize-batch",
@@ -602,7 +602,7 @@
         ],
         "revertData": "0xa67b9f9e000000000000000000000000000000000000000000000000000000000000000b",
         "target": "0x3a7c3cc67034197208923587b8dc5c4674cbcef7",
-        "ms": 2019
+        "ms": 2071
       },
       {
         "id": "stale-root",
@@ -619,7 +619,7 @@
         ],
         "revertData": "0x06dcad071e63d128f6be06903bc09349882f7150eebbb1ad93947a0104b41b34a41379df",
         "target": "0x3a7c3cc67034197208923587b8dc5c4674cbcef7",
-        "ms": 1324
+        "ms": 1018
       },
       {
         "id": "double-registration",
@@ -634,7 +634,7 @@
         "args": [],
         "revertData": "0x94a3d979",
         "target": "0x62c2fd99ea587e4b466175ad248468782bd5298d",
-        "ms": 1229
+        "ms": 1126
       }
     ]
   }
