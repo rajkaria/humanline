@@ -10,7 +10,7 @@
 
 [![Live](https://img.shields.io/badge/live-humanline.credit-0ea5e9)](https://humanline.credit)
 [![Chain](https://img.shields.io/badge/Creditcoin_CC3-chainId_102031-1f2937)](https://creditcoin-testnet.blockscout.com)
-[![Contracts](https://img.shields.io/badge/contracts-12_verified_on_Blockscout-16a34a)](#live-addresses)
+[![Contracts](https://img.shields.io/badge/contracts-18_verified_on_Blockscout-16a34a)](#live-addresses)
 [![Attacks](https://img.shields.io/badge/live_attacks-12%2F12_refused-dc2626)](https://humanline.credit/judge)
 [![Coverage](https://img.shields.io/badge/coverage-93.6%25_lines-16a34a)](docs/MEASUREMENTS.md)
 [![Mutation](https://img.shields.io/badge/mutation_score-95.8%25-16a34a)](docs/MEASUREMENTS.md)
@@ -499,7 +499,7 @@ And one relayed root, end to end, on public explorers: Ethereum mainnet [`0xf321
 
 ## Live addresses
 
-Creditcoin CC3 testnet, chainId 102031, RPC `https://rpc.cc3-testnet.creditcoin.network`, explorer `https://creditcoin-testnet.blockscout.com`. All twelve verified on Blockscout, re-checked daily by `scripts/submission-check.ts`.
+Creditcoin CC3 testnet, chainId 102031, RPC `https://rpc.cc3-testnet.creditcoin.network`, explorer `https://creditcoin-testnet.blockscout.com`. All eighteen verified on Blockscout (four shared, seven per deployment), re-checked daily by `scripts/submission-check.ts`.
 
 **Shared by both deployments**
 
@@ -661,6 +661,19 @@ Stated up front rather than discovered later, because a system you cannot critic
 - **World ID 4.0** verifies on World Chain, which is not an Attestcoin source chain yet. IDKit is asked for legacy proofs. Periscope is the roadmap answer, and it is a design, not a deployment.
 - **Cross-chain history has edges.** Links prove an externally owned account; smart-contract wallets cannot sign the self-send or the EIP-712 message. On Sepolia, Aave reserves are faucet tokens, so testnet history demonstrates the rules rather than signalling creditworthiness. Someone with capital can still borrow, wait, and repay to build a record, at real interest, for a boost capped at 500 hUSD.
 - **A freeze is permanent and there is nobody to appeal to.** That is the design. It is also a real product limitation, and a production version would address it with a lender-controlled cure path written into the contract from the start.
+
+### What personhood does not solve
+
+The first objections a lender should raise, answered with the deployed parameters rather than with hope.
+
+- **Being one person is not the same as being willing or able to repay.** Personhood makes a default expensive, because it follows the nullifier to every wallet for good. It says nothing about income. So the credit model on top is deliberately small and slow: 25 hUSD to start, ×1.25 only after an on-time repayment, halved when late, 2,000 hUSD at most. Seven on-time 30-day terms take a line from 25 to about 119 hUSD. Income or cash-flow underwriting is not in this build. The Month 6 pilot exists to produce the loss curve that would tell a lender how far to trust the ramp.
+- **World IDs can be bought, rented or coerced.** The guarantee is one World ID, one line, so to the contract a purchased identity is a real borrower. What the buyer can take is bounded by numbers you can read on chain:
+  - A fresh line is 25 hUSD, and 24.75 of it can be drawn after the 1% fee.
+  - The history boost is 25% of Aave V3 repayments proven from linked Ethereum wallets, capped at 500 hUSD. An Ethereum wallet can be linked to only one human (`WalletAlreadyLinked`), and a repayment only counts if it lands at least 7,200 source blocks, about a day, after its borrow. The full boost therefore costs 2,000 USD of real Aave borrowing, repaid, for every identity.
+  - The worst case is a 525 hUSD line, about 520 drawable, lost once per bought identity. Across all humans together, lending is capped by the attestors' bonded stake read from `0x0FD4`.
+  - Not built yet, and the cheapest fix: a boost that vests over on-time Creditcoin terms instead of counting on the first draw.
+- **A stolen World ID steals the line.** Re-binding needs only a valid proof for the nullifier. There is no cooldown and no check for an open balance. Someone who takes over a person's World App credential can move that person's line to a new wallet, draw the earned limit, and leave the default frozen on the victim. Account security is World's boundary, and Humanline cannot see past it. A production version should hold re-binds on a line that owes money for a waiting period the original wallet can act in.
+- **World's Orb has a legal history in markets this README names.** In May 2025 Kenya's High Court ordered World to delete the Orb data it had collected from Kenyans, and Indonesia suspended World's operations the same month. A pilot runs only where World operates lawfully at the time. Humanline stores no biometrics and reads only the identity roots World publishes on Ethereum.
 
 ---
 

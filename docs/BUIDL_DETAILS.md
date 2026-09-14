@@ -260,6 +260,13 @@ Every lender that plugs in makes it stronger for the next one. A default recorde
 - **Sybil resistance is exactly World ID's:** one World ID, one line.
 - **A freeze is permanent** and there's nobody to appeal to. A production version would add a lender-controlled cure path.
 
+### What personhood does not solve
+
+- **One person isn't the same as a person who repays.** Personhood makes a default expensive, since it follows the human to every wallet. It says nothing about income, so the ramp is small and slow: 25 hUSD to start, ×1.25 per on-time term, halved when late. Seven on-time 30-day terms reach about 119 hUSD.
+- **World IDs can be bought or rented.** To the contract, a bought identity is a real borrower, so its reach is capped. A fresh line is 25 hUSD. The Aave history boost is capped at 500 hUSD, a linked Ethereum wallet can belong to only one human, and each repayment has to come at least a day after its borrow. The full boost costs 2,000 USD of real Aave borrowing per identity. Worst case: a 525 hUSD line lost once per bought ID, with total lending capped by attestor bonds from `0x0FD4`. Not built yet: a boost that vests over on-time Creditcoin terms.
+- **A stolen World ID steals the line.** A re-bind needs only a valid proof, with no cooldown and no open-balance check. Whoever takes over someone's World App can move their line, draw it, and leave the default on the victim. A production version should hold re-binds on a line that owes money.
+- **World's Orb has a legal history in markets we name.** In May 2025 Kenya's High Court ordered World to delete Kenyan Orb data, and Indonesia suspended World's operations. A pilot runs only where World operates lawfully. Humanline stores no biometrics.
+
 ---
 
 **Built by Raj Karia** ([X @rajkaria_](https://x.com/rajkaria_) · [GitHub @rajkaria](https://github.com/rajkaria)). BUIDL CTC 2026 Fall · Creditcoin CC3 testnet · MIT licensed.
