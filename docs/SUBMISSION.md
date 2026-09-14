@@ -87,6 +87,10 @@ For the long-form description field, if the form offers one. It names no other p
 
 Word count check: run `wc -w` on the block before pasting. The form's limit is 400.
 
+### Details (the long-form BUIDL page)
+
+Paste the whole of `docs/BUIDL_DETAILS.md` into the Details editor. It is Markdown, its images load from this repo on `main`, and its numbers were read off the live site on 2026-09-14. Put the demo video at the very top with the editor's video button once it is uploaded.
+
 ### GitHub Repository URL
 
 ```
