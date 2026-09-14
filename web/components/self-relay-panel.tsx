@@ -96,7 +96,7 @@ export function SelfRelayPanel({
         <p className="text-xs text-muted-foreground">
           Could not plan a relay right now ({planError}). The scheduled relayer will still carry it.
         </p>
-      ) : plan && (plan.status === "not-found" || plan.status === "stale" || plan.status === "gap") ? (
+      ) : plan && "reason" in plan ? (
         <p className="flex gap-1.5 text-xs leading-relaxed text-muted-foreground">
           <TriangleAlertIcon className="mt-0.5 size-3 shrink-0 text-warning" aria-hidden />
           {plan.reason}

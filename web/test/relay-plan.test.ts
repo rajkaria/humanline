@@ -181,6 +181,31 @@ describe("planRelay", () => {
     expect(plan.status).toBe("not-found");
   });
 
+  test("a root that belongs to the other World ID tree names that tree instead of a dead end", () => {
+    // World App (Orb) proof opened on the staging profile: the root is on mainnet, not Sepolia.
+    const all = history(2);
+    const plan = planRelay({ ...input({ all, latestIdx: 0, targetIdx: 1 }), targetChange: null, otherTree: 3 });
+    expect(plan.status).toBe("wrong-tree");
+    if (plan.status !== "wrong-tree") return;
+    expect(plan.chainKey).toBe(3);
+    expect(plan.reason).toMatch(/Orb/);
+  });
+
+  test("a staging proof on the Orb profile points back at the staging tree", () => {
+    const all = history(2);
+    const plan = planRelay({ ...input({ all, latestIdx: 0, targetIdx: 1 }), targetChange: null, otherTree: 1 });
+    expect(plan.status).toBe("wrong-tree");
+    if (plan.status !== "wrong-tree") return;
+    expect(plan.chainKey).toBe(1);
+    expect(plan.reason).toMatch(/staging/);
+  });
+
+  test("the other tree is never consulted once the root is found on this one", () => {
+    const all = history(2);
+    const plan = planRelay({ ...input({ all, latestIdx: 0, targetIdx: 1 }), otherTree: 3 });
+    expect(plan.status).toBe("ready");
+  });
+
   test("a target update that does not carry the proof root is treated as not found", () => {
     const all = history(2);
     const plan = planRelay({ ...input({ all, latestIdx: 0, targetIdx: 1 }), target: 999n });
@@ -239,5 +264,11 @@ describe("wire format", () => {
   test("reason-only statuses pass through unchanged", () => {
     const plan = { status: "gap" as const, reason: "x" };
     expect(planFromJson(planToJson(plan))).toEqual(plan);
+  });
+
+  test("wrong-tree keeps the chainKey it points at", () => {
+    const all = history(1);
+    const plan = planRelay({ ...input({ all, latestIdx: null, targetIdx: 0 }), targetChange: null, otherTree: 3 });
+    expect(planFromJson(JSON.parse(JSON.stringify(planToJson(plan))))).toEqual(plan);
   });
 });

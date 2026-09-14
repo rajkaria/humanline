@@ -30,6 +30,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **A World App (Orb) proof on the staging profile no longer dead-ends.** `/app` opens on the
+  staging profile, so someone with a real World ID who scanned with World App got a proof whose root
+  lives in the Orb tree on Ethereum mainnet, and the Sync step looked for it on Sepolia and reported
+  "No World ID update with this root was found". The relay plan now checks the other tree when a root
+  is missing (Creditcoin's other `AttestedWorldID` first, then one log window on the other source
+  chain) and answers `wrong-tree` with that tree's `chainKey`. The verify card turns that into a
+  "Switch to Real humans (Orb tree)" button that keeps the proof, which stays valid because both
+  registries share the app id and action (now asserted in `profiles.test.ts`). The reverse case, a
+  simulator proof on the Orb profile, gets the same treatment, and the staging prompt tells Orb holders
+  to switch before scanning.
 - `verify-blockscout.sh` resolves a relative `DEPLOYMENT` path before changing directory, so the
   Orb-tree deployment's CreditLine v3 and cross-chain contracts are verified rather than skipped.
 - `/relay` counts the wallets `web/scripts/self-relay.ts` generates as Humanline's, and leads with

@@ -1,7 +1,8 @@
 "use client";
 
 import { SelfRelayPanel } from "@/components/self-relay-panel";
-import { RelayWaitPanel, VerifySteps } from "@/components/verify-card";
+import { RelayWaitPanel, VerifySteps, WrongTreePanel } from "@/components/verify-card";
+import { PROFILES } from "@/lib/profiles";
 import type { RelayPlan, TreeChange } from "@/lib/relay/plan";
 
 const change = (n: number, block: number): TreeChange => ({
@@ -89,6 +90,17 @@ export function SelfRelayPreview() {
           </div>
         </section>
       ))}
+      <section className="flex flex-col gap-2" data-case="Wrong tree">
+        <h2 className="text-sm font-semibold">World App proof on the staging profile</h2>
+        <div className="flex flex-col gap-4 rounded-xl border p-4">
+          <VerifySteps states={["done", "working", "upcoming"]} />
+          <WrongTreePanel
+            target={PROFILES.production}
+            reason="This proof comes from World's Orb tree (World App), but this profile verifies against the staging tree on Ethereum Sepolia. Switch to the Orb profile: the same proof works there, no need to scan again."
+            onSwitch={() => undefined}
+          />
+        </div>
+      </section>
     </main>
   );
 }

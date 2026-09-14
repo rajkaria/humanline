@@ -6,6 +6,7 @@ import {
   type IDKitResult,
 } from "@worldcoin/idkit";
 import {
+  ArrowLeftRightIcon,
   CheckCircle2Icon,
   CheckIcon,
   ChevronDownIcon,
@@ -46,6 +47,8 @@ import { useRootStatus } from "@/lib/hooks/use-root-status";
 import { useRpContext } from "@/lib/hooks/use-rp-context";
 import { useSelfRelay } from "@/lib/hooks/use-self-relay";
 import { useProfile } from "@/lib/profile-context";
+import { profileForChainKey, type Profile } from "@/lib/profiles";
+import type { RelayPlan } from "@/lib/relay/plan";
 import { useTx } from "@/lib/hooks/use-tx";
 import { cn } from "@/lib/utils";
 import { hashSignalAddress, toRegistrationProof, type RegistrationProof } from "@/lib/worldid";
@@ -81,7 +84,7 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
   const [receivedAt, setReceivedAt] = useState(0);
   const [proofError, setProofError] = useState<string | null>(null);
 
-  const { profile } = useProfile();
+  const { profile, setProfileId } = useProfile();
   const registry = profile.deployment.contracts.humanRegistry.address;
   // The IDKit environment and the registry have to agree: a staging proof is not in
   // the Orb tree and an Orb proof is not in the staging tree, so verifying one
@@ -110,6 +113,12 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
     enabled: rootNotRelayedYet,
     onRelayed: () => void rootStatus.refetch(),
   });
+
+  // A genuine proof from the other tree: World App (Orb) on the staging profile, or the
+  // simulator on the Orb one. Both registries share the app id and action, so switching
+  // profile keeps this proof valid; waiting on a relay here would never end.
+  const wrongTree: Extract<RelayPlan, { status: "wrong-tree" }> | null =
+    rootNotRelayedYet && selfRelay.plan?.status === "wrong-tree" ? selfRelay.plan : null;
 
   // Tell the user the moment the wait is over — they may have looked away.
   const wasWaiting = useRef(false);
@@ -290,6 +299,17 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
                     <ExternalLinkIcon className="size-3" />
                   </a>{" "}
                   instead of World App.
+                  <span className="block pt-1">
+                    Verified at an Orb?{" "}
+                    <button
+                      type="button"
+                      onClick={() => setProfileId("production")}
+                      className="text-brand underline-offset-4 hover:underline"
+                    >
+                      Switch to the Orb tree
+                    </button>{" "}
+                    and scan with World App.
+                  </span>
                 </p>
               ) : (
                 <p className="text-center text-xs text-muted-foreground">
@@ -298,6 +318,12 @@ export function VerifyCard({ onRegistered }: { onRegistered?: () => void }) {
               )}
             </div>
           </>
+        ) : wrongTree ? (
+          <WrongTreePanel
+            target={profileForChainKey(wrongTree.chainKey)}
+            reason={wrongTree.reason}
+            onSwitch={() => setProfileId(profileForChainKey(wrongTree.chainKey).id)}
+          />
         ) : rootNotRelayedYet ? (
           <>
             <RelayWaitPanel receivedAt={receivedAt} onCheck={rootStatus.refetch}>
@@ -507,6 +533,48 @@ export function RelayWaitPanel({
       <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
         <InfoIcon className="size-3 shrink-0" aria-hidden />
         Keep this tab open. Your proof lives here until it is verified.
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Step 2, when the proof is genuine but belongs to the other World ID tree. Nothing will
+ * ever relay it into this profile's tree, so the only useful thing is the switch.
+ */
+export function WrongTreePanel({
+  target,
+  reason,
+  onSwitch,
+}: {
+  /** The profile whose registry can verify this proof. */
+  target: Profile;
+  reason: string;
+  onSwitch: () => void;
+}) {
+  return (
+    <div
+      className="flex flex-col gap-3 rounded-lg border border-warning/30 bg-warning/5 p-3"
+      role="status"
+      aria-live="polite"
+      data-testid="wrong-tree"
+    >
+      <div className="flex items-start gap-2.5">
+        <TriangleAlertIcon className="mt-0.5 size-4 shrink-0 text-warning" aria-hidden />
+        <div className="flex min-w-0 flex-col gap-1">
+          <p className="text-sm font-medium text-foreground">
+            This proof is for the {target.worldEnv === "production" ? "Orb" : "staging"} tree
+          </p>
+          <p className="text-xs leading-relaxed text-muted-foreground">{reason}</p>
+        </div>
+      </div>
+      <Button size="lg" onClick={onSwitch} disabled={!target.available}>
+        <ArrowLeftRightIcon />
+        Switch to {target.label}
+      </Button>
+      <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+        <InfoIcon className="size-3 shrink-0" aria-hidden />
+        Your proof is kept. Verify on Creditcoin right after switching.
       </p>
     </div>
   );

@@ -13,6 +13,8 @@
  * sign are unit-tested without an RPC.
  */
 
+import type { SourceChainKey } from "@/lib/chains";
+
 /** One source-chain transaction that emitted a genuine `TreeChanged`. */
 export type TreeChange = {
   txHash: `0x${string}`;
@@ -45,6 +47,11 @@ export type PlanInput = {
   latestRoot: bigint | null;
   /** The source tx whose postRoot is the target, when the scan found one. */
   targetChange: TreeChange | null;
+  /**
+   * When the target is missing here, the other World ID tree that does have it: a World
+   * App (Orb) proof opened on the staging profile, or a simulator proof on the Orb one.
+   */
+  otherTree?: SourceChainKey | null;
   /** The source tx whose postRoot is Creditcoin's latest root, when found. */
   latestChange: TreeChange | null;
   /** Every TreeChanged tx strictly after `latestChange` up to and including the target, any order. */
@@ -83,6 +90,7 @@ type Shared = {
 export type RelayPlan =
   | { status: "known" }
   | { status: "not-found"; reason: string }
+  | { status: "wrong-tree"; chainKey: SourceChainKey; reason: string }
   | { status: "stale"; reason: string }
   | { status: "gap"; reason: string }
   | ({ status: "waiting" } & Shared)
@@ -173,6 +181,22 @@ export function planRelay(input: PlanInput): RelayPlan {
 
   const target = input.targetChange;
   if (!target || target.postRoot !== input.target) {
+    if (input.otherTree === 3) {
+      return {
+        status: "wrong-tree",
+        chainKey: 3,
+        reason:
+          "This proof comes from World's Orb tree (World App), but this profile verifies against the staging tree on Ethereum Sepolia. Switch to the Orb profile: the same proof works there, no need to scan again.",
+      };
+    }
+    if (input.otherTree === 1) {
+      return {
+        status: "wrong-tree",
+        chainKey: 1,
+        reason:
+          "This proof comes from World's staging tree (the World ID Simulator), but this profile verifies against the Orb tree on Ethereum mainnet. Switch to the staging profile: the same proof works there, no need to scan again.",
+      };
+    }
     return {
       status: "not-found",
       reason:
@@ -246,6 +270,7 @@ export type BatchJson = Omit<Batch, "changes"> & { changes: TreeChangeJson[] };
 export type RelayPlanJson =
   | { status: "known" }
   | { status: "not-found" | "stale" | "gap"; reason: string }
+  | { status: "wrong-tree"; chainKey: SourceChainKey; reason: string }
   | (Omit<Shared, "chain" | "batches"> & {
       status: "waiting" | "ready";
       chain: TreeChangeJson[];
@@ -262,7 +287,14 @@ export function changeFromJson(change: TreeChangeJson): TreeChange {
 
 export function planToJson(plan: RelayPlan): RelayPlanJson {
   if (plan.status === "known") return plan;
-  if (plan.status === "not-found" || plan.status === "stale" || plan.status === "gap") return plan;
+  if (
+    plan.status === "not-found" ||
+    plan.status === "wrong-tree" ||
+    plan.status === "stale" ||
+    plan.status === "gap"
+  ) {
+    return plan;
+  }
   return {
     ...plan,
     chain: plan.chain.map(changeToJson),

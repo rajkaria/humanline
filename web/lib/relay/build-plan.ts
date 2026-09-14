@@ -7,6 +7,7 @@
 
 import type { Hex, PublicClient } from "viem";
 
+import { attestedWorldIdAbi } from "@/lib/abi";
 import type { SourceChainKey } from "@/lib/chains";
 import { CONTRACTS } from "@/lib/contracts";
 import { planRelay, type RelayPlan, type TreeChange } from "@/lib/relay/plan";
@@ -21,6 +22,44 @@ import {
 
 export function attestedWorldIdFor(chainKey: SourceChainKey): Hex | undefined {
   return (chainKey === 3 ? CONTRACTS.attestedWorldIDMainnet : CONTRACTS.attestedWorldIDSepolia).address;
+}
+
+/** How far back the other tree is scanned: one log window, about a week of blocks. */
+const OTHER_TREE_LOOKBACK = 50_000;
+
+/**
+ * Whether `root` belongs to the *other* World ID tree: a World App (Orb) proof opened
+ * on the staging profile, or a simulator proof opened on the Orb one. Both are genuine
+ * proofs aimed at the wrong registry, and naming the right tree turns a dead end into
+ * one click.
+ *
+ * Creditcoin's other AttestedWorldID instance is asked first (one read); the other
+ * source chain is scanned only when that says no. Any failure answers `null`, which
+ * leaves the plain not-found answer in place rather than guessing.
+ */
+export async function findInOtherTree(
+  client: PublicClient,
+  chainKey: SourceChainKey,
+  root: bigint,
+): Promise<SourceChainKey | null> {
+  const other: SourceChainKey = chainKey === 3 ? 1 : 3;
+  try {
+    const contract = attestedWorldIdFor(other);
+    if (contract) {
+      const known = await client.readContract({
+        address: contract,
+        abi: attestedWorldIdAbi,
+        functionName: "isValidRoot",
+        args: [root],
+      });
+      if (known) return other;
+    }
+    const head = await sourceHead(other);
+    const change = await findChangeByPostRoot(other, root, { toBlock: head, maxLookback: OTHER_TREE_LOOKBACK });
+    return change ? other : null;
+  } catch {
+    return null;
+  }
 }
 
 export type BuiltPlan = {
@@ -55,11 +94,12 @@ export async function buildRelayPlan(options: {
   ]);
 
   // Inclusive of the tip's own block: a later update can share it.
-  const [changes, targetAttested] = await Promise.all([
+  const [changes, targetAttested, otherTree] = await Promise.all([
     targetChange && latestChange && targetChange.blockNumber >= latestChange.blockNumber
       ? scanChanges(chainKey, latestChange.blockNumber, targetChange.blockNumber)
       : Promise.resolve([]),
     targetChange ? isHeightAttested(client, chainKey, targetChange.blockNumber) : Promise.resolve(undefined),
+    targetChange ? Promise.resolve(null) : findInOtherTree(client, chainKey, root),
   ]);
 
   const plan = planRelay({
@@ -67,6 +107,7 @@ export async function buildRelayPlan(options: {
     targetKnown: false,
     latestRoot: state.latestRoot,
     targetChange,
+    otherTree,
     latestChange,
     changes,
     attestedTip: state.attestedTip,

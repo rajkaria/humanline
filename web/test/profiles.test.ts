@@ -11,7 +11,14 @@
 import { describe, expect, test } from "bun:test";
 
 import { buildDeployment } from "@/lib/deployment";
-import { DEFAULT_PROFILE_ID, PROFILE_IDS, PROFILES, profileById, termLabel } from "@/lib/profiles";
+import {
+  DEFAULT_PROFILE_ID,
+  PROFILE_IDS,
+  PROFILES,
+  profileById,
+  profileForChainKey,
+  termLabel,
+} from "@/lib/profiles";
 
 describe("deployment profiles", () => {
   test("both profiles resolved a registry and a credit line", () => {
@@ -35,6 +42,19 @@ describe("deployment profiles", () => {
     // in the wrong environment produces a proof that can only ever revert.
     expect(PROFILES.demo.worldEnv).toBe("staging");
     expect(PROFILES.production.worldEnv).toBe("production");
+  });
+
+  test("both registries share the app id and action, so a proof made on one profile carries over", () => {
+    // Someone with World App who lands on the staging profile gets an Orb proof. The
+    // verify card offers to switch profiles *keeping that proof*, which is only sound
+    // while the external nullifier (app id + action) is identical on both registries.
+    expect(PROFILES.demo.deployment.config.appId).toBe(PROFILES.production.deployment.config.appId);
+    expect(PROFILES.demo.deployment.config.action).toBe(PROFILES.production.deployment.config.action);
+  });
+
+  test("profileForChainKey maps each World ID tree to the profile that verifies it", () => {
+    expect(profileForChainKey(3).id).toBe("production");
+    expect(profileForChainKey(1).id).toBe("demo");
   });
 
   test("the profiles are separate registries and separate credit lines", () => {

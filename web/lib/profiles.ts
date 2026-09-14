@@ -16,6 +16,7 @@
  * demo or a real thing": it is a real thing, with a reproducible demo beside it.
  */
 
+import type { SourceChainKey } from "@/lib/chains";
 import { buildDeployment, type ContractKey, type Deployment } from "@/lib/deployment";
 import demoDoc from "./generated/deployments.json";
 import productionDoc from "./generated/deployments.production.json";
@@ -85,6 +86,11 @@ export const DEFAULT_PROFILE_ID: ProfileId = "demo";
 
 export function profileById(id: string | null | undefined): Profile | undefined {
   return id === "demo" || id === "production" ? PROFILES[id] : undefined;
+}
+
+/** The profile whose registry verifies roots from this World ID tree (Attestcoin chainKey). */
+export function profileForChainKey(chainKey: SourceChainKey): Profile {
+  return chainKey === 3 ? PROFILES.production : PROFILES.demo;
 }
 
 /** Term length in a form the UI can print without unit maths. */

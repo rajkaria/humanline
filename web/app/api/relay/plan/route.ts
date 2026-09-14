@@ -12,7 +12,8 @@ import { clientKey, rateLimit, tooManyRequests } from "@/lib/rate-limit";
  * `GET /api/relay/plan?chainKey=1&root=<uint256 as decimal or 0x hex>`
  *
  * Answers with one of `known`, `ready`, `waiting` (with the attested height still
- * needed and an ETA), `not-found`, `stale` or `gap`. `ready` and `waiting` carry
+ * needed and an ETA), `wrong-tree` (the root is in the other World ID tree, whose
+ * `chainKey` it names), `not-found`, `stale` or `gap`. `ready` and `waiting` carry
  * the ordered World ID updates and how they split into `executeBatch` calls. The
  * browser then fetches the proof for each batch and sends it from the user's own
  * wallet: nothing here signs anything, and the plan cannot make a wallet relay a
