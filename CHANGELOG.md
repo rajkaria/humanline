@@ -7,6 +7,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Documentation
+
+- Every doc that mentions the SDK now links to [`@humanline/sdk` on npm](https://www.npmjs.com/package/@humanline/sdk)
+  and shows `npm install @humanline/sdk viem`: the README, the SDK README (npm badge), `ARCHITECTURE`,
+  `ATTESTCOIN_INTEGRATION`, `SECURITY` (the SDK is now in scope), `SUBMISSION`, `BUIDL_DETAILS`, `DECK`,
+  `VIDEO_SCRIPT`, the deployments and web READMEs, the Gluwa examples PR draft and both launch drafts.
+  The `/docs` integration guide gains a TypeScript card with the install command, and `/api` links
+  the package.
+
 ### Deployed
 
 - **`@humanline/sdk` 0.1.0 is on npm** (https://www.npmjs.com/package/@humanline/sdk). The published

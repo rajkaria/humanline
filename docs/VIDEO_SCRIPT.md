@@ -94,7 +94,7 @@ Final URL: {{VIDEO_URL}} · Live app: https://humanline.credit · Repo: https://
 
 ### 9 · 2:32 to 2:40 · Close
 
-**Show.** Cut back to the landing page's *Live protocol readout*. Hold for three seconds. Then show an end card with `humanline.credit`, `github.com/rajkaria/humanline`, and `npm i @humanline/sdk`.
+**Show.** Cut back to the landing page's *Live protocol readout*. Hold for three seconds. Then show an end card with `humanline.credit`, `github.com/rajkaria/humanline`, and `npm i @humanline/sdk` (npmjs.com/package/@humanline/sdk).
 
 **Say.**
 > "Eighteen contracts, no owner, no pause, and nobody to trust, including us. One human, one credit line."

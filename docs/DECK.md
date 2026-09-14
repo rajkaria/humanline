@@ -135,7 +135,7 @@ visual: A limit-growth staircase chart, 25 to 31.25 to 39.06 to 48.83 to 61.04 t
 
 ## 11. Roadmap, and Periscope
 
-- Built already: a public read API and loan-lifecycle feed, `@humanline/sdk` with `HumanGated.sol`, a relayer reward vault, and the cross-chain contracts (Ethereum wallet links, Aave repayment history, repay-from-Ethereum) tested against real Sepolia proofs.
+- Built already: a public read API and loan-lifecycle feed, `@humanline/sdk` on npm (`npm i @humanline/sdk`) with `HumanGated.sol`, a relayer reward vault, and the cross-chain contracts (Ethereum wallet links, Aave repayment history, repay-from-Ethereum) tested against real Sepolia proofs.
 - Month 1: `AttestedWorldID` and `HumanRegistry` on Creditcoin mainnet. The cross-chain contracts deployed. First Creditcoin lender using `isHuman` as a sybil check through Credal.
 - Month 3: lines funded by PenguinSwap LPs. BSC as a source chain when `chainKey 8` ships.
 - Month 6: supervised pilot in Kenya and Argentina with a lending partner, and a published cohort loss curve for personhood-gated credit. Nobody has one.

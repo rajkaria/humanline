@@ -938,6 +938,21 @@ attestor counts, and the bn128 answers the Semaphore verifier depends on.
 The `/judge` page of the deployed site runs the same reproduction path in the browser, including a
 "prove any Ethereum transaction" widget that calls `0x0FD2` with no wallet connected.
 
+To read the result from your own code instead, install the SDK from npm,
+[`@humanline/sdk`](https://www.npmjs.com/package/@humanline/sdk). It needs no wallet either:
+
+```bash
+npm install @humanline/sdk viem
+```
+
+```ts
+import { createHumanlineClient, isHuman, profileOf } from "@humanline/sdk";
+
+const client = createHumanlineClient();          // CC3 testnet
+await isHuman(client, "0x…");                    // bound to a human verified against a relayed root?
+await profileOf(client, "0x…");                  // nullifier, registration time, credit line
+```
+
 ### With a wallet
 
 You need a CC3 testnet key with a little tCTC from the faucet. The worker reads

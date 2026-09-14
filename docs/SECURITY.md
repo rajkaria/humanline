@@ -167,7 +167,7 @@ If you find a vulnerability in Humanline, please report it privately before disc
 
 **What we commit to.** Acknowledgement within 72 hours. An assessment with a severity and a plan within 7 days. Credit in the fix commit and in the release notes unless you ask us not to.
 
-**Scope.** In scope: `contracts/src/`, the relay worker in `worker/`, and the web application in `web/`. Out of scope: the vendored World ID bridge and Semaphore verifier under `contracts/vendor/worldid/` (report those to World), the Attestcoin Protocol precompiles and SDK (report those to Gluwa and Credit Labs), and the Creditcoin node itself.
+**Scope.** In scope: `contracts/src/`, the relay worker in `worker/`, the web application in `web/`, and the SDK in `packages/sdk/` (published as [`@humanline/sdk`](https://www.npmjs.com/package/@humanline/sdk)). Out of scope: the vendored World ID bridge and Semaphore verifier under `contracts/vendor/worldid/` (report those to World), the Attestcoin Protocol precompiles and SDK (report those to Gluwa and Credit Labs), and the Creditcoin node itself.
 
 **A note on the contracts.** There is no owner, no pause and no upgrade path. A vulnerability in a deployed contract cannot be patched in place. The response to a critical finding is to deploy a corrected contract, publish the new addresses, and tell users to migrate. Anyone relying on `IHumanRegistry` should read the registry address from a source they control rather than hardcoding ours, so that a migration is a configuration change for them and not a redeploy.
 

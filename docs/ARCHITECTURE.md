@@ -344,6 +344,12 @@ Values 1 through 9 are the Attestcoin half of the system. Values 10 through 13 a
 
 **The web app** (`web/`) is Next.js 15 on Vercel. It is entirely a read-and-submit client. It runs no indexer of its own and reads every number it shows directly from CC3, including the precompile values on `/relay`. If the app is down, every contract still works. Two read-only routes serve self-relay: `/api/relay/plan` scans the source chain (the browser cannot call `eth_getLogs` against public Ethereum endpoints reliably) and `/api/relay/proof` proxies the proof builder (no CORS). Neither signs anything. Two server-side keys exist and neither can move a user's funds or sign on their behalf: the World ID relying-party key, which signs the `rp_context` nonce IDKit requires, and the gas faucet key, which sends native tCTC to a wallet that cannot yet pay for its own registration.
 
+**The SDK** (`packages/sdk`) is published on npm as [`@humanline/sdk`](https://www.npmjs.com/package/@humanline/sdk). It wraps the registry and credit-line view calls for any viem client, adds a `useHuman` React hook, and ships `HumanGated.sol` and `IHumanRegistry.sol`. It holds no key and sends nothing; the deployment addresses are compiled in, and `{ deployment }` overrides them.
+
+```bash
+npm install @humanline/sdk viem
+```
+
 **The evidence log** (`evidence/relay-log.jsonl`) is one JSON line per relayed transaction: source, Ethereum tx hash, source block and tx index, pre and post root, humans added, Creditcoin tx hash, gas used, attestation lag, timestamp. It is committed to the repository by the relay workflow. It proves nothing on its own, and no contract reads it. It exists so a judge can audit the relay's history without running the worker.
 
 ---

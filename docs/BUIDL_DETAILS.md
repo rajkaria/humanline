@@ -167,7 +167,7 @@ All in [MEASUREMENTS.md](https://github.com/rajkaria/humanline/blob/main/docs/ME
 
 ## Build on it
 
-We think the most valuable thing Humanline can be for Creditcoin is not a lending app. It's the `isHuman` call every other lending app makes. So personhood ships as a primitive.
+We think the most valuable thing Humanline can be for Creditcoin is not a lending app. It's the `isHuman` call every other lending app makes. So personhood ships as a primitive, published on npm as **[`@humanline/sdk`](https://www.npmjs.com/package/@humanline/sdk)**.
 
 ```bash
 npm install @humanline/sdk viem

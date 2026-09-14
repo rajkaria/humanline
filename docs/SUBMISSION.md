@@ -83,7 +83,7 @@ For the long-form description field, if the form offers one. It names no other p
 | Relay nobody has to trust or wait for | Self-relay from the user's wallet, a vault that pays third-party relayers, and a 5-minute cron with a watchdog. |
 | Prover independence | Proofs built locally match the hosted prover byte for byte; the browser re-verifies before sending. |
 | Refusals you can watch | Twelve attacks fired at the deployed contracts on page load, re-run every six hours by Vercel Cron. |
-| A primitive for others | `HumanGated.sol`, `@humanline/sdk`, a public API with a loan-lifecycle feed, and `HumanPoll` built on them. |
+| A primitive for others | `HumanGated.sol`, [`@humanline/sdk`](https://www.npmjs.com/package/@humanline/sdk) (`npm install @humanline/sdk viem`), a public API with a loan-lifecycle feed, and `HumanPoll` built on them. |
 
 Word count check: run `wc -w` on the block before pasting. The form's limit is 400.
 

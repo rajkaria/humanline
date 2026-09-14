@@ -93,3 +93,6 @@ Live values read from those precompiles on 2026-09-12: Ethereum mainnet (chain k
 1. Bootstrap each relay with the first root (`humanline bootstrap` in `worker/`).
 2. Seed the lender pool: call `HUSD.faucet()` from a few wallets and `CreditLine.deposit`.
 3. Point the web app at `deployments/cc3-testnet.json`.
+4. Update `DEPLOYMENTS` in `packages/sdk/src/index.ts`, bump the version, and publish a new
+   [`@humanline/sdk`](https://www.npmjs.com/package/@humanline/sdk) (`cd packages/sdk && npm publish --access public`). Integrators pick
+   up the new addresses with `npm install @humanline/sdk@latest viem`.

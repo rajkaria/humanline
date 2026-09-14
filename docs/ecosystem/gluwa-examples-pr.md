@@ -39,6 +39,9 @@ and twelve adversarial calls against it are refused by name (forged proof, decoy
 replay, out-of-order batch, below the attestor floor and more); see `docs/MEASUREMENTS.md` in
 github.com/rajkaria/humanline.
 
+Apps that only want the resulting personhood check, without writing Solidity, can read it with the
+TypeScript SDK on npm, [`@humanline/sdk`](https://www.npmjs.com/package/@humanline/sdk): `npm install @humanline/sdk viem`.
+
 ## Files
 
 ```

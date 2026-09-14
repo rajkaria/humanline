@@ -37,6 +37,9 @@ attestor set thins, credit shrinks with it.
 7/ Personhood is a primitive, so it ships as one: HumanGated.sol, an SDK, a public API, and /vote, a
 one-person-one-vote poll where a second wallet does not buy a second ballot.
 
+npm install @humanline/sdk viem
+npmjs.com/package/@humanline/sdk
+
 8/ Everything is open and measured: coverage, invariants, mutation score, gas regression, latency.
 
 github.com/rajkaria/humanline

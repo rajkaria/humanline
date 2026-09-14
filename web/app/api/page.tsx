@@ -32,8 +32,18 @@ export default function ApiPage() {
         <CommandBlock command="curl -s https://humanline.credit/api/openapi.json" />
         <p className="text-sm text-muted-foreground">
           Prefer TypeScript? The same reads, plus a React hook and the <code className="font-mono">HumanGated</code> Solidity
-          modifier, ship in <code className="font-mono">@humanline/sdk</code>.
+          modifier, ship in{" "}
+          <a
+            href="https://www.npmjs.com/package/@humanline/sdk"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-brand underline-offset-4 hover:underline"
+          >
+            @humanline/sdk
+          </a>{" "}
+          on npm.
         </p>
+        <CommandBlock command="npm install @humanline/sdk viem" />
       </section>
 
       {paths.map(([path, { get }]) => {

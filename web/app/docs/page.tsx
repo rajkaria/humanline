@@ -2,6 +2,7 @@ import {
   BookOpenIcon,
   CodeIcon,
   LockKeyholeIcon,
+  PackageIcon,
   ScaleIcon,
   TriangleAlertIcon,
 } from "lucide-react";
@@ -37,6 +38,7 @@ export const metadata: Metadata = {
 };
 
 const RPC = creditcoinTestnet.rpcUrls.default.http[0];
+const SDK_NPM_URL = "https://www.npmjs.com/package/@humanline/sdk";
 
 const NAV = [
   { href: "#integrate", label: "Integration guide" },
@@ -207,6 +209,39 @@ contract OnePerHuman {
           </TableBody>
         </Table>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <PackageIcon className="size-4 text-brand" />
+            From TypeScript or React: @humanline/sdk
+          </CardTitle>
+          <CardDescription>
+            The same reads over any viem client, a <code className="font-mono text-xs">useHuman</code>{" "}
+            hook, and <code className="font-mono text-xs">HumanGated.sol</code>, published on{" "}
+            <a
+              href={SDK_NPM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand underline-offset-4 hover:underline"
+            >
+              npm
+            </a>
+            . No wallet needed.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          <CommandBlock title="Install" command="npm install @humanline/sdk viem" />
+          <pre className="overflow-x-auto rounded-xl bg-card/70 p-4 font-mono text-[11.5px] leading-relaxed ring-1 ring-foreground/10">
+            <code>{`import { createHumanlineClient, isHuman, humanOf, lineOf } from "@humanline/sdk";
+
+const client = createHumanlineClient();       // CC3 testnet
+await isHuman(client, "0xBorrower");          // sybil check
+const human = await humanOf(client, "0xBorrower");
+const line = await lineOf(client, human);     // limit, principal, due date, repaid/late`}</code>
+          </pre>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

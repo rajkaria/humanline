@@ -1,5 +1,8 @@
 # @humanline/sdk
 
+[![npm](https://img.shields.io/npm/v/@humanline/sdk?color=cb3837)](https://www.npmjs.com/package/@humanline/sdk)
+[![License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/rajkaria/humanline/blob/main/LICENSE)
+
 Sybil resistance on Creditcoin. Ask whether a wallet belongs to a verified human, read that human's
 credit line, and gate your own contracts to one action per person.
 
@@ -9,7 +12,10 @@ one wallet at a time. A person who moves to a new wallet keeps their history and
 
 ```bash
 npm install @humanline/sdk viem
+# or: bun add @humanline/sdk viem · pnpm add @humanline/sdk viem
 ```
+
+`viem` is a peer dependency. `react` is optional and only needed for `@humanline/sdk/react`.
 
 ## Read from TypeScript
 

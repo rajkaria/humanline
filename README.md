@@ -42,7 +42,7 @@ If you read nothing else, read this. Everything below it is the receipt.
 - **The zero-knowledge proof is verified on Creditcoin itself**, on the bn128 precompiles. Groth16 on Creditcoin was an open question. It is now a deployed contract with real humans in it.
 - **Attestcoin is load-bearing 22 different ways**, including one nobody else has tried: the attestors' bonded stake, read live from `0x0FD4`, caps how much the pool may lend.
 - **Nothing here asks for trust, and that includes trusting us.** Anyone can relay, from the app, from a wallet funded only by the faucet, or through a vault that pays them. Twelve named attacks are fired at the deployed contracts every time the judge page loads. Coverage, invariants, mutation score, gas curves and latency are published from chain data.
-- **Personhood ships as a primitive**: `@humanline/sdk` on npm, `HumanGated.sol`, a CORS-open public API with a loan-lifecycle feed, and `HumanPoll`, one person one vote, built on nothing but the SDK.
+- **Personhood ships as a primitive**: [`@humanline/sdk` on npm](https://www.npmjs.com/package/@humanline/sdk), `HumanGated.sol`, a CORS-open public API with a loan-lifecycle feed, and `HumanPoll`, one person one vote, built on nothing but the SDK.
 
 ---
 
@@ -149,7 +149,7 @@ ETHEREUM SEPOLIA (chainKey 1)             │  · finality (0xFD3) + quorum (0xF
 | **Always-on relay** | Vercel Cron every 5 minutes, GitHub Actions as backup, a watchdog at `/api/relay/health` that returns `503` when a relayable root is late, and an alert webhook. | `web/app/api/cron/relay` | Uptime and latency published on [`/relay`](https://humanline.credit/relay). |
 | **Self-relay** | When a proof's root has not reached Creditcoin yet, the verify card plans the missing updates, builds the proof, dry-runs it, and the user's own wallet sends it. Also a CLI. | `web/lib/hooks/use-self-relay.ts`, `web/scripts/self-relay.ts` | Two live self-relays from fresh wallets, one paid by the vault. |
 | **Web app** | `/`, `/app` (verify, borrow, repay, lend, link, import history, repay from Ethereum), `/relay`, `/judge`, `/vote`, `/docs`, `/api`, `/h/{human}`. Auto gas drip for first-time wallets. | `web/` | [humanline.credit](https://humanline.credit) |
-| **`@humanline/sdk`** | `isHuman`, `humanOf`, `lineOf`, `profileOf` over any viem client, a `useHuman` React hook, `HumanGated.sol`. | `packages/sdk` | `npm install @humanline/sdk viem` |
+| **`@humanline/sdk`** | `isHuman`, `humanOf`, `lineOf`, `profileOf` over any viem client, a `useHuman` React hook, `HumanGated.sol`. | `packages/sdk` | [npm](https://www.npmjs.com/package/@humanline/sdk): `npm install @humanline/sdk viem` |
 | **Public API** | `GET /api/v1/human/{address}`, `/api/v1/line/{nullifier}`, `/api/v1/feed`. CORS open, OpenAPI 3.1. | `web/app/api/v1` | [humanline.credit/api](https://humanline.credit/api) |
 | **Prover independence** | Proofs built from any Ethereum RPC match the hosted prover byte for byte. The browser recomputes every Merkle path and continuity fold and matches it against `0x0FD3` before anything is signed. | `worker/src/local-proof.ts`, `web/lib/relay/verify-proof.ts` | [`evidence/proof-diff.jsonl`](evidence/proof-diff.jsonl); *Verify a proof in your browser* on `/judge`. |
 | **Rigor** | 12 stateful invariants, fuzzing, 93.6% line coverage, 95.8% mutation score, Slither triaged, CodeQL, gitleaks, a submission checker that resolves every cited address and URL. | `.github/workflows`, `scripts/` | [`docs/MEASUREMENTS.md`](docs/MEASUREMENTS.md) |
@@ -304,6 +304,8 @@ Personhood is a primitive, so it ships as one. We built the package because the 
 
 ### `@humanline/sdk`
 
+Published on npm as [`@humanline/sdk`](https://www.npmjs.com/package/@humanline/sdk). `viem` is a peer dependency; `react` is optional and only needed for the hook.
+
 ```bash
 npm install @humanline/sdk viem
 ```
@@ -352,7 +354,7 @@ contract Airdrop is HumanGated {
 }
 ```
 
-Package source and README: [`packages/sdk`](packages/sdk). Docs: [humanline.credit/docs](https://humanline.credit/docs).
+On npm: [`@humanline/sdk`](https://www.npmjs.com/package/@humanline/sdk). Package source and README: [`packages/sdk`](packages/sdk). Docs: [humanline.credit/docs](https://humanline.credit/docs).
 
 ### Public API
 

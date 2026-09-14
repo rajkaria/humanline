@@ -100,4 +100,17 @@ From `docs/MEASUREMENTS.md`, all reproducible by one command each:
 reads for viem and React, a CORS-open API answers "is this wallet a human" over HTTP, and
 [`/vote`](https://humanline.credit/vote) is a one-person-one-vote poll built on nothing else.
 
+The SDK is on npm as [`@humanline/sdk`](https://www.npmjs.com/package/@humanline/sdk):
+
+```bash
+npm install @humanline/sdk viem
+```
+
+```ts
+import { createHumanlineClient, isHuman } from "@humanline/sdk";
+
+const client = createHumanlineClient();  // Creditcoin CC3 testnet, no wallet needed
+await isHuman(client, "0x…");            // true when the wallet belongs to a verified human
+```
+
 Code, tests and the full write-up: [github.com/rajkaria/humanline](https://github.com/rajkaria/humanline).
