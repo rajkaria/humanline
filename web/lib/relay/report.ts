@@ -9,9 +9,12 @@
 import type { SourceChainKey } from "@/lib/chains";
 import { getPublicClient } from "@/lib/public-client";
 import { collectTrack, operatorAddresses } from "@/lib/relay/collect";
+import { runWithDeadline } from "@/lib/relay/deadline";
 import { buildReport, type RelayReport } from "@/lib/relay/summary";
 
 const TTL_MS = 60_000;
+/** A cold report takes ~10 s; 25 s leaves room for a slow RPC inside the 60 s routes. */
+export const REPORT_DEADLINE_MS = 25_000;
 let cached: { at: number; report: RelayReport } | null = null;
 let inflight: Promise<RelayReport> | null = null;
 
@@ -22,7 +25,10 @@ export async function relayReport({ fresh = false }: { fresh?: boolean } = {}): 
   inflight = (async () => {
     const client = getPublicClient();
     const chainKeys: SourceChainKey[] = [3, 1];
-    const tracks = await Promise.all(chainKeys.map((ck) => collectTrack(client, ck)));
+    const tracks = await runWithDeadline(
+      (signal) => Promise.all(chainKeys.map((ck) => collectTrack(client, ck, signal))),
+      REPORT_DEADLINE_MS,
+    );
     const report = buildReport(tracks, operatorAddresses(), Math.floor(Date.now() / 1000));
     cached = { at: Date.now(), report };
     return report;

@@ -15,7 +15,10 @@ import { relayReport } from "@/lib/relay/report";
  * 3. When `GITHUB_DISPATCH_TOKEN` is set, also dispatches `relay.yml` as a second,
  *    independent relayer (GitHub's own `schedule` stays as the third).
  * 4. Rebuilds the relay report and, when the watchdog has just crossed a threshold,
- *    posts to `RELAY_ALERT_WEBHOOK` (any Slack/Discord-style incoming webhook).
+ *    posts to `RELAY_ALERT_WEBHOOK` (any Slack/Discord-style incoming webhook). The
+ *    report gives up after `REPORT_DEADLINE_MS`: when CC3 refused `eth_getLogs`, the
+ *    unbounded history scan ran every pass into the 300 s limit, holding a function
+ *    instance all day for a relay that itself finishes in seconds.
  *
  * The relayer key can do nothing but pay gas: `AttestedWorldID` accepts the same
  * proof from anyone, so a compromised key costs tCTC, never correctness.

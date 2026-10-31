@@ -68,12 +68,18 @@ export function operatorAddresses(): string[] {
   return [...new Set(listed.filter((a) => /^0x[0-9a-fA-F]{40}$/.test(a)).map((a) => a.toLowerCase()))];
 }
 
-async function mapLimit<T, R>(items: readonly T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+async function mapLimit<T, R>(
+  items: readonly T[],
+  limit: number,
+  fn: (item: T) => Promise<R>,
+  signal?: AbortSignal,
+): Promise<R[]> {
   const out: R[] = new Array(items.length);
   let next = 0;
   await Promise.all(
     Array.from({ length: Math.min(limit, items.length) }, async () => {
       while (next < items.length) {
+        signal?.throwIfAborted();
         const i = next++;
         out[i] = await fn(items[i]!);
       }
@@ -82,7 +88,16 @@ async function mapLimit<T, R>(items: readonly T[], limit: number, fn: (item: T) 
   return out;
 }
 
-export async function collectTrack(client: PublicClient, chainKey: SourceChainKey): Promise<ChainTrack> {
+/**
+ * `signal` (see `lib/relay/deadline`) stops the scans between windows. An aborted
+ * track throws rather than returning a partial history, because a report built from
+ * half the relays would read as a stall and page someone.
+ */
+export async function collectTrack(
+  client: PublicClient,
+  chainKey: SourceChainKey,
+  signal?: AbortSignal,
+): Promise<ChainTrack> {
   const key = WORLD_ID_INSTANCES.find((i) => i.chainKey === chainKey)!.key;
   const resolved = CONTRACTS[key];
   const contract = resolved.address;
@@ -96,25 +111,32 @@ export async function collectTrack(client: PublicClient, chainKey: SourceChainKe
   }
 
   const [scan, state] = await Promise.all([
-    scanLogs({ client, address: contract, event: ROOT_RELAYED, fromBlock, toBlock: tip, maxWindows: 80 }),
+    scanLogs({ client, address: contract, event: ROOT_RELAYED, fromBlock, toBlock: tip, maxWindows: 80, signal }),
     readRootState(client, contract, chainKey, 1n),
   ]);
+  // scanLogs stops quietly on abort; a truncated history must not become a report.
+  signal?.throwIfAborted();
 
   type Log = { blockNumber: bigint; transactionHash: Hex; args: { sourceBlock: bigint; postRoot: bigint; relayer: Hex } };
   const logs = scan.logs as unknown as Log[];
 
   const ccBlocks = [...new Set(logs.map((l) => l.blockNumber))];
   const ccTimes = new Map<bigint, number>();
-  await mapLimit(ccBlocks, 8, async (blockNumber) => {
-    try {
-      ccTimes.set(blockNumber, Number((await client.getBlock({ blockNumber })).timestamp));
-    } catch {
-      // a block we cannot read drops that sample rather than inventing a time
-    }
-  });
+  await mapLimit(
+    ccBlocks,
+    8,
+    async (blockNumber) => {
+      try {
+        ccTimes.set(blockNumber, Number((await client.getBlock({ blockNumber })).timestamp));
+      } catch {
+        // a block we cannot read drops that sample rather than inventing a time
+      }
+    },
+    signal,
+  );
 
   const sourceBlocks = [...new Set(logs.map((l) => Number(l.args.sourceBlock)))];
-  await mapLimit(sourceBlocks, 6, (b) => sourceTimestamp(chainKey, b));
+  await mapLimit(sourceBlocks, 6, (b) => sourceTimestamp(chainKey, b), signal);
 
   // A relay through the RelayReward vault records the vault as `relayer`; the person who did
   // the work is the transaction's sender.
@@ -122,13 +144,18 @@ export async function collectTrack(client: PublicClient, chainKey: SourceChainKe
   const senders = new Map<Hex, Hex>();
   if (vault) {
     const viaVault = [...new Set(logs.filter((l) => l.args.relayer.toLowerCase() === vault).map((l) => l.transactionHash))];
-    await mapLimit(viaVault, 6, async (hash) => {
-      try {
-        senders.set(hash, (await client.getTransaction({ hash })).from);
-      } catch {
-        // keep the vault as the relayer rather than guess
-      }
-    });
+    await mapLimit(
+      viaVault,
+      6,
+      async (hash) => {
+        try {
+          senders.set(hash, (await client.getTransaction({ hash })).from);
+        } catch {
+          // keep the vault as the relayer rather than guess
+        }
+      },
+      signal,
+    );
   }
 
   const samples: RelaySample[] = [];
@@ -153,7 +180,9 @@ export async function collectTrack(client: PublicClient, chainKey: SourceChainKe
   const ceiling = state.attestedTip - state.finalityDepth;
   const pending: PendingRoot[] = [];
   if (maxRelayed > 0 && ceiling >= maxRelayed) {
+    signal?.throwIfAborted();
     const changes = await scanChanges(chainKey, maxRelayed, ceiling);
+    signal?.throwIfAborted();
     for (const c of changes) {
       if (relayedRoots.has(c.postRoot)) continue;
       const ts = await sourceTimestamp(chainKey, c.blockNumber);
